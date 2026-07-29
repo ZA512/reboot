@@ -46,3 +46,11 @@ Statuts autorisés :
 4. implémentation du type monétaire ;
 5. représentation des cycles en dates civiles locales ;
 6. primitives cryptographiques et stockage des clés.
+
+## ADR proposés
+
+- [ADR-0001 — Journal local dès le MVP](0001-local-event-journal.md)
+- [ADR-0002 — Cycles hebdomadaires en dates civiles locales](0002-civil-weekly-cycles.md)
+- [ADR-0003 — Représentation monétaire et arrondis](0003-money-and-rounding.md)
+
+Ces ADR restent au statut `Proposed` jusqu’à leur validation explicite.
