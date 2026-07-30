@@ -3,7 +3,7 @@
 - Statut : Accepted
 - Date : 2026-07-29
 - Accepté le : 2026-07-30
-- Amendé le : 2026-07-30
+- Amendements : 2026-07-30, 2026-07-31
 - Décideur : porteur du projet REBOOT
 
 ## Contexte
@@ -44,10 +44,11 @@ L’interface est disponible en anglais et en français. La langue d’affichage
 Toute répartition utilise quotient et reste :
 
 1. calculer le quotient entier ;
-2. distribuer les unités mineures restantes de manière déterministe sur les premiers cycles ;
-3. garantir que la somme des allocations est strictement égale au montant d’origine.
+2. affecter ce quotient aux `N - 1` premières échéances ;
+3. calculer la dernière échéance comme le montant d’origine moins la somme des échéances précédentes ;
+4. garantir que la somme des allocations est strictement égale au montant d’origine.
 
-Aucun centime résiduel ne disparaît.
+La dernière échéance absorbe ainsi tous les centimes résiduels. Aucun centime ne disparaît.
 
 ### Recommandation hebdomadaire
 
@@ -97,6 +98,7 @@ Recommandée : modèle simple, exact et facile à tester par propriétés.
 ## Tests minimaux
 
 - répartition exacte de 90 € sur 26 cycles ;
+- répartition de 28 € sur trois échéances : 9,33 €, 9,33 € et 9,34 € ;
 - recommandation brute de 233,82 € arrondie à 233 € ;
 - capacité négative ;
 - zéro ;

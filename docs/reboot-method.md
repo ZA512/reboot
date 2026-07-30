@@ -290,6 +290,20 @@ engagement cycle +2 :         50 €
 
 La transaction réelle de 150 € est conservée pour l’audit et le rapprochement. Les trois affectations virtuelles réduisent les restants hebdomadaires correspondants sans créer trois nouvelles dépenses.
 
+Pour un montant non divisible exactement :
+
+1. REBOOT arrondit les `N - 1` premières échéances au centime inférieur ;
+2. la dernière échéance est calculée comme le montant total moins toutes les échéances précédentes.
+
+Exemple :
+
+```text
+28 € sur trois semaines
+= 9,33 € + 9,33 € + 9,34 €
+```
+
+Toutes les affectations sont créées dès la confirmation, avec leurs dates futures.
+
 La date proposée est la date de saisie. Pour une dépense oubliée, REBOOT recommande d’indiquer la date d’achat réelle, ce qui peut corriger rétroactivement un ancien cycle et ses tendances.
 
 L’utilisateur peut néanmoins choisir de l’affecter au cycle courant. La dépense réduit alors le restant actuel et n’est toujours comptée qu’une seule fois.
@@ -384,6 +398,8 @@ Un remboursement de produit corrige la dépense d’origine.
 - s’il arrive après la clôture, il améliore la trajectoire annuelle sans augmenter automatiquement le budget de la semaine actuelle ;
 - l’utilisateur décide de conserver, réserver ou redépenser l’argent reçu.
 
+Dans le MVP, un remboursement ne reconfigure pas un étalement déjà confirmé. Les affectations prévues restent en place et le remboursement améliore la trajectoire annuelle. Utiliser ce surplus pour compenser ou financer autre chose reste une décision de l’utilisateur.
+
 Message proposé :
 
 > Remboursement reçu : votre trajectoire annuelle s’améliore de 80 €. Votre budget de la semaine reste inchangé.
@@ -444,6 +460,24 @@ Pour une dépense quotidienne ordinaire, l’affectation complète au cycle cour
 
 REBOOT affiche toujours la réduction de chaque semaine avant validation.
 
+Une fois confirmé, l’étalement et sa source de financement ne sont pas reconfigurables dans le premier MVP.
+
+Si une échéance, même après étalement, dépasse 50 % du budget REBOOT hebdomadaire de référence, l’application affiche un avertissement fort. Elle indique que la dépense n’est pas absorbable confortablement par le budget courant et invite à :
+
+- utiliser une réserve disponible ;
+- reporter ou réduire la dépense lorsque cela est possible ;
+- examiner séparément une solution de financement et en déclarer ensuite les véritables échéances.
+
+REBOOT ne recommande, ne fournit et ne souscrit aucun crédit.
+
+Avant validation, un aperçu peut présenter les engagements futurs :
+
+```text
+Budget habituel la semaine prochaine : 230 €
+Dépenses déjà engagées :              -120 €
+Disponible prévisionnel :              110 €
+```
+
 L’utilisateur peut choisir une durée allant jusqu’à 12 semaines, même si elle dépasse la date de paiement. REBOOT distingue alors :
 
 - la préparation constituée avant l’échéance ;
@@ -493,3 +527,23 @@ Un changement de méthode possède une date d’effet et ne réinterprète pas l
 - toute correction ou tout rattrapage important reste un choix explicite de l’utilisateur.
 - la fiabilité du restant et des tendances dépend de la complétude des dépenses, remboursements et transferts déclarés ;
 - REBOOT explique les conséquences d’un oubli ou d’une saisie volontairement décalée, mais laisse l’utilisateur responsable de ses choix.
+
+## Affectation d’un surplus hebdomadaire
+
+Un surplus de prime déjà lissée n’est pas compté une seconde fois. En revanche, les sous-dépenses réelles s’accumulent dans la tendance.
+
+Exemple :
+
+```text
+budget hebdomadaire : 200 €
+dépenses réelles :    150 €
+surplus par semaine :  50 €
+sur 10 semaines :     500 €
+```
+
+REBOOT peut proposer d’affecter tout ou partie des 500 € à une réserve ou à un projet :
+
+- réaffectation interne pour une réserve virtuelle ;
+- rappel de virement et confirmation de l’utilisateur pour un compte de réserve réel.
+
+Cette proposition ne déclenche jamais automatiquement le transfert ni une hausse du budget hebdomadaire.
