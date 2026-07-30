@@ -27,8 +27,8 @@ L’organisation détaillée du dépôt et l’ordre d’implémentation sont d�
 - [x] Dépôt public initialisé
 - [x] PRD archivé comme source de vérité
 - [x] Garde-fous Git et sécurité posés
-- [ ] Analyse des contradictions et questions ouvertes
-- [ ] ADR de fondation
+- [x] Analyse initiale des contradictions et questions ouvertes
+- [x] Trois ADR de fondation acceptés
 - [ ] Création du workspace Flutter/Dart
 - [ ] Premiers types métier et tests de référence
 

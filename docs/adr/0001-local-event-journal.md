@@ -1,8 +1,9 @@
 # ADR-0001 — Journal local dès le MVP
 
-- Statut : Proposed
+- Statut : Accepted
 - Date : 2026-07-29
-- Décideurs : à compléter
+- Accepté le : 2026-07-30
+- Décideur : porteur du projet REBOOT
 
 ## Contexte
 
@@ -10,15 +11,17 @@ Le PRD place le produit local en Phase 1 et le journal d’événements en Phase
 
 Construire d’abord un modèle CRUD puis ajouter l’event sourcing provoquerait une migration structurelle après la création des principales fonctions métier.
 
-## Décision proposée
+## Décision
 
 Créer un journal d’événements append-only local dès la première mutation métier.
 
 - L’interface lit exclusivement des projections SQLite.
 - Une commande validée produit un ou plusieurs événements immuables.
 - L’ajout des événements et la mise à jour des projections s’effectuent dans une transaction locale atomique.
-- Chaque événement possède dès le départ un UUID, un type, une version de schéma, une date métier, une entité cible et une charge utile.
-- Les champs liés au partage, à l’appareil et à la signature peuvent être absents ou locaux tant que la synchronisation n’est pas activée.
+- Chaque événement possède dès le départ un UUID, un type, une version de schéma, une date d’enregistrement, une date métier, une entité cible et une charge utile.
+- Le journal attribue une position locale monotone à chaque événement. Cette position ordonne le rejeu local, sans prétendre définir à elle seule un ordre global entre appareils.
+- Les futures métadonnées de transport, de foyer, d’appareil, de membre, de chiffrement et de signature sont portées par une enveloppe distincte du contenu métier immuable.
+- L’activation ultérieure de la synchronisation peut envelopper un événement local existant sans réécrire son identité ni sa charge utile métier.
 - Le rejeu complet doit reconstruire les projections.
 - La Phase 2 devient une phase de durcissement : snapshots, migrations, rejeu, métadonnées multi-appareils et préparation de la synchronisation.
 
@@ -50,6 +53,7 @@ Ajoute une discipline initiale, mais aligne immédiatement le stockage, l’audi
 - davantage de code d’infrastructure au démarrage ;
 - versionnement des événements nécessaire dès le premier MVP ;
 - règles strictes de transaction et de migration.
+- distinction à maintenir entre événement métier, position du journal local et enveloppe de synchronisation.
 
 ## Conditions d’acceptation
 

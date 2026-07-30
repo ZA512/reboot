@@ -1,8 +1,9 @@
 # ADR-0003 — Représentation monétaire et arrondis
 
-- Statut : Proposed
+- Statut : Accepted
 - Date : 2026-07-29
-- Décideurs : à compléter
+- Accepté le : 2026-07-30
+- Décideur : porteur du projet REBOOT
 
 ## Contexte
 
@@ -10,7 +11,7 @@ Le PRD interdit les flottants binaires et impose des centimes signés 64 bits. I
 
 Une simple division arrondie à chaque cycle peut perdre des centimes. Exemple : 90 € répartis sur 26 cycles ne peuvent pas être représentés par 26 contributions identiques au centime tout en conservant exactement 90 €.
 
-## Décision proposée
+## Décision
 
 ### Type monétaire
 
@@ -19,7 +20,16 @@ Le domaine utilise un type valeur `Money` composé de :
 - `minorUnits` : entier signé 64 bits ;
 - `currency` : code ISO 4217 validé.
 
-Les opérations arithmétiques entre devises différentes échouent explicitement. Le MVP calcule uniquement dans la devise du foyer ; aucune conversion implicite n’est autorisée.
+Les opérations arithmétiques entre devises différentes échouent explicitement. Le type ne suppose pas que toutes les devises possèdent deux décimales : leur nombre d’unités mineures dépend de la devise.
+
+Le premier MVP cible la France et l’euro :
+
+- un foyer et toutes ses entités financières utilisent `EUR` ;
+- aucun compte, revenu, charge, réserve ou projet dans une autre devise n’entre dans les calculs ;
+- modifier la devise d’un foyer contenant des données exige une migration explicite et n’est pas proposé dans le MVP ;
+- aucune conversion implicite n’est autorisée.
+
+L’interface est disponible en anglais et en français. La langue d’affichage, le format des nombres et le format des dates ne modifient jamais la devise ni les unités stockées.
 
 ### Conventions de signe
 
@@ -79,6 +89,7 @@ Recommandée : modèle simple, exact et facile à tester par propriétés.
 - nécessité de gérer le reste pour chaque répartition ;
 - absence de multi-devise réelle dans le MVP ;
 - besoin d’un type distinct pour les taux ou pourcentages.
+- besoin futur de métadonnées ISO 4217 fiables avant l’ouverture à d’autres devises.
 
 ## Tests minimaux
 
@@ -88,6 +99,7 @@ Recommandée : modèle simple, exact et facile à tester par propriétés.
 - zéro ;
 - limites de l’entier 64 bits ;
 - addition de devises différentes refusée ;
+- données non libellées en EUR refusées dans un foyer MVP ;
 - remboursement partiel et total ;
 - propriété : somme des parts égale au montant source.
 

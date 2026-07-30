@@ -3,13 +3,13 @@
 - Date : 2026-07-29
 - Document analysé : `docs/PRD.md`
 - Portée : préparation de la Phase 0
-- Statut : base de discussion, aucune décision implicite
+- Statut : analyse initiale ; ADR-0001 à ADR-0003 acceptés le 2026-07-30
 
 ## Conclusion
 
 Le PRD est suffisamment précis pour commencer les fondations du domaine, mais pas encore pour générer tout le workspace ni choisir les bibliothèques structurantes. Trois décisions affectent directement le premier code : l’existence du journal d’événements dès le MVP local, la définition exacte d’un cycle civil et les règles monétaires.
 
-Les trois ADR associés restent au statut `Proposed`.
+Les trois ADR associés ont été acceptés explicitement le 2026-07-30. Les autres clarifications produit et de sécurité restent à traiter.
 
 ## Points bloquants avant le premier code métier
 
@@ -57,7 +57,7 @@ Ordre recommandé :
 
 ## Ordre de travail révisé proposé
 
-1. valider les trois ADR de domaine ;
+1. appliquer les trois ADR de domaine acceptés ;
 2. choisir l’outillage du workspace dans ADR-0004 ;
 3. générer les packages minimaux ;
 4. implémenter `Money` et ses tests ;

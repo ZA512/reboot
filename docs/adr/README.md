@@ -38,19 +38,18 @@ Statuts autorisés :
 - ADR liés :
 ```
 
-## Décisions à traiter en priorité
+## Prochaines décisions à traiter
 
 1. organisation du workspace Flutter/Dart et outillage monorepo ;
-2. gestion d’état et injection de dépendances ;
-3. bibliothèque SQLite chiffrée et stratégie de migration ;
-4. implémentation du type monétaire ;
-5. représentation des cycles en dates civiles locales ;
-6. primitives cryptographiques et stockage des clés.
+2. bibliothèque SQLite chiffrée et stratégie de migration ;
+3. gestion d’état et injection de dépendances ;
+4. primitives cryptographiques, stockage des clés et révocation ;
+5. modèle de synchronisation et résolution des conflits.
 
-## ADR proposés
+## ADR acceptés
 
 - [ADR-0001 — Journal local dès le MVP](0001-local-event-journal.md)
 - [ADR-0002 — Cycles hebdomadaires en dates civiles locales](0002-civil-weekly-cycles.md)
 - [ADR-0003 — Représentation monétaire et arrondis](0003-money-and-rounding.md)
 
-Ces ADR restent au statut `Proposed` jusqu’à leur validation explicite.
+Ces trois ADR ont été acceptés explicitement le 2026-07-30.
