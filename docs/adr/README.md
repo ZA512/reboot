@@ -40,10 +40,9 @@ Statuts autorisés :
 
 ## Prochaines décisions à traiter
 
-1. bibliothèque SQLite chiffrée et stratégie de migration ;
+1. primitives cryptographiques, stockage des clés et révocation ;
 2. gestion d’état et injection de dépendances ;
-3. primitives cryptographiques, stockage des clés et révocation ;
-4. modèle de synchronisation et résolution des conflits.
+3. modèle de synchronisation et résolution des conflits.
 
 ## ADR acceptés
 
@@ -51,7 +50,9 @@ Statuts autorisés :
 - [ADR-0002 — Cycles hebdomadaires en dates civiles locales](0002-civil-weekly-cycles.md)
 - [ADR-0003 — Représentation monétaire et arrondis](0003-money-and-rounding.md)
 - [ADR-0004 — Workspace Flutter/Dart et outillage monorepo](0004-flutter-dart-workspace.md)
+- [ADR-0005 — SQLite chiffrée, Drift et migrations](0005-encrypted-sqlite-and-migrations.md)
 
 Les trois premiers ADR ont été acceptés explicitement le 2026-07-30.
 L’ADR-0004 a été accepté le 2026-07-31 dans le cadre de la délégation des
 décisions techniques au responsable de l’implémentation.
+L’ADR-0005 a été décidé par le responsable de l’implémentation le 2026-07-31.
