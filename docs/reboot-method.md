@@ -304,6 +304,16 @@ Exemple :
 
 Toutes les affectations sont créées dès la confirmation, avec leurs dates futures.
 
+Plusieurs étalements peuvent se chevaucher. Par exemple, deux dépenses successives de 150 € étalées chacune sur trois semaines produisent :
+
+```text
+première dépense : 50 € + 50 € + 50 €
+seconde dépense :         50 € + 50 € + 50 €
+engagement total : 50 € + 100 € + 100 € + 50 €
+```
+
+REBOOT additionne donc tous les engagements déjà prévus pour chaque cycle futur.
+
 La date proposée est la date de saisie. Pour une dépense oubliée, REBOOT recommande d’indiquer la date d’achat réelle, ce qui peut corriger rétroactivement un ancien cycle et ses tendances.
 
 L’utilisateur peut néanmoins choisir de l’affecter au cycle courant. La dépense réduit alors le restant actuel et n’est toujours comptée qu’une seule fois.
@@ -462,13 +472,15 @@ REBOOT affiche toujours la réduction de chaque semaine avant validation.
 
 Une fois confirmé, l’étalement et sa source de financement ne sont pas reconfigurables dans le premier MVP.
 
-Si une échéance, même après étalement, dépasse 50 % du budget REBOOT hebdomadaire de référence, l’application affiche un avertissement fort. Elle indique que la dépense n’est pas absorbable confortablement par le budget courant et invite à :
+Si la somme de tous les engagements affectés à un cycle dépasse 50 % du budget REBOOT applicable à ce cycle, l’application affiche un avertissement fort. Elle indique que les dépenses engagées ne sont pas absorbables confortablement par le budget courant et invite à :
 
 - utiliser une réserve disponible ;
 - reporter ou réduire la dépense lorsque cela est possible ;
 - examiner séparément une solution de financement et en déclarer ensuite les véritables échéances.
 
 REBOOT ne recommande, ne fournit et ne souscrit aucun crédit.
+
+L’utilisateur peut confirmer même si les engagements dépassent 50 % du budget ou rendent un futur disponible négatif. REBOOT rappelle alors explicitement que cette décision éloigne la trajectoire de l’équilibre recherché. Il ne bloque pas l’utilisateur et ne présente jamais ce choix comme recommandé.
 
 Avant validation, un aperçu peut présenter les engagements futurs :
 
@@ -477,6 +489,19 @@ Budget habituel la semaine prochaine : 230 €
 Dépenses déjà engagées :              -120 €
 Disponible prévisionnel :              110 €
 ```
+
+### Suppression et erreur de saisie
+
+Le MVP ne modifie pas un étalement existant.
+
+Une transaction erronée peut être supprimée, qu’elle appartienne au cycle actuel ou à un cycle passé. Si elle possède un étalement :
+
+- la transaction réelle fait l’objet d’une suppression métier par événement tombstone ;
+- toutes ses affectations passées et futures sont annulées ensemble ;
+- les cycles et tendances concernés sont recalculés ;
+- aucune échéance individuelle ne peut être conservée, déplacée ou modifiée.
+
+Pour remplacer la transaction, l’utilisateur en crée ensuite une nouvelle avec les bonnes informations. Cette règle privilégie un audit simple et évite les plans partiellement incohérents.
 
 L’utilisateur peut choisir une durée allant jusqu’à 12 semaines, même si elle dépasse la date de paiement. REBOOT distingue alors :
 
@@ -541,9 +566,11 @@ surplus par semaine :  50 €
 sur 10 semaines :     500 €
 ```
 
-REBOOT peut proposer d’affecter tout ou partie des 500 € à une réserve ou à un projet :
+Après huit cycles terminés, REBOOT peut proposer d’affecter tout ou partie du surplus cumulé à une réserve ou à un projet :
 
 - réaffectation interne pour une réserve virtuelle ;
 - rappel de virement et confirmation de l’utilisateur pour un compte de réserve réel.
 
 Cette proposition ne déclenche jamais automatiquement le transfert ni une hausse du budget hebdomadaire.
+
+La fenêtre de huit cycles évite de traiter comme une économie durable une courte période atypique : séjour chez des proches, maladie, impossibilité temporaire d’acheter ou dépense simplement reportée à la semaine suivante.
