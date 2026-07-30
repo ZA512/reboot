@@ -389,6 +389,53 @@ Les fenêtres proposées sont 4, 8, 16, 32 et 52 cycles. L’analyse ne dépasse
 
 Un ancien cycle n’est jamais recalculé avec le budget actuel. Un cycle exceptionnel de transition reste visible dans l’historique, mais il est exclu par défaut des tendances hebdomadaires normales.
 
+### Balance observée et alertes
+
+La balance principale utilise tous les cycles terminés disponibles, dans la limite des 52 derniers :
+
+```text
+balance observée =
+  somme des budgets applicables
+  - somme des dépenses hebdomadaires affectées
+```
+
+REBOOT distingue deux pourcentages :
+
+```text
+dépassement du dernier cycle / budget du dernier cycle
+```
+
+```text
+balance négative cumulée / somme des budgets observés
+```
+
+Seuils du MVP :
+
+- moins de 5 % : aucune alerte ;
+- de 5 % inclus à 15 % exclus : vigilance ;
+- 15 % ou plus : alerte forte dans l’application.
+
+La sévérité affichée correspond au signal le plus important, mais le détail distingue toujours l’écart récent de la trajectoire générale.
+
+Exemple : un dépassement unique de 23 € sur un budget de 80 € produit une alerte forte pour la dernière semaine. Si les semaines précédentes étaient positives, le détail indique néanmoins que la méthode reste globalement bien suivie.
+
+Le cycle suivant conserve son budget normal :
+
+```text
+Budget de la semaine : 200 €  /!\
+```
+
+L’icône ou la zone tactile explique :
+
+- le dépassement du dernier cycle ;
+- la balance cumulée ;
+- le nombre de cycles observés, jusqu’à 52 ;
+- si la trajectoire globale reste saine ou dérive.
+
+La couleur renforce le message, mais n’est jamais le seul moyen de transmettre l’alerte.
+
+Le MVP affiche les valeurs réelles observées. Il n’extrapole pas encore automatiquement la dérive sur une année complète.
+
 Au passage au cycle suivant, un résumé court peut indiquer :
 
 ```text
