@@ -73,6 +73,18 @@ L’écran présente une liste de lignes facultatives, par exemple :
 
 Chaque ligne accepte un titre, un montant et une fréquence. L’utilisateur peut ajouter, renommer ou supprimer des lignes.
 
+La fréquence mensuelle est sélectionnée par défaut. REBOOT propose les rythmes courants :
+
+- hebdomadaire ;
+- toutes les quatre semaines ;
+- mensuel ;
+- trimestriel ;
+- semestriel ;
+- annuel ;
+- dates personnalisées.
+
+Pour un rythme trop particulier, l’utilisateur peut calculer lui-même le total attendu sur l’année et utiliser la fréquence annuelle.
+
 Une astuce explique :
 
 > Vous pouvez calculer tous vos revenus de votre côté et saisir uniquement un total. Les détailler permettra toutefois à REBOOT de mieux détecter les changements futurs.
@@ -134,7 +146,32 @@ Une entrée ponctuelle non prévue ne modifie pas le budget hebdomadaire. REBOOT
 - financer une dépense exceptionnelle ;
 - la conserver sans affectation.
 
-Si une prime ou une autre entrée est raisonnablement attendue tous les ans, elle devient un revenu récurrent annuel et entre dans la projection des 52 cycles.
+Si une prime ou une autre entrée est raisonnablement attendue tous les ans, elle possède une récurrence annuelle. Elle ne contribue toutefois au quotidien qu’à travers les montants déjà reçus et explicitement affectés selon la règle suivante.
+
+### Prime à durée de vie
+
+Une prime versée en une seule fois ne peut soutenir le quotidien que si l’argent correspondant existe encore et si l’utilisateur décide explicitement de l’y affecter.
+
+À la création du profil, l’utilisateur indique :
+
+- le montant encore disponible et destiné au quotidien, et non le montant brut initial de la prime ;
+- la prochaine date anniversaire ou date de versement attendue.
+
+Le montant disponible est réparti uniquement sur les cycles restant avant cette date.
+
+À la date anniversaire, REBOOT demande de confirmer :
+
+- que la nouvelle prime a réellement été reçue ;
+- le montant reçu cette année ;
+- la part que l’utilisateur veut injecter dans son quotidien.
+
+Seule cette part confirmée est répartie jusqu’à la prochaine date anniversaire. Une prime future, même habituelle, n’est jamais utilisée avant confirmation de sa réception.
+
+Une prime semestrielle possède deux dates de versement. À chaque occurrence, le montant réellement reçu et affecté au quotidien est confirmé puis réparti jusqu’à l’occurrence suivante.
+
+Une prime mensuelle est traitée comme un revenu variable récurrent et estimée à partir d’une moyenne, plutôt que comme une succession de primes à durée de vie.
+
+La part non affectée au quotidien peut financer un projet, une réserve ou une dépense exceptionnelle. Elle ne modifie pas le budget hebdomadaire.
 
 Toutes les sorties prévisibles sont également prises en compte :
 
@@ -237,6 +274,22 @@ Une dépense demande au minimum :
 - un montant ;
 - un libellé libre ou un raccourci.
 
+Une dépense payée en une seule fois peut avoir deux traitements dans la méthode :
+
+- être entièrement affectée au cycle courant ;
+- être étalée sur plusieurs cycles.
+
+Exemple pour une dépense réelle de 150 € étalée sur trois semaines :
+
+```text
+dépense réelle :             150 €
+affectation au cycle actuel : 50 €
+engagement cycle suivant :    50 €
+engagement cycle +2 :         50 €
+```
+
+La transaction réelle de 150 € est conservée pour l’audit et le rapprochement. Les trois affectations virtuelles réduisent les restants hebdomadaires correspondants sans créer trois nouvelles dépenses.
+
 La date proposée est la date de saisie. Pour une dépense oubliée, REBOOT recommande d’indiquer la date d’achat réelle, ce qui peut corriger rétroactivement un ancien cycle et ses tendances.
 
 L’utilisateur peut néanmoins choisir de l’affecter au cycle courant. La dépense réduit alors le restant actuel et n’est toujours comptée qu’une seule fois.
@@ -260,6 +313,8 @@ Une dépense non qualifiée reste valide. Les statistiques seront simplement moi
 REBOOT ne peut piloter que les opérations qui lui sont déclarées. Une dépense oubliée augmente artificiellement le restant affiché ; un remboursement oublié dégrade artificiellement l’estimation correspondante. L’application explique cette conséquence sans bloquer l’utilisateur ni prétendre contrôler son compte bancaire.
 
 ## Modes de financement
+
+L’**annualisation** d’une charge récurrente lors de la configuration et l’**étalement** d’une dépense déjà réalisée sont deux mécanismes distincts.
 
 ### Budget hebdomadaire
 
@@ -385,7 +440,9 @@ Choix proposés :
 - affecter tout le montant à la semaine actuelle ;
 - répartir le montant de 1 à 12 semaines.
 
-La durée proposée par défaut est de 3 semaines. REBOOT affiche toujours la réduction hebdomadaire avant validation.
+Pour une dépense quotidienne ordinaire, l’affectation complète au cycle courant est sélectionnée par défaut. Pour une dépense importante ou une régularisation, REBOOT peut proposer 3 semaines. L’utilisateur reste libre de choisir une durée de 1 à 12 semaines.
+
+REBOOT affiche toujours la réduction de chaque semaine avant validation.
 
 L’utilisateur peut choisir une durée allant jusqu’à 12 semaines, même si elle dépasse la date de paiement. REBOOT distingue alors :
 
