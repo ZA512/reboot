@@ -38,13 +38,19 @@ Statuts autorisés :
 - ADR liés :
 ```
 
+## ADR proposés
+
+- [ADR-0004 — Workspace Flutter/Dart et outillage monorepo](0004-flutter-dart-workspace.md)
+
+Cette proposition doit être acceptée, amendée ou rejetée explicitement avant la
+création du workspace.
+
 ## Prochaines décisions à traiter
 
-1. organisation du workspace Flutter/Dart et outillage monorepo ;
-2. bibliothèque SQLite chiffrée et stratégie de migration ;
-3. gestion d’état et injection de dépendances ;
-4. primitives cryptographiques, stockage des clés et révocation ;
-5. modèle de synchronisation et résolution des conflits.
+1. bibliothèque SQLite chiffrée et stratégie de migration ;
+2. gestion d’état et injection de dépendances ;
+3. primitives cryptographiques, stockage des clés et révocation ;
+4. modèle de synchronisation et résolution des conflits.
 
 ## ADR acceptés
 
