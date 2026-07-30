@@ -110,5 +110,7 @@ Recommandée : modèle simple, exact et facile à tester par propriétés.
 
 ## Liens
 
-- PRD : sections 8, 9.1, 11.2, 12.4, 14.5, 32.1 et 34.
+- PRD REBOOT 2.0 : sections 5, 6, 12, 14, 16 et 22.
+- Méthode REBOOT : sections « Construction du budget », « Saisie rapide » et « Rattrapage d’une dépense importante ».
+- PRD Budget52 archivé : sections 8, 9.1, 11.2, 12.4, 14.5, 32.1 et 34.
 - Analyse : `docs/foundation-analysis.md`, FND-03.

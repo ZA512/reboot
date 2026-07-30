@@ -77,5 +77,7 @@ Recommandée pour le MVP : comportement compréhensible, déterministe et testab
 
 ## Liens
 
-- PRD : sections 2.1, 7.1, 8.1, 13.4, 29.1, 29.12 et 33.
+- PRD REBOOT 2.0 : sections 2.1, 8, 9 et 22.
+- Méthode REBOOT : sections « Démarrage du premier cycle » et « Cycle hebdomadaire ».
+- PRD Budget52 archivé : sections 2.1, 7.1, 8.1, 13.4, 29.1, 29.12 et 33.
 - Analyse : `docs/foundation-analysis.md`, FND-02.

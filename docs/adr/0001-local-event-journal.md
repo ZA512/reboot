@@ -64,5 +64,6 @@ Ajoute une discipline initiale, mais aligne immédiatement le stockage, l’audi
 
 ## Liens
 
-- PRD : sections 18.4, 21.2, 30, 32.2, 34.2 et 36.
+- PRD REBOOT 2.0 : sections 17, 19, 21 et 22.
+- PRD Budget52 archivé : sections 18.4, 21.2, 30, 32.2, 34.2 et 36.
 - Analyse : `docs/foundation-analysis.md`, FND-01.

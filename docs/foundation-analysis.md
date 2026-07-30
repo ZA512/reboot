@@ -1,9 +1,11 @@
 # Analyse de fondation du PRD
 
 - Date : 2026-07-29
-- Document analysé : `docs/PRD.md`
+- Document analysé : `docs/archive/PRD-Budget52-v1.0.md`
 - Portée : préparation de la Phase 0
-- Statut : analyse initiale ; ADR-0001 à ADR-0003 acceptés le 2026-07-30
+- Statut : analyse historique du PRD Budget52 ; ADR-0001 à ADR-0003 acceptés le 2026-07-30
+
+Cette analyse porte sur le PRD original désormais archivé. Les décisions validées ont été consolidées dans `docs/PRD.md` et `docs/reboot-method.md`.
 
 ## Conclusion
 

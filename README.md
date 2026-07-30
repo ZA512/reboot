@@ -8,10 +8,11 @@ Le projet est actuellement en **Phase 0 — Fondation**.
 
 ## Documentation
 
-- [PRD de référence](docs/PRD.md)
+- [PRD REBOOT 2.0](docs/PRD.md)
 - [Méthode REBOOT](docs/reboot-method.md)
 - [Décisions d’architecture](docs/adr/README.md)
 - [Principes de sécurité](docs/security/README.md)
+- [Documents historiques](docs/archive/README.md)
 
 ## Architecture cible
 
@@ -21,15 +22,19 @@ L’organisation détaillée du dépôt et l’ordre d’implémentation sont d�
 
 ## Nom du projet
 
-**REBOOT** est le nom du projet. Le PRD fourni utilise encore **Budget52** comme nom de travail interne ; cette divergence sera résolue explicitement lors de la prochaine révision documentaire.
+**REBOOT** est le nom officiel du projet et du produit.
+
+Le nom de travail **Budget52** est conservé uniquement dans le PRD historique archivé.
 
 ## État du chantier
 
 - [x] Dépôt public initialisé
-- [x] PRD archivé comme source de vérité
+- [x] PRD Budget52 original archivé sans modification
+- [x] PRD REBOOT 2.0 publié comme source de vérité
 - [x] Garde-fous Git et sécurité posés
 - [x] Analyse initiale des contradictions et questions ouvertes
 - [x] Trois ADR de fondation acceptés
+- [x] Méthode REBOOT formalisée
 - [ ] Création du workspace Flutter/Dart
 - [ ] Premiers types métier et tests de référence
 
