@@ -9,6 +9,7 @@ Le projet est actuellement en **Phase 0 — Fondation**.
 ## Documentation
 
 - [PRD de référence](docs/PRD.md)
+- [Méthode REBOOT](docs/reboot-method.md)
 - [Décisions d’architecture](docs/adr/README.md)
 - [Principes de sécurité](docs/security/README.md)
 
