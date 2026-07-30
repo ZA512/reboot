@@ -132,6 +132,28 @@ Le parcours demande ensuite :
 - la stratégie : équilibre, coussin ou sortie de découvert ;
 - les réserves et principaux imprévus à préparer.
 
+### Démarrage du premier cycle
+
+REBOOT ne crée pas automatiquement un cycle partiel au milieu de la semaine.
+
+Après l’onboarding, deux choix sont proposés :
+
+1. **Commencer au prochain jour REBOOT**, option recommandée et sélectionnée par défaut.
+2. **Reprendre depuis le jour REBOOT précédent**, à condition de saisir toutes les dépenses hebdomadaires réalisées depuis cette date.
+
+Exemple pour un onboarding terminé un mercredi avec un jour REBOOT fixé au samedi :
+
+```text
+Option recommandée
+Votre première semaine REBOOT commencera samedi.
+
+Autre possibilité
+Commencer depuis samedi dernier et saisir les dépenses
+effectuées depuis cette date.
+```
+
+Si l’utilisateur choisit la reprise depuis la semaine précédente, il crée un cycle normal complet. REBOOT rappelle que le restant et les tendances seront inexacts si certaines dépenses de la période sont oubliées.
+
 ## Construction du budget
 
 ```text
@@ -250,6 +272,10 @@ Ils servent à comparer les opérations observées aux hypothèses confirmées p
 Lorsque les montants observés dérivent durablement de l’hypothèse, REBOOT émet une alerte et propose une nouvelle valeur. L’utilisateur doit confirmer toute modification du budget futur.
 
 Même lorsque toutes les opérations sont importées automatiquement, REBOOT demande périodiquement de confirmer que les montants moyens et leur traitement correspondent toujours à la réalité du foyer.
+
+Lorsqu’une hypothèse structurelle est modifiée et validée pendant un cycle — salaire, charge, revenu récurrent, réserve ou objectif — la nouvelle recommandation s’applique à la prochaine occurrence hebdomadaire du jour REBOOT. Elle ne modifie pas le budget du cycle déjà commencé.
+
+Par exemple, avec un jour REBOOT le samedi, une modification validée le mercredi prend effet le samedi suivant, et non 52 semaines plus tard.
 
 ### Provenance de chaque montant
 
