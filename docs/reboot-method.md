@@ -58,12 +58,11 @@ Une version ultérieure pourra relier deux espaces solo. Chaque personne conserv
 ## Construction du budget
 
 ```text
-revenus annuels de référence
-  - charges fixes
-  - dépenses essentielles lissées
-  - provisions et réserves
+total de toutes les entrées prévues sur 52 cycles
+  - total de toutes les sorties prévues sur 52 cycles
+  - provisions et réserves choisies
   - projets et objectifs
-  - marge de sécurité choisie
+  - marge de sécurité
 = capacité annuelle pilotable
 ```
 
@@ -74,7 +73,50 @@ capacité annuelle pilotable / 52
 
 L’horizon est toujours glissant : REBOOT projette les 52 cycles à venir à partir du cycle actif. Il ne se termine ni à la fin de l’année civile ni à la date anniversaire de l’onboarding.
 
-Les revenus, charges et objectifs sont annualisés avant d’être transposés sur les semaines. Le mois civil n’est jamais l’unité principale : sa durée varie et il peut contenir quatre ou cinq occurrences du jour REBOOT.
+Toutes les entrées prévisibles sont prises en compte :
+
+- salaires ;
+- prestations familiales et sociales, dont CAF et allocations ;
+- pensions ;
+- revenus récurrents fixes ou variables ;
+- primes et autres entrées planifiées.
+
+Toutes les sorties prévisibles sont également prises en compte :
+
+- charges mensuelles ;
+- charges annuelles, comme le ramonage ou une assurance ;
+- charges périodiques non mensuelles ;
+- dépenses variables lissées ;
+- dépenses irrégulières estimées.
+
+Chaque élément possède une fréquence, des dates prévues ou une estimation annuelle. Exemples d’annualisation :
+
+```text
+montant mensuel × 12
+montant hebdomadaire × 52
+montant toutes les 4 semaines × 13
+montant annuel × 1
+```
+
+Lorsque des dates exactes sont connues, le moteur compte les occurrences réelles présentes dans les 52 cycles au lieu d’appliquer aveuglément un multiplicateur.
+
+Pour un revenu variable, REBOOT propose :
+
+- **prudent** : 90 % de la moyenne annuelle disponible ;
+- **équilibré** : 100 % de cette moyenne ;
+- **personnalisé** : montant libre, avec avertissement s’il dépasse l’historique connu.
+
+Les revenus, charges et objectifs sont ainsi annualisés avant d’être transposés sur les semaines. Le mois civil n’est jamais l’unité principale : sa durée varie et il peut contenir quatre ou cinq occurrences du jour REBOOT.
+
+Le budget brut conserve les centimes. La recommandation du MVP est arrondie à l’euro inférieur :
+
+```text
+budget brut :       233,82 €
+budget recommandé : 233 €
+marge conservée :     0,82 € par cycle
+```
+
+Cette marge reste dans la trajectoire annuelle. Aucun arrondi automatique à 5 € n’est appliqué.
 
 Le budget hebdomadaire reste stable tant qu’aucune donnée structurelle ne change. Un surplus ou un dépassement sur une semaine ne modifie jamais automatiquement le budget de la semaine suivante.
 
@@ -258,6 +300,8 @@ Lorsque le reste estimé dépasse le seuil, l’utilisateur peut :
 
 La même mécanique s’applique à la santé, au vétérinaire, à une réparation automobile ou à une autre facture importante.
 
+Elle s’applique également à une charge annuelle connue mais insuffisamment préparée. Par exemple, une facture de 600 € arrivant bientôt sans réserve suffisante peut être répartie sur la durée choisie par l’utilisateur.
+
 Choix proposés :
 
 - utiliser une réserve ;
@@ -265,6 +309,11 @@ Choix proposés :
 - répartir le montant de 1 à 12 semaines.
 
 La durée proposée par défaut est de 3 semaines. REBOOT affiche toujours la réduction hebdomadaire avant validation.
+
+L’utilisateur peut choisir une durée allant jusqu’à 12 semaines, même si elle dépasse la date de paiement. REBOOT distingue alors :
+
+- la préparation constituée avant l’échéance ;
+- le rattrapage virtuel poursuivi après le paiement.
 
 Exemple :
 

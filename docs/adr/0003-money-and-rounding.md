@@ -3,6 +3,7 @@
 - Statut : Accepted
 - Date : 2026-07-29
 - Accepté le : 2026-07-30
+- Amendé le : 2026-07-30
 - Décideur : porteur du projet REBOOT
 
 ## Contexte
@@ -50,7 +51,9 @@ Aucun centime résiduel ne disparaît.
 
 ### Recommandation hebdomadaire
 
-- une capacité positive est divisée en centimes puis arrondie vers le bas au multiple configuré ;
+- une capacité positive est divisée en centimes puis arrondie vers le bas à l’euro entier pour le MVP ;
+- pour `EUR`, le pas d’arrondi du MVP est fixé à 100 unités mineures ;
+- les centimes écartés de la recommandation restent dans la trajectoire annuelle et constituent une petite marge ;
 - une capacité négative reste un déficit explicite ;
 - l’interface ne propose jamais un budget de dépense négatif : elle affiche zéro disponible et l’effort minimal ou le déficit séparément ;
 - un budget choisi par l’utilisateur est toujours supérieur ou égal à zéro.
@@ -94,7 +97,7 @@ Recommandée : modèle simple, exact et facile à tester par propriétés.
 ## Tests minimaux
 
 - répartition exacte de 90 € sur 26 cycles ;
-- montant non divisible par 5 € ;
+- recommandation brute de 233,82 € arrondie à 233 € ;
 - capacité négative ;
 - zéro ;
 - limites de l’entier 64 bits ;
