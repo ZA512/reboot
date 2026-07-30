@@ -72,6 +72,10 @@ capacité annuelle pilotable / 52
 = budget REBOOT hebdomadaire
 ```
 
+L’horizon est toujours glissant : REBOOT projette les 52 cycles à venir à partir du cycle actif. Il ne se termine ni à la fin de l’année civile ni à la date anniversaire de l’onboarding.
+
+Les revenus, charges et objectifs sont annualisés avant d’être transposés sur les semaines. Le mois civil n’est jamais l’unité principale : sa durée varie et il peut contenir quatre ou cinq occurrences du jour REBOOT.
+
 Le budget hebdomadaire reste stable tant qu’aucune donnée structurelle ne change. Un surplus ou un dépassement sur une semaine ne modifie jamais automatiquement le budget de la semaine suivante.
 
 L’utilisateur choisit lui-même de conserver un surplus, de le placer dans une réserve ou de faire un effort ultérieur. Une modification durable d’un revenu, d’une charge ou d’un objectif peut produire une nouvelle recommandation, qui doit être acceptée explicitement.
@@ -97,6 +101,14 @@ Le repère journalier est informatif et ne constitue pas un sous-budget quotidie
 
 Un changement de jour REBOOT crée un cycle exceptionnel de transition conformément à l’ADR-0002.
 
+À chaque nouveau jour REBOOT :
+
+- le cycle précédent devient une période historique utilisable dans les tendances ;
+- un nouveau cycle hebdomadaire commence ;
+- l’horizon de projection glisse pour conserver 52 cycles à venir.
+
+Il n’existe aucune clôture mensuelle ou annuelle obligatoire.
+
 ## Saisie rapide
 
 La saisie en temps réel est le comportement recommandé, particulièrement pour un foyer où plusieurs personnes utilisent le même budget.
@@ -105,6 +117,10 @@ Une dépense demande au minimum :
 
 - un montant ;
 - un libellé libre ou un raccourci.
+
+La date proposée est la date de saisie. Pour une dépense oubliée, REBOOT recommande d’indiquer la date d’achat réelle, ce qui peut corriger rétroactivement un ancien cycle et ses tendances.
+
+L’utilisateur peut néanmoins choisir de l’affecter au cycle courant. La dépense réduit alors le restant actuel et n’est toujours comptée qu’une seule fois.
 
 Un raccourci peut mémoriser :
 
@@ -121,6 +137,8 @@ Les natures proposées restent peu nombreuses :
 - imprévu.
 
 Une dépense non qualifiée reste valide. Les statistiques seront simplement moins détaillées.
+
+REBOOT ne peut piloter que les opérations qui lui sont déclarées. Une dépense oubliée augmente artificiellement le restant affiché ; un remboursement oublié dégrade artificiellement l’estimation correspondante. L’application explique cette conséquence sans bloquer l’utilisateur ni prétendre contrôler son compte bancaire.
 
 ## Modes de financement
 
@@ -140,7 +158,14 @@ Une même enseigne pouvant correspondre à plusieurs usages, le libellé seul ne
 
 La dépense réduit la réserve sélectionnée et non le budget hebdomadaire.
 
-Si la réserve correspond à un compte bancaire différent, REBOOT rappelle le montant du virement à effectuer vers le compte courant. Si la réserve est virtuelle dans le même compte, aucune opération bancaire réelle n’est nécessaire.
+Une réserve est déclarée comme :
+
+- **réelle**, lorsqu’elle correspond à un compte bancaire distinct ;
+- **virtuelle**, lorsqu’elle représente une allocation interne dans le même compte.
+
+Pour une réserve réelle, REBOOT rappelle le montant du virement à effectuer vers le compte courant lors de son utilisation. Pour une réserve virtuelle, aucune opération bancaire réelle n’est demandée.
+
+REBOOT ne vérifie pas le solde bancaire de la réserve. La cohérence dépend des opérations déclarées par l’utilisateur.
 
 ### Transfert
 
@@ -166,6 +191,17 @@ Les fenêtres proposées sont 4, 8, 16, 32 et 52 cycles. L’analyse ne dépasse
 
 Un ancien cycle n’est jamais recalculé avec le budget actuel. Un cycle exceptionnel de transition reste visible dans l’historique, mais il est exclu par défaut des tendances hebdomadaires normales.
 
+Au passage au cycle suivant, un résumé court peut indiquer :
+
+```text
+Semaine terminée : +18 €
+Tendance sur 8 semaines : +74 €
+```
+
+Ce résumé sert à montrer si le foyer reste sur sa trajectoire ou creuse progressivement un écart. Il ne déclenche aucune compensation automatique.
+
+Des statistiques par année civile pourront être proposées comme lecture secondaire, sans intervenir dans le calcul du budget.
+
 ## Remboursement d’un achat
 
 Un remboursement de produit corrige la dépense d’origine.
@@ -181,6 +217,13 @@ Message proposé :
 ## Santé sans rapprochement individuel
 
 REBOOT ne demande pas à l’utilisateur de consulter séparément chaque décompte d’assurance maladie ou de mutuelle.
+
+Le suivi Santé est facultatif. Lorsqu’il est activé, son estimation n’a de sens que si l’utilisateur déclare les deux flux :
+
+- les dépenses de santé ;
+- les remboursements reçus.
+
+Ces flux peuvent être saisis opération par opération ou sous forme de montants agrégés. L’utilisateur peut par exemple saisir une fois par mois le total des remboursements observés sur son compte, sans les rattacher à chaque consultation.
 
 L’application utilise une estimation agrégée :
 
@@ -201,6 +244,8 @@ Paramètres par défaut :
 L’utilisateur peut augmenter le délai s’il sait que ses remboursements prennent habituellement plus de temps. Le seuil est également modifiable.
 
 Cette valeur est une estimation de pilotage et non un rapprochement comptable exact. Un résultat négatif ne crée jamais de budget hebdomadaire supplémentaire.
+
+Si l’utilisateur désactive le suivi Santé et ne constitue aucune provision dédiée, REBOOT indique que les dépenses non suivies peuvent dégrader la trajectoire. Il propose alors d’augmenter la marge de sécurité ou de réduire le budget hebdomadaire, sans appliquer automatiquement cette modification.
 
 Lorsque le reste estimé dépasse le seuil, l’utilisateur peut :
 
@@ -263,3 +308,5 @@ Un changement de méthode possède une date d’effet et ne réinterprète pas l
 - aucune dépense comptée deux fois ;
 - aucune hausse automatique du budget après un remboursement ou un revenu supérieur aux prévisions ;
 - toute correction ou tout rattrapage important reste un choix explicite de l’utilisateur.
+- la fiabilité du restant et des tendances dépend de la complétude des dépenses, remboursements et transferts déclarés ;
+- REBOOT explique les conséquences d’un oubli ou d’une saisie volontairement décalée, mais laisse l’utilisateur responsable de ses choix.
