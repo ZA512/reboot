@@ -527,6 +527,39 @@ Ce résumé sert à montrer si le foyer reste sur sa trajectoire ou creuse progr
 
 Des statistiques par année civile pourront être proposées comme lecture secondaire, sans intervenir dans le calcul du budget.
 
+## Partage et fraîcheur du restant
+
+Dans un foyer partagé, chaque dépense est enregistrée immédiatement sur l’appareil utilisé. Elle est ensuite synchronisée avec les autres appareils dès que le réseau et le fournisseur de synchronisation le permettent.
+
+L’écran principal et le widget indiquent la fraîcheur du restant affiché :
+
+```text
+147
+Actualisé il y a 3 min
+```
+
+Pour un affichage plus discret, le widget peut remplacer le texte par une icône d’état. Il n’affiche ni le budget hebdomadaire total ni le solde bancaire.
+
+L’application propose un bouton d’actualisation explicite. Sur le widget, l’interaction exacte dépend des capacités de la plateforme et peut ouvrir l’application pour lancer la synchronisation.
+
+Si les données sont anciennes ou si l’appareil est hors ligne :
+
+- le dernier restant connu reste visible ;
+- une icône et une zone explicative indiquent qu’il peut être incomplet ;
+- l’heure de dernière synchronisation est accessible ;
+- l’utilisateur peut demander une actualisation.
+
+REBOOT ne prétend jamais qu’un montant ancien est garanti exact.
+
+Deux membres hors ligne peuvent dépenser simultanément à partir du même restant connu. Après synchronisation, toutes les dépenses indépendantes sont conservées et le nouveau restant peut devenir négatif.
+
+Ce dépassement :
+
+- apparaît dans le cycle et les tendances ;
+- ne modifie pas automatiquement le budget du cycle suivant ;
+- ne crée aucune compensation automatique ;
+- laisse l’utilisateur décider s’il veut réaliser ultérieurement un surplus pour rétablir sa trajectoire.
+
 ## Remboursement d’un achat
 
 Un remboursement de produit corrige la dépense d’origine.
