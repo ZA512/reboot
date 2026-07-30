@@ -411,7 +411,8 @@ Les décisions acceptées sont :
 
 - [ADR-0001 — Journal local dès le MVP](adr/0001-local-event-journal.md) ;
 - [ADR-0002 — Cycles hebdomadaires en dates civiles locales](adr/0002-civil-weekly-cycles.md) ;
-- [ADR-0003 — Représentation monétaire et arrondis](adr/0003-money-and-rounding.md).
+- [ADR-0003 — Représentation monétaire et arrondis](adr/0003-money-and-rounding.md) ;
+- [ADR-0004 — Workspace Flutter/Dart et outillage monorepo](adr/0004-flutter-dart-workspace.md).
 
 ## 20. Écrans du premier produit
 
@@ -493,7 +494,6 @@ Le premier produit doit permettre de :
 
 Les décisions suivantes doivent être prises avant le code concerné :
 
-- workspace Flutter/Dart et outillage monorepo ;
 - gestion d’état et injection de dépendances ;
 - bibliothèque SQLite chiffrée et migrations ;
 - primitives cryptographiques et stockage des clés ;

@@ -1,7 +1,8 @@
 # ADR-0004 — Workspace Flutter/Dart et outillage monorepo
 
-- Statut : Proposed
+- Statut : Accepted
 - Date : 2026-07-31
+- Accepté le : 2026-07-31
 - Décideur : porteur du projet REBOOT
 
 ## Contexte

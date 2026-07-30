@@ -38,13 +38,6 @@ Statuts autorisés :
 - ADR liés :
 ```
 
-## ADR proposés
-
-- [ADR-0004 — Workspace Flutter/Dart et outillage monorepo](0004-flutter-dart-workspace.md)
-
-Cette proposition doit être acceptée, amendée ou rejetée explicitement avant la
-création du workspace.
-
 ## Prochaines décisions à traiter
 
 1. bibliothèque SQLite chiffrée et stratégie de migration ;
@@ -57,5 +50,8 @@ création du workspace.
 - [ADR-0001 — Journal local dès le MVP](0001-local-event-journal.md)
 - [ADR-0002 — Cycles hebdomadaires en dates civiles locales](0002-civil-weekly-cycles.md)
 - [ADR-0003 — Représentation monétaire et arrondis](0003-money-and-rounding.md)
+- [ADR-0004 — Workspace Flutter/Dart et outillage monorepo](0004-flutter-dart-workspace.md)
 
-Ces trois ADR ont été acceptés explicitement le 2026-07-30.
+Les trois premiers ADR ont été acceptés explicitement le 2026-07-30.
+L’ADR-0004 a été accepté le 2026-07-31 dans le cadre de la délégation des
+décisions techniques au responsable de l’implémentation.
