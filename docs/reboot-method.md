@@ -71,7 +71,26 @@ L’écran présente une liste de lignes facultatives, par exemple :
 - autre revenu récurrent ;
 - autre entrée personnalisée.
 
-Chaque ligne accepte un titre, un montant et une fréquence. L’utilisateur peut ajouter, renommer ou supprimer des lignes.
+Chaque ligne accepte :
+
+- un titre ;
+- un montant ;
+- une fréquence ;
+- un comportement de montant : **Fixe** ou **Variable**.
+
+La fréquence et le comportement sont indépendants. Une charge annuelle peut être fixe, tandis qu’un revenu mensuel peut être variable.
+
+L’interface utilise de préférence un bouton segmenté :
+
+```text
+Montant : [ Fixe | Variable ]
+```
+
+Pour un montant fixe, l’utilisateur indique la valeur attendue à chaque occurrence. Pour un montant variable, il choisit une méthode prudente, équilibrée ou personnalisée selon les règles de la méthode.
+
+Les modèles proposés peuvent présélectionner le comportement le plus courant, mais l’utilisateur peut toujours le changer.
+
+L’utilisateur peut ajouter, renommer ou supprimer des lignes.
 
 La fréquence mensuelle est sélectionnée par défaut. REBOOT propose les rythmes courants :
 
@@ -231,6 +250,41 @@ Ils servent à comparer les opérations observées aux hypothèses confirmées p
 Lorsque les montants observés dérivent durablement de l’hypothèse, REBOOT émet une alerte et propose une nouvelle valeur. L’utilisateur doit confirmer toute modification du budget futur.
 
 Même lorsque toutes les opérations sont importées automatiquement, REBOOT demande périodiquement de confirmer que les montants moyens et leur traitement correspondent toujours à la réalité du foyer.
+
+### Provenance de chaque montant
+
+REBOOT n’utilise le mot **estimation** que pour une valeur réellement calculée, comme une moyenne de revenu variable, d’essence ou de dépenses de santé.
+
+Chaque hypothèse indique sa provenance et sa méthode :
+
+```text
+Salaire : 3 000 €/mois
+Montant fixe déclaré, confirmé le 31 juillet
+
+Essence : 180 €/mois
+Montant variable estimé sur 12 mois, confirmé le 31 juillet
+
+Ramonage : 180 €/an
+Montant fixe annuel déclaré
+```
+
+Une saisie manuelle complète et récemment confirmée n’est pas considérée moins fiable uniquement parce qu’elle ne provient pas d’un import.
+
+### État global des données
+
+REBOOT remplace les quatre niveaux de confiance du PRD initial par trois états actionnables :
+
+- **Configuration à compléter** : des revenus, charges ou dépenses annuelles importants manquent ;
+- **Données à confirmer** : certains montants sont anciens, estimés ou en dérive ;
+- **Données à jour** : les hypothèses importantes ont été récemment confirmées.
+
+La marge de sécurité conseillée est :
+
+- 10 % lorsque la configuration reste à compléter ;
+- 5 % lorsque des données sont à confirmer ;
+- 2 % lorsque les données sont à jour.
+
+Cette marge reste visible, modifiable et soumise à validation. REBOOT ne l’applique ni ne la change automatiquement.
 
 Le budget hebdomadaire reste stable tant qu’aucune donnée structurelle ne change. Un surplus ou un dépassement sur une semaine ne modifie jamais automatiquement le budget de la semaine suivante.
 
