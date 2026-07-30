@@ -55,6 +55,52 @@ Le MVP ne propose pas :
 
 Une version ultérieure pourra relier deux espaces solo. Chaque personne conserverait son propre budget et pourrait partager uniquement son restant hebdomadaire avec son partenaire. Les budgets ne seraient ni additionnés ni rééquilibrés automatiquement.
 
+## Onboarding
+
+L’onboarding propose deux niveaux de précision dans le même parcours, sans créer deux modèles incompatibles.
+
+### Entrées d’argent
+
+L’écran présente une liste de lignes facultatives, par exemple :
+
+- salaire 1 ;
+- salaire 2 ;
+- prestation ou allocation 1 ;
+- prestation ou allocation 2 ;
+- pension ;
+- autre revenu récurrent ;
+- autre entrée personnalisée.
+
+Chaque ligne accepte un titre, un montant et une fréquence. L’utilisateur peut ajouter, renommer ou supprimer des lignes.
+
+Une astuce explique :
+
+> Vous pouvez calculer tous vos revenus de votre côté et saisir uniquement un total. Les détailler permettra toutefois à REBOOT de mieux détecter les changements futurs.
+
+### Sorties d’argent
+
+Le même principe s’applique aux charges et dépenses lissées. Les propositions utilisent des noms génériques et non des marques ou organismes propres à un pays :
+
+- logement ;
+- électricité ;
+- gaz ou chauffage ;
+- eau ;
+- assurances ;
+- télécommunications ;
+- crédits ;
+- transport ;
+- garde d’enfants ou scolarité ;
+- impôts et taxes ;
+- autre charge personnalisée.
+
+L’utilisateur peut saisir un total global ou détailler progressivement les éléments. Lorsqu’un total est décomposé, les nouveaux éléments remplacent une partie de ce total afin d’éviter tout double comptage.
+
+Le parcours demande ensuite :
+
+- le jour REBOOT ;
+- la stratégie : équilibre, coussin ou sortie de découvert ;
+- les réserves et principaux imprévus à préparer.
+
 ## Construction du budget
 
 ```text
@@ -81,6 +127,15 @@ Toutes les entrées prévisibles sont prises en compte :
 - revenus récurrents fixes ou variables ;
 - primes et autres entrées planifiées.
 
+Une entrée ponctuelle non prévue ne modifie pas le budget hebdomadaire. REBOOT propose de :
+
+- la placer dans une réserve ;
+- l’affecter à un projet ou à un objet à acheter ;
+- financer une dépense exceptionnelle ;
+- la conserver sans affectation.
+
+Si une prime ou une autre entrée est raisonnablement attendue tous les ans, elle devient un revenu récurrent annuel et entre dans la projection des 52 cycles.
+
 Toutes les sorties prévisibles sont également prises en compte :
 
 - charges mensuelles ;
@@ -106,6 +161,12 @@ Pour un revenu variable, REBOOT propose :
 - **équilibré** : 100 % de cette moyenne ;
 - **personnalisé** : montant libre, avec avertissement s’il dépasse l’historique connu.
 
+Pour une charge variable lissée, REBOOT propose :
+
+- **prudent** : 110 % de la moyenne annuelle disponible ;
+- **équilibré** : 100 % de cette moyenne ;
+- **personnalisé** : montant libre.
+
 Les revenus, charges et objectifs sont ainsi annualisés avant d’être transposés sur les semaines. Le mois civil n’est jamais l’unité principale : sa durée varie et il peut contenir quatre ou cinq occurrences du jour REBOOT.
 
 Le budget brut conserve les centimes. La recommandation du MVP est arrondie à l’euro inférieur :
@@ -117,6 +178,22 @@ marge conservée :     0,82 € par cycle
 ```
 
 Cette marge reste dans la trajectoire annuelle. Aucun arrondi automatique à 5 € n’est appliqué.
+
+## Contrôle des hypothèses
+
+L’import ou la synchronisation ne modifie jamais automatiquement un montant de référence.
+
+Ils servent à comparer les opérations observées aux hypothèses confirmées par l’utilisateur :
+
+- salaire moyen ;
+- prestations et autres revenus ;
+- charges fixes ;
+- dépenses variables lissées, comme l’essence ;
+- charges annuelles ou irrégulières.
+
+Lorsque les montants observés dérivent durablement de l’hypothèse, REBOOT émet une alerte et propose une nouvelle valeur. L’utilisateur doit confirmer toute modification du budget futur.
+
+Même lorsque toutes les opérations sont importées automatiquement, REBOOT demande périodiquement de confirmer que les montants moyens et leur traitement correspondent toujours à la réalité du foyer.
 
 Le budget hebdomadaire reste stable tant qu’aucune donnée structurelle ne change. Un surplus ou un dépassement sur une semaine ne modifie jamais automatiquement le budget de la semaine suivante.
 
