@@ -1477,4 +1477,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get saveReceivedBonus => 'Enregistrer ce montant';
+
+  @override
+  String get weeklyWidgetTitle => 'Widget semaine confidentiel';
+
+  @override
+  String get weeklyWidgetHelp =>
+      'Affiche uniquement le restant, masqué jusqu’à ce que vous le touchiez.';
+
+  @override
+  String get weeklyWidgetRequestSent =>
+      'Confirmez l’ajout du widget sur votre écran d’accueil.';
+
+  @override
+  String get weeklyWidgetManualInstall =>
+      'Ouvrez le menu des widgets de l’écran d’accueil et ajoutez le widget REBOOT.';
 }

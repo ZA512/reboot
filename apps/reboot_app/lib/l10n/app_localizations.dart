@@ -2453,6 +2453,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save this amount'**
   String get saveReceivedBonus;
+
+  /// Dashboard action for the private Android home-screen widget.
+  ///
+  /// In en, this message translates to:
+  /// **'Private weekly widget'**
+  String get weeklyWidgetTitle;
+
+  /// Privacy behavior of the Android weekly widget.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows only the remaining amount, masked until you tap it.'**
+  String get weeklyWidgetHelp;
+
+  /// Android launcher accepted the pin-widget request.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the widget placement on your home screen.'**
+  String get weeklyWidgetRequestSent;
+
+  /// Fallback instructions when widget pinning is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Open your home-screen widget menu and add the REBOOT widget.'**
+  String get weeklyWidgetManualInstall;
 }
 
 class _AppLocalizationsDelegate

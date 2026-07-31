@@ -1472,4 +1472,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveReceivedBonus => 'Save this amount';
+
+  @override
+  String get weeklyWidgetTitle => 'Private weekly widget';
+
+  @override
+  String get weeklyWidgetHelp =>
+      'Shows only the remaining amount, masked until you tap it.';
+
+  @override
+  String get weeklyWidgetRequestSent =>
+      'Confirm the widget placement on your home screen.';
+
+  @override
+  String get weeklyWidgetManualInstall =>
+      'Open your home-screen widget menu and add the REBOOT widget.';
 }

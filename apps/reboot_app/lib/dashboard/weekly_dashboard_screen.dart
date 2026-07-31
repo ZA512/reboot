@@ -16,6 +16,7 @@ import '../expenses/quick_expense_screen.dart';
 import '../financial_setup/cash_flow_management_screen.dart';
 import '../health/health_controller.dart';
 import '../health/health_screen.dart';
+import '../infrastructure/android_weekly_widget.dart';
 import '../infrastructure/device_context_providers.dart';
 import '../l10n/app_localizations.dart';
 import '../refunds/refund_controller.dart';
@@ -26,13 +27,22 @@ import '../trajectory_setup/trajectory_management_screen.dart';
 import '../trends/trends_screen.dart';
 
 /// Live answer to the daily question: how much can the household still spend?
-final class WeeklyDashboardScreen extends ConsumerWidget {
+final class WeeklyDashboardScreen extends ConsumerStatefulWidget {
   const WeeklyDashboardScreen({required this.service, super.key});
 
   final LocalRebootService service;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WeeklyDashboardScreen> createState() =>
+      _WeeklyDashboardScreenState();
+}
+
+final class _WeeklyDashboardScreenState
+    extends ConsumerState<WeeklyDashboardScreen> {
+  String? _lastPublishedWidgetState;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final deviceContext = ref.watch(onboardingDeviceContextProvider);
     final mutation = ref.watch(quickExpenseControllerProvider);
@@ -57,16 +67,12 @@ final class WeeklyDashboardScreen extends ConsumerWidget {
         error: (_, _) => _DashboardDateError(
           onRetry: () => ref.invalidate(onboardingDeviceContextProvider),
         ),
-        data: (device) => _DashboardBody(
-          service: service,
-          today: device.localDate,
-          deleting: mutation.isLoading,
-        ),
+        data: _dashboardFor,
       ),
       floatingActionButton: switch (deviceContext) {
         AsyncData(:final value)
             when !value.localDate.isBefore(
-              service.configuration.household!.firstCycleStart,
+              widget.service.configuration.household!.firstCycleStart,
             ) =>
           FloatingActionButton.extended(
             key: const ValueKey('add-expense'),
@@ -75,7 +81,7 @@ final class WeeklyDashboardScreen extends ConsumerWidget {
                 : () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => QuickExpenseScreen(
-                        service: service,
+                        service: widget.service,
                         today: value.localDate,
                       ),
                     ),
@@ -88,6 +94,50 @@ final class WeeklyDashboardScreen extends ConsumerWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
+
+  Widget _dashboardFor(OnboardingDeviceContext device) {
+    final current = widget.service
+        .buildRollingBudget(device.localDate)
+        .cycles
+        .first;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final displayAmount = NumberFormat.decimalPatternDigits(
+      locale: locale,
+      decimalDigits: 2,
+    ).format(current.remaining.minorUnits / 100);
+    final validBeforeDate = current.cycle.endExclusive.toString();
+    final state = '$displayAmount|$validBeforeDate';
+    if (_lastPublishedWidgetState != state) {
+      _lastPublishedWidgetState = state;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AndroidWeeklyWidget.update(
+          displayAmount: displayAmount,
+          validBeforeDate: validBeforeDate,
+        );
+      });
+    }
+    return _DashboardBody(
+      service: widget.service,
+      today: device.localDate,
+      deleting: ref.watch(quickExpenseControllerProvider).isLoading,
+      onRequestWidget: _requestWidget,
+    );
+  }
+
+  Future<void> _requestWidget() async {
+    final l10n = AppLocalizations.of(context);
+    final requested = await AndroidWeeklyWidget.requestPin();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          requested
+              ? l10n.weeklyWidgetRequestSent
+              : l10n.weeklyWidgetManualInstall,
+        ),
+      ),
+    );
+  }
 }
 
 final class _DashboardBody extends ConsumerWidget {
@@ -95,11 +145,13 @@ final class _DashboardBody extends ConsumerWidget {
     required this.service,
     required this.today,
     required this.deleting,
+    required this.onRequestWidget,
   });
 
   final LocalRebootService service;
   final LocalDate today;
   final bool deleting;
+  final VoidCallback onRequestWidget;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -310,6 +362,19 @@ final class _DashboardBody extends ConsumerWidget {
               ),
             ),
           ),
+          if (AndroidWeeklyWidget.isSupported) ...[
+            const SizedBox(height: 12),
+            Card(
+              child: ListTile(
+                key: const ValueKey('install-weekly-widget'),
+                leading: const Icon(Icons.widgets_outlined),
+                title: Text(l10n.weeklyWidgetTitle),
+                subtitle: Text(l10n.weeklyWidgetHelp),
+                trailing: const Icon(Icons.add_to_home_screen_outlined),
+                onTap: onRequestWidget,
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           Card(
             child: ListTile(

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:reboot_app/bonuses/received_bonus_screen.dart';
@@ -1106,6 +1107,56 @@ void main() {
     expect(
       service.weeklyBudgetForCycleStarting(nextCycle).minorUnits,
       nextBudgetBefore.minorUnits + 100,
+    );
+  });
+
+  testWidgets('offers the private Android widget from the dashboard', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    const widgetChannel = MethodChannel('com.za512.reboot/weekly_widget');
+    final nativeCalls = <MethodCall>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(widgetChannel, (call) async {
+          nativeCalls.add(call);
+          return call.method == 'requestPinWeeklyWidget';
+        });
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(widgetChannel, null),
+    );
+    final service = await _readyService(_MemoryJournal());
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 4, 6),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final install = find.byKey(const ValueKey('install-weekly-widget'));
+    await tester.scrollUntilVisible(install, 250);
+    await tester.ensureVisible(install);
+    await tester.pumpAndSettle();
+    await tester.tap(install);
+    await tester.pumpAndSettle();
+
+    expect(
+      nativeCalls.map((call) => call.method),
+      containsAll(['updateWeeklyWidget', 'requestPinWeeklyWidget']),
+    );
+    expect(
+      find.text('Confirmez l’ajout du widget sur votre écran d’accueil.'),
+      findsOneWidget,
     );
   });
 

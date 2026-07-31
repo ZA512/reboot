@@ -391,5 +391,9 @@
   "receivedBonusName": "Nom",
   "receivedBonusRemainingAmount": "Montant encore disponible pour le quotidien",
   "receivedBonusNextPayment": "Date du prochain versement attendu",
-  "saveReceivedBonus": "Enregistrer ce montant"
+  "saveReceivedBonus": "Enregistrer ce montant",
+  "weeklyWidgetTitle": "Widget semaine confidentiel",
+  "weeklyWidgetHelp": "Affiche uniquement le restant, masqué jusqu’à ce que vous le touchiez.",
+  "weeklyWidgetRequestSent": "Confirmez l’ajout du widget sur votre écran d’accueil.",
+  "weeklyWidgetManualInstall": "Ouvrez le menu des widgets de l’écran d’accueil et ajoutez le widget REBOOT."
 }

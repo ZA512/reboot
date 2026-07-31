@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+    <color name="widget_background">#FFF7F2</color>
+    <color name="widget_label">#665F5A</color>
+    <color name="widget_amount_masked">#C2BAB4</color>
+    <color name="widget_amount_revealed">#243C32</color>
+    <string name="widget_name">REBOOT — weekly remaining</string>
+    <string name="widget_description">Private weekly remaining amount, masked by default</string>
+    <string name="widget_brand" translatable="false">REBOOT</string>
+    <string name="widget_masked_amount" translatable="false">••••</string>
+    <string name="widget_empty_amount" translatable="false">—</string>
+    <string name="widget_tap_to_reveal">Tap the amount to reveal it</string>
+    <string name="widget_hides_automatically">Hides automatically</string>
+    <string name="widget_open_reboot">Open REBOOT to refresh</string>
+</resources>

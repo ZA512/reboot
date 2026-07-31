@@ -783,5 +783,13 @@
   "receivedBonusNextPayment": "Next expected payment date",
   "@receivedBonusNextPayment": {"description": "Mandatory received bonus renewal date."},
   "saveReceivedBonus": "Save this amount",
-  "@saveReceivedBonus": {"description": "Persists a received bonus snapshot."}
+  "@saveReceivedBonus": {"description": "Persists a received bonus snapshot."},
+  "weeklyWidgetTitle": "Private weekly widget",
+  "@weeklyWidgetTitle": {"description": "Dashboard action for the private Android home-screen widget."},
+  "weeklyWidgetHelp": "Shows only the remaining amount, masked until you tap it.",
+  "@weeklyWidgetHelp": {"description": "Privacy behavior of the Android weekly widget."},
+  "weeklyWidgetRequestSent": "Confirm the widget placement on your home screen.",
+  "@weeklyWidgetRequestSent": {"description": "Android launcher accepted the pin-widget request."},
+  "weeklyWidgetManualInstall": "Open your home-screen widget menu and add the REBOOT widget.",
+  "@weeklyWidgetManualInstall": {"description": "Fallback instructions when widget pinning is unavailable."}
 }

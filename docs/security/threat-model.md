@@ -1,6 +1,6 @@
 # Modèle de menaces initial
 
-- Version : 2
+- Version : 3
 - Date : 2026-08-01
 - Portée : application Android locale, future PWA et futur partage chiffré
 
@@ -38,6 +38,9 @@ ne remplace pas les tests, les revues de code ni les ADR cryptographiques.
   mais susceptible d’être perdu, volé, révoqué ou compromis.
 - **Interface et journaux** : ne doivent jamais devenir un canal de fuite des
   données financières ou cryptographiques.
+- **Widget Android** : reçoit uniquement le restant déjà calculé et sa date de
+  validité. Son cache privé est chiffré avec une clé AES-GCM non exportable de
+  l’Android Keystore ; aucun événement, libellé ou budget global n’y entre.
 
 ## Adversaires considérés
 
@@ -73,6 +76,8 @@ ne remplace pas les tests, les revues de code ni les ADR cryptographiques.
 - une erreur de stockage sécurisé ne provoque ni effacement silencieux ni
   recréation d’une base vide ;
 - aucune clé, donnée financière ou jeton OAuth n’apparaît dans les journaux.
+- le widget masque le restant par défaut, refuse de révéler un montant périmé
+  et remasque automatiquement une révélation temporaire ;
 - aucune donnée métier, clé ou jeton OAuth n’est placé en clair dans un cache
   Web ou confié au service worker ;
 - une perte du stockage PWA est détectée et conduit à une récupération
@@ -114,6 +119,8 @@ garantie absolue.
 | Perte du dernier appareil | kit de récupération et paquet distant chiffré |
 | Perte du stockage sécurisé local | échec fermé puis récupération explicite |
 | Fuite par diagnostic | redaction stricte et télémétrie sans données métier |
+| Lecture du cache du widget | cache AES-GCM, clé Android Keystore et sauvegarde Android désactivée |
+| Regard indiscret sur l’écran d’accueil | montant masqué par défaut et révélation limitée à deux secondes |
 | Dépendance compromise | versions verrouillées, revue des mises à jour et inventaire |
 | Migration interrompue | transaction, schémas versionnés et tests de reprise |
 | XSS dans la PWA | CSP restrictive, aucun HTML dynamique non assaini, revue des dépendances |
