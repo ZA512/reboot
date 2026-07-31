@@ -1,0 +1,10 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          databases:
+            reboot_database: lib/src/database.dart
+          schema_dir: drift_schemas/
+          test_dir: test/drift/
+          fatal_warnings: true

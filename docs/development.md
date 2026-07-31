@@ -64,6 +64,24 @@ La commande de contrôle vérifie le formatage, l’analyse statique et les test
 tous les membres du workspace. Les packages métier restent testables sans
 import Flutter.
 
+Le code Drift et l’instantané du schéma chiffré sont maintenus depuis le
+package de stockage :
+
+```shell
+cd packages/reboot_storage
+dart run build_runner build
+dart run drift_dev make-migrations
+```
+
+Après une modification de Drift, de `sqlite3` ou de la configuration des hooks,
+construire aussi l’application Android afin de vérifier l’intégration du moteur
+natif SQLite3MultipleCiphers :
+
+```shell
+cd apps/reboot_app
+flutter build apk --debug
+```
+
 ## Politique de dépendances
 
 - utiliser la dernière version stable compatible au moment de l’ajout ;

@@ -46,7 +46,8 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Allocations et projection hebdomadaire glissante sur 52 cycles
 - [x] Annualisation des revenus, charges, réserves et objectifs
 - [x] Événements et projection de configuration du foyer
-- [ ] Journal local SQLite chiffré et orchestration applicative
+- [x] Journal local SQLite chiffré, append-only et rejouable
+- [ ] Cas d’usage et orchestration applicative
 
 ## Licence
 

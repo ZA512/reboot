@@ -10,6 +10,12 @@ workspace:
   - packages/reboot_application
   - packages/reboot_domain
   - packages/reboot_projection
+  - packages/reboot_storage
 
 dev_dependencies:
   lints: ^6.1.0
+
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc

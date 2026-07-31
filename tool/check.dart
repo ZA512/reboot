@@ -17,6 +17,7 @@ Future<void> main() async {
     'packages/reboot_domain',
     'packages/reboot_projection',
     'packages/reboot_application',
+    'packages/reboot_storage',
   ]) {
     await _runTestsWhenPresent(
       executable: Platform.resolvedExecutable,

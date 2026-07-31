@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   reboot_application: ^0.1.0
+  reboot_storage: ^0.1.0
 
 dev_dependencies:
   flutter_test:
@@ -20,3 +21,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc
