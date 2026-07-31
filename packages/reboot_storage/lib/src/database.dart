@@ -136,8 +136,23 @@ final class EncryptedDatabaseKey {
   }
 
   final typed.Uint8List _bytes;
+  bool _destroyed = false;
 
-  typed.Uint8List copyBytes() => typed.Uint8List.fromList(_bytes);
+  typed.Uint8List copyBytes() {
+    if (_destroyed) {
+      throw StateError('The encrypted database key has been destroyed.');
+    }
+    return typed.Uint8List.fromList(_bytes);
+  }
+
+  /// Overwrites this wrapper's in-memory key material after database opening.
+  void destroy() {
+    if (_destroyed) {
+      return;
+    }
+    _bytes.fillRange(0, _bytes.length, 0);
+    _destroyed = true;
+  }
 }
 
 /// Sanitized failure that never embeds a key, path, SQL statement, or amount.

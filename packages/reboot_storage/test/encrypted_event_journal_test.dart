@@ -62,6 +62,13 @@ void main() {
       );
     });
 
+    test('destroys transient key material explicitly', () {
+      final key = _key(1)..destroy();
+
+      expect(key.copyBytes, throwsStateError);
+      expect(key.destroy, returnsNormally);
+    });
+
     test('enables and verifies required SQLite settings', () async {
       final database = await RebootDatabase.open(
         filePath: databasePath,

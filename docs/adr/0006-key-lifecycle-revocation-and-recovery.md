@@ -107,7 +107,8 @@ Configuration obligatoire :
 - espace de noms dédié à REBOOT ;
 - algorithmes sélectionnés explicitement ;
 - `resetOnError: false` sur Android ;
-- aucune migration automatique d’algorithme sans migration REBOOT testée ;
+- migration d’algorithme autorisée uniquement par un chemin de préservation
+  testé, sans repli vers une suppression ou une nouvelle clé ;
 - aucun stockage de secours dans des préférences ordinaires ;
 - aucune synchronisation Keychain ;
 - sauvegardes Android, transferts automatiques et copies iOS exclus pour les
@@ -116,6 +117,12 @@ Configuration obligatoire :
 Une erreur du Keystore ou du Keychain ne supprime pas un secret et ne déclenche
 pas la création d’un nouveau profil. L’application se verrouille et propose les
 voies de récupération disponibles.
+
+Avec `flutter_secure_storage` 10.3.1, ce chemin de migration est aussi utilisé
+à la première installation Android pour passer des marqueurs historiques aux
+algorithmes explicites actuels, même lorsqu’aucune donnée n’existe. Il reste
+donc activé avec `resetOnError: false` : une migration réussie préserve les
+secrets ; un échec verrouille le profil sans rien effacer.
 
 Le verrouillage biométrique est une protection d’interface optionnelle. Il ne
 constitue ni une clé de chiffrement ni une méthode de récupération. Son absence,

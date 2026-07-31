@@ -9,7 +9,7 @@ Future<void> main() async {
     'format',
     '--output=none',
     '--set-exit-if-changed',
-    '.',
+    ..._sourceRoots,
   ]);
   await _run(Platform.resolvedExecutable, const ['analyze', '--fatal-infos']);
 
@@ -30,6 +30,20 @@ Future<void> main() async {
     package: 'apps/reboot_app',
   );
 }
+
+const List<String> _sourceRoots = [
+  'apps/reboot_app/lib',
+  'apps/reboot_app/test',
+  'packages/reboot_application/lib',
+  'packages/reboot_application/test',
+  'packages/reboot_domain/lib',
+  'packages/reboot_domain/test',
+  'packages/reboot_projection/lib',
+  'packages/reboot_projection/test',
+  'packages/reboot_storage/lib',
+  'packages/reboot_storage/test',
+  'tool',
+];
 
 Future<void> _runTestsWhenPresent({
   required String executable,

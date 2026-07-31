@@ -11,6 +11,10 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  flutter_riverpod: 3.4.2
+  flutter_secure_storage: 10.3.1
+  path: 1.9.1
+  path_provider: 2.1.6
   reboot_application: ^0.1.0
   reboot_storage: ^0.1.0
 
@@ -18,6 +22,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  reboot_domain: ^0.1.0
 
 flutter:
   uses-material-design: true
