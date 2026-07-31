@@ -1,0 +1,77 @@
+# Environnement de développement
+
+## Outils de référence
+
+REBOOT utilise :
+
+- Flutter 3.44.8, canal `stable` ;
+- Dart 3.12.2 fourni par ce SDK Flutter ;
+- révision Flutter `058e0af2c2b57e369d905a03ac9748b0ebf543c6`.
+
+Les archives et empreintes SHA-256 officielles sont enregistrées dans
+[`tool/flutter-version.json`](../tool/flutter-version.json).
+
+La version est volontairement précise. Ne pas exécuter `flutter upgrade` dans
+ce projet sans modification dédiée du fichier de version, régénération
+contrôlée des fichiers plateforme et exécution de tous les tests.
+
+## Installation
+
+1. Installer Git.
+2. Télécharger l’archive correspondant au système depuis
+   [l’archive officielle Flutter](https://docs.flutter.dev/install/archive).
+3. Vérifier son SHA-256 avec la valeur du fichier de version.
+4. Extraire le SDK dans un chemin local accessible en écriture, sans espace ni
+   caractère spécial.
+5. Ajouter le dossier `flutter/bin` au `PATH`.
+6. Exécuter `flutter doctor -v`.
+
+Exemples de chemins :
+
+- Windows : `C:\Users\<utilisateur>\develop\flutter` ;
+- macOS et Linux : `~/develop/flutter`.
+
+## Plateformes mobiles
+
+### Android
+
+Installer Android Studio, le SDK Android courant demandé par Flutter, les
+command-line tools et accepter les licences avec :
+
+```shell
+flutter doctor --android-licenses
+```
+
+REBOOT ne cible pas Windows, macOS, Linux ou le web comme plateformes produit.
+Le poste Windows sert au développement Dart, Flutter et Android.
+
+### iOS
+
+Une construction iOS exige macOS, Xcode et CocoaPods ou Swift Package Manager
+selon les plugins utilisés. Les vérifications iOS seront exécutées sur un
+runner macOS et sur un appareil réel avant distribution.
+
+## Commandes du dépôt
+
+Depuis la racine :
+
+```shell
+flutter pub get
+dart run tool/check.dart
+```
+
+La commande de contrôle vérifie le formatage, l’analyse statique et les tests de
+tous les membres du workspace. Les packages métier restent testables sans
+import Flutter.
+
+## Politique de dépendances
+
+- utiliser la dernière version stable compatible au moment de l’ajout ;
+- versionner le lockfile racine ;
+- ne pas utiliser de préversion sans justification documentée ;
+- examiner le changelog, la maintenance, la licence et les avis de sécurité ;
+- tester Android et iOS après toute mise à niveau native ;
+- ne jamais fusionner automatiquement une mise à niveau majeure.
+
+Les versions mentionnées dans un ADR décrivent l’état étudié au moment de la
+décision. Le lockfile décrit exactement ce qui est construit.

@@ -12,13 +12,17 @@ Le projet est actuellement en **Phase 0 — Fondation**.
 - [Méthode REBOOT](docs/reboot-method.md)
 - [Décisions d’architecture](docs/adr/README.md)
 - [Principes de sécurité](docs/security/README.md)
+- [Environnement de développement](docs/development.md)
 - [Documents historiques](docs/archive/README.md)
 
 ## Architecture cible
 
 Le client sera développé en Flutter/Dart pour Android et iOS. La logique financière restera indépendante de l’interface et manipulera exclusivement des montants entiers en centimes.
 
-L’organisation détaillée du dépôt et l’ordre d’implémentation sont définis dans le PRD. Les packages applicatifs seront créés après validation des premières décisions d’architecture.
+L’organisation détaillée du dépôt et l’ordre d’implémentation sont définis dans
+le PRD. Le workspace sépare le domaine, les projections, l’orchestration
+applicative et le client mobile afin que les calculs métier restent testables
+sans Flutter.
 
 ## Nom du projet
 
@@ -33,9 +37,9 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] PRD REBOOT 2.0 publié comme source de vérité
 - [x] Garde-fous Git et sécurité posés
 - [x] Analyse initiale des contradictions et questions ouvertes
-- [x] Trois ADR de fondation acceptés
+- [x] Six ADR de fondation acceptés
 - [x] Méthode REBOOT formalisée
-- [ ] Création du workspace Flutter/Dart
+- [x] Création du workspace Flutter/Dart
 - [ ] Premiers types métier et tests de référence
 
 ## Licence

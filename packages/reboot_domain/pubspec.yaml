@@ -1,0 +1,12 @@
+name: reboot_domain
+description: Pure domain values, rules, and events for REBOOT.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+
+resolution: workspace
+
+dev_dependencies:
+  test: 1.31.0
