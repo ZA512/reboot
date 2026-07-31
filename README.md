@@ -41,7 +41,8 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Méthode REBOOT formalisée
 - [x] Création du workspace Flutter/Dart
 - [x] Type monétaire et tests de référence
-- [ ] Moteur de cycles civils et tests de changements d’heure
+- [x] Moteur de cycles civils et tests de changements d’heure
+- [ ] Premiers événements métier locaux
 
 ## Licence
 

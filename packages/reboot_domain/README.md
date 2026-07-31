@@ -9,4 +9,6 @@ Implemented foundations:
 
 - exact signed 64-bit `Money` values;
 - explicit supported ISO 4217 currencies;
-- checked arithmetic and exact installment allocation.
+- checked arithmetic and exact installment allocation;
+- local civil dates and auditable weekly-cycle policies;
+- explicit short or long transitions when the anchor weekday changes.
