@@ -37,6 +37,7 @@ final class _TrendsScreenState extends State<TrendsScreen> {
               ),
             )
           : _TrendDetails(
+              service: widget.service,
               trends: trends,
               selectedWindow: _selectedWindow,
               onWindowSelected: (value) =>
@@ -48,11 +49,13 @@ final class _TrendsScreenState extends State<TrendsScreen> {
 
 final class _TrendDetails extends StatelessWidget {
   const _TrendDetails({
+    required this.service,
     required this.trends,
     required this.selectedWindow,
     required this.onWindowSelected,
   });
 
+  final LocalRebootService service;
   final TrendProjection trends;
   final int selectedWindow;
   final ValueChanged<int> onWindowSelected;
@@ -62,6 +65,9 @@ final class _TrendDetails extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
     final window = trends.window(selectedWindow);
+    final natureBreakdown = service.buildExpenseNatureBreakdown(
+      window.observedCycles.map((item) => item.cycle.start),
+    );
     final statusColor = switch (trends.severity) {
       TrendAlertSeverity.none => colors.primary,
       TrendAlertSeverity.vigilance => colors.tertiary,
@@ -133,6 +139,37 @@ final class _TrendDetails extends StatelessWidget {
               ),
             ),
           ),
+          if (natureBreakdown.total.isPositive) ...[
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.trendNatureBreakdownTitle,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(l10n.trendNatureBreakdownHelp),
+                    const SizedBox(height: 8),
+                    for (final share in natureBreakdown.shares)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        leading: Icon(_natureIcon(share.nature)),
+                        title: Text(_natureLabel(l10n, share.nature)),
+                        trailing: Text(
+                          '${_formatMoney(context, share.amount)} · '
+                          '${_formatBasisPoints(context, share.basisPoints)}',
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           if (trends.observedCycles.length >= 8 && trends.balance.isPositive)
             Padding(
               padding: const EdgeInsets.only(top: 8),
@@ -308,6 +345,23 @@ IconData _statusIcon(TrendAlertSeverity severity) => switch (severity) {
   TrendAlertSeverity.strong => Icons.error_outline,
 };
 
+IconData _natureIcon(ExpenseNature? nature) => switch (nature) {
+  ExpenseNature.necessary => Icons.check_circle_outline,
+  ExpenseNature.pleasure => Icons.celebration_outlined,
+  ExpenseNature.deferrable => Icons.schedule_outlined,
+  ExpenseNature.unexpected => Icons.bolt_outlined,
+  null => Icons.help_outline,
+};
+
+String _natureLabel(AppLocalizations l10n, ExpenseNature? nature) =>
+    switch (nature) {
+      ExpenseNature.necessary => l10n.expenseNatureNecessary,
+      ExpenseNature.pleasure => l10n.expenseNaturePleasure,
+      ExpenseNature.deferrable => l10n.expenseNatureDeferrable,
+      ExpenseNature.unexpected => l10n.expenseNatureUnexpected,
+      null => l10n.expenseNatureUnqualified,
+    };
+
 String _latestCycleMessage(BuildContext context, TrendProjection trends) {
   final l10n = AppLocalizations.of(context);
   final ratio = trends.latestOverspendRatio;
@@ -349,6 +403,12 @@ String _formatRatio(BuildContext context, TrendRatio ratio) =>
       locale: Localizations.localeOf(context).toLanguageTag(),
       decimalDigits: ratio.basisPoints % 100 == 0 ? 0 : 2,
     ).format(ratio.basisPoints / 10000);
+
+String _formatBasisPoints(BuildContext context, int basisPoints) =>
+    NumberFormat.decimalPercentPattern(
+      locale: Localizations.localeOf(context).toLanguageTag(),
+      decimalDigits: basisPoints % 100 == 0 ? 0 : 2,
+    ).format(basisPoints / 10000);
 
 String _formatDate(BuildContext context, LocalDate date) =>
     MaterialLocalizations.of(

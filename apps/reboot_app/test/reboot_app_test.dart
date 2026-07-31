@@ -386,6 +386,12 @@ void main() {
       'Réparation',
     );
     await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('expense-nature-necessary')),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const ValueKey('expense-nature-necessary')));
+    await tester.scrollUntilVisible(
       find.byKey(const ValueKey('expense-cycle-count')),
       300,
       scrollable: find.byType(Scrollable).first,
@@ -412,7 +418,11 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Réparation'), findsOneWidget);
-    expect(journal.entries, hasLength(6));
+    expect(
+      service.expenses.activeExpenses.single.nature,
+      ExpenseNature.necessary,
+    );
+    expect(journal.entries, hasLength(7));
 
     await tester.scrollUntilVisible(
       find.byIcon(Icons.delete_outline),
@@ -443,7 +453,69 @@ void main() {
           .minorUnits,
       41500,
     );
-    expect(journal.entries, hasLength(7));
+    expect(journal.entries, hasLength(8));
+  });
+
+  testWidgets('reuses a frequent label and its latest optional nature', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final service = await _readyService(_MemoryJournal());
+    await service.recordExpense(
+      RecordExpenseCommand(
+        amount: Money.fromMinorUnits(8000, Currency.eur),
+        label: 'Courses',
+        purchaseDate: LocalDate(2026, 4, 5),
+        nature: ExpenseNature.necessary,
+      ),
+    );
+    await service.recordExpense(
+      RecordExpenseCommand(
+        amount: Money.fromMinorUnits(6000, Currency.eur),
+        label: 'Courses',
+        purchaseDate: LocalDate(2026, 4, 5),
+        nature: ExpenseNature.pleasure,
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 4, 5),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('add-expense')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Raccourcis récents et fréquents'), findsOneWidget);
+    await tester.tap(find.widgetWithText(ActionChip, 'Courses'));
+    await tester.pumpAndSettle();
+    final labelField = tester.widget<TextFormField>(
+      find.byKey(const ValueKey('expense-label')),
+    );
+    expect(labelField.controller!.text, 'Courses');
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('expense-nature-pleasure')),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      tester
+          .widget<ChoiceChip>(
+            find.byKey(const ValueKey('expense-nature-pleasure')),
+          )
+          .selected,
+      isTrue,
+    );
   });
 
   testWidgets('uses a real reserve without reducing the weekly budget', (
@@ -592,6 +664,13 @@ void main() {
       find.byKey(const ValueKey('observed-trend-balance')),
       findsOneWidget,
     );
+    await tester.scrollUntilVisible(
+      find.text('À quoi le budget semaine a servi'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('À quoi le budget semaine a servi'), findsOneWidget);
+    expect(find.text('Non qualifié'), findsOneWidget);
   });
 
   testWidgets('records a same-week refund from its original purchase', (

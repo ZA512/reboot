@@ -303,5 +303,18 @@
   "healthEntryDate": "Date",
   "saveHealthEntry": "Enregistrer la saisie",
   "healthDashboardEstimate": "Estimation Santé : {amount}",
-  "healthDashboardOnTrack": "Aucune alerte selon le délai et le seuil actuels."
+  "healthDashboardOnTrack": "Aucune alerte selon le délai et le seuil actuels.",
+  "expenseSuggestionsTitle": "Raccourcis récents et fréquents",
+  "expenseNatureTitle": "Nature facultative de la dépense",
+  "expenseNatureHelp": "Ce choix ne change jamais le montant de la semaine. Il sert uniquement à mieux comprendre vos tendances.",
+  "expenseNatureNecessary": "Nécessaire",
+  "expenseNaturePleasure": "Plaisir",
+  "expenseNatureDeferrable": "Aurait pu attendre",
+  "expenseNatureUnexpected": "Imprévu",
+  "expenseNatureSkipped": "Vous pouvez ne rien choisir : la dépense reste valide.",
+  "expenseNatureSelected": "Choisi : {nature}",
+  "expenseNatureUnqualified": "Non qualifié",
+  "expenseNatureDisplay": "Nature : {nature}",
+  "trendNatureBreakdownTitle": "À quoi le budget semaine a servi",
+  "trendNatureBreakdownHelp": "Qualifications facultatives sur les semaines terminées sélectionnées. Les dépenses non qualifiées restent visibles."
 }

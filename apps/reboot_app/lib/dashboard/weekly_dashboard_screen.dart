@@ -512,7 +512,8 @@ final class _ExpenseTile extends StatelessWidget {
       title: Text(expense.label),
       subtitle: Text(
         '${splitCount > 1 ? l10n.splitExpenseDetail(_formatMoney(context, expense.amount), splitCount, _formatDate(context, expense.purchaseDate)) : _formatDate(context, expense.purchaseDate)}'
-        '${expense.refundedAmount.isPositive ? '\n${l10n.expenseRefunded(_formatMoney(context, expense.refundedAmount))}' : ''}',
+        '${expense.refundedAmount.isPositive ? '\n${l10n.expenseRefunded(_formatMoney(context, expense.refundedAmount))}' : ''}'
+        '${expense.nature == null ? '' : '\n${l10n.expenseNatureDisplay(_expenseNatureLabel(l10n, expense.nature!))}'}',
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -576,3 +577,11 @@ String _formatDate(BuildContext context, LocalDate date) =>
     MaterialLocalizations.of(
       context,
     ).formatFullDate(DateTime(date.year, date.month, date.day));
+
+String _expenseNatureLabel(AppLocalizations l10n, ExpenseNature nature) =>
+    switch (nature) {
+      ExpenseNature.necessary => l10n.expenseNatureNecessary,
+      ExpenseNature.pleasure => l10n.expenseNaturePleasure,
+      ExpenseNature.deferrable => l10n.expenseNatureDeferrable,
+      ExpenseNature.unexpected => l10n.expenseNatureUnexpected,
+    };

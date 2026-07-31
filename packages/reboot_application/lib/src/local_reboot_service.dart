@@ -229,6 +229,7 @@ final class RecordExpenseCommand {
     required this.label,
     required this.purchaseDate,
     this.allocationCycleCount = 1,
+    this.nature,
   });
 
   /// Exact real amount paid.
@@ -242,6 +243,9 @@ final class RecordExpenseCommand {
 
   /// Number of weekly cycles over which the amount is virtually allocated.
   final int allocationCycleCount;
+
+  /// Optional behavioral qualification used only for insights.
+  final ExpenseNature? nature;
 }
 
 /// Accepted result of an expense command.
@@ -798,6 +802,20 @@ final class LocalRebootService {
     return total;
   }
 
+  /// Frequent and recent labels derived from active expense history.
+  List<ExpenseLabelSuggestion> expenseSuggestions({int limit = 5}) {
+    _requireOpen();
+    return ExpenseInsights.suggestions(_expenses, limit: limit);
+  }
+
+  /// Optional behavioral allocation breakdown for selected cycle starts.
+  ExpenseNatureBreakdown buildExpenseNatureBreakdown(
+    Iterable<LocalDate> cycleStarts,
+  ) {
+    _requireOpen();
+    return ExpenseInsights.natureBreakdown(_expenses, cycleStarts);
+  }
+
   /// Records a real expense and its complete 1-to-12-cycle allocation atomically.
   Future<ExpenseRecordingResult> recordExpense(RecordExpenseCommand command) {
     return _runExclusive(() async {
@@ -850,7 +868,18 @@ final class LocalRebootService {
         ),
       );
 
-      await _appendValidated([recorded, allocated]);
+      final natureSet = switch (command.nature) {
+        final nature? => EventRecord(
+          id: _identities.nextEventId(),
+          recordedAtUtc: recordedAt,
+          businessDate: command.purchaseDate,
+          target: target,
+          payload: ExpenseNatureSetPayload(nature: nature),
+        ),
+        null => null,
+      };
+
+      await _appendValidated([recorded, allocated, ?natureSet]);
       return ExpenseRecordingResult(
         expenseId: expenseId,
         expense: _expenses.expenses[expenseId]!,

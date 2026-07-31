@@ -55,6 +55,8 @@ final class ProjectedExpense {
     required this.recordedAtUtc,
     required this.recordingEventId,
     required this.refunds,
+    this.nature,
+    this.natureEventId,
     this.allocations,
     this.allocationEventId,
     this.deletedAtUtc,
@@ -95,6 +97,12 @@ final class ProjectedExpense {
 
   /// Event that created this projection.
   final EventId recordingEventId;
+
+  /// Optional behavioral qualification; absence never invalidates an expense.
+  final ExpenseNature? nature;
+
+  /// Latest event that explicitly selected [nature].
+  final EventId? natureEventId;
 
   /// Complete refund history, including corrected entries.
   final List<ProjectedExpenseRefund> refunds;
@@ -155,6 +163,8 @@ final class ProjectedExpense {
       recordedAtUtc: recordedAtUtc,
       recordingEventId: recordingEventId,
       refunds: refunds,
+      nature: nature,
+      natureEventId: natureEventId,
       allocations: payload.allocations,
       allocationEventId: event.id,
     );
@@ -169,6 +179,8 @@ final class ProjectedExpense {
       cycleAssignment: cycleAssignment,
       recordedAtUtc: recordedAtUtc,
       recordingEventId: recordingEventId,
+      nature: nature,
+      natureEventId: natureEventId,
       allocations: allocations,
       allocationEventId: allocationEventId,
       deletedAtUtc: event.recordedAtUtc,
@@ -198,6 +210,8 @@ final class ProjectedExpense {
       cycleAssignment: cycleAssignment,
       recordedAtUtc: recordedAtUtc,
       recordingEventId: recordingEventId,
+      nature: nature,
+      natureEventId: natureEventId,
       allocations: allocations,
       allocationEventId: allocationEventId,
       deletedAtUtc: deletedAtUtc,
@@ -230,11 +244,38 @@ final class ProjectedExpense {
       cycleAssignment: cycleAssignment,
       recordedAtUtc: recordedAtUtc,
       recordingEventId: recordingEventId,
+      nature: nature,
+      natureEventId: natureEventId,
       allocations: allocations,
       allocationEventId: allocationEventId,
       deletedAtUtc: deletedAtUtc,
       deletionEventId: deletionEventId,
       refunds: next,
+    );
+  }
+
+  ProjectedExpense _natureSetBy(EventRecord event) {
+    if (isDeleted) {
+      throw ProjectionConflictException(
+        'Deleted expense $id cannot receive a nature.',
+      );
+    }
+    final payload = event.payload as ExpenseNatureSetPayload;
+    return ProjectedExpense._(
+      id: id,
+      amount: amount,
+      label: label,
+      purchaseDate: purchaseDate,
+      cycleAssignment: cycleAssignment,
+      recordedAtUtc: recordedAtUtc,
+      recordingEventId: recordingEventId,
+      nature: payload.nature,
+      natureEventId: event.id,
+      allocations: allocations,
+      allocationEventId: allocationEventId,
+      deletedAtUtc: deletedAtUtc,
+      deletionEventId: deletionEventId,
+      refunds: refunds,
     );
   }
 
@@ -248,6 +289,8 @@ final class ProjectedExpense {
         cycleAssignment == other.cycleAssignment &&
         recordedAtUtc == other.recordedAtUtc &&
         recordingEventId == other.recordingEventId &&
+        nature == other.nature &&
+        natureEventId == other.natureEventId &&
         _refundListsEqual(refunds, other.refunds) &&
         _allocationListsEqual(allocations, other.allocations) &&
         allocationEventId == other.allocationEventId &&
@@ -265,6 +308,8 @@ final class ProjectedExpense {
       cycleAssignment,
       recordedAtUtc,
       recordingEventId,
+      nature,
+      natureEventId,
       Object.hashAll(refunds),
       Object.hashAll(allocations ?? const <ExpenseAllocation>[]),
       allocationEventId,
@@ -347,6 +392,16 @@ final class ExpenseLedger {
             );
           }
           nextExpenses[entry.event.target.id] = existing._allocatedBy(
+            entry.event,
+          );
+        case ExpenseNatureSetPayload():
+          final existing = nextExpenses[entry.event.target.id];
+          if (existing == null) {
+            throw ProjectionConflictException(
+              'Expense ${entry.event.target.id} was qualified before recording.',
+            );
+          }
+          nextExpenses[entry.event.target.id] = existing._natureSetBy(
             entry.event,
           );
         case ExpenseDeletedPayload():

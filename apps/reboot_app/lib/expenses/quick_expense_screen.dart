@@ -38,6 +38,7 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
   final _labelController = TextEditingController();
   late LocalDate _purchaseDate;
   int _cycleCount = 1;
+  ExpenseNature? _nature;
   late _ExpenseFunding _funding;
   EntityId? _reserveId;
 
@@ -65,6 +66,7 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
     final reserveMutation = ref.watch(reserveControllerProvider);
     final reserves = widget.service.reserves.reserves.values.toList()
       ..sort((left, right) => left.name.compareTo(right.name));
+    final suggestions = widget.service.expenseSuggestions();
     final selectedReserve = _selectedReserve(reserves);
     final amount = parsePositiveEuroAmount(_amountController.text);
     final warning = amount == null || _funding == _ExpenseFunding.reserve
@@ -104,6 +106,28 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
                     : null,
                 onChanged: (_) => setState(() {}),
               ),
+              if (suggestions.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  l10n.expenseSuggestionsTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final suggestion in suggestions)
+                      ActionChip(
+                        avatar: const Icon(Icons.history, size: 18),
+                        label: Text(suggestion.label.trim()),
+                        onPressed: busy
+                            ? null
+                            : () => _selectSuggestion(suggestion),
+                      ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 16),
               TextFormField(
                 key: const ValueKey('expense-label'),
@@ -198,6 +222,40 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
                 ],
               ],
               if (_funding == _ExpenseFunding.weeklyBudget) ...[
+                const Divider(),
+                Text(
+                  l10n.expenseNatureTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(l10n.expenseNatureHelp),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final nature in ExpenseNature.values)
+                      ChoiceChip(
+                        key: ValueKey('expense-nature-${nature.name}'),
+                        label: Text(_natureLabel(l10n, nature)),
+                        selected: _nature == nature,
+                        onSelected: busy
+                            ? null
+                            : (selected) => setState(
+                                () => _nature = selected ? nature : null,
+                              ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _nature == null
+                      ? l10n.expenseNatureSkipped
+                      : l10n.expenseNatureSelected(
+                          _natureLabel(l10n, _nature!),
+                        ),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
                 const Divider(),
                 Text(
                   l10n.expenseAllocationTitle,
@@ -344,6 +402,7 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
             label: _labelController.text,
             purchaseDate: _purchaseDate,
             allocationCycleCount: _cycleCount,
+            nature: _nature,
           ),
         );
     if (accepted && mounted) Navigator.of(context).pop();
@@ -355,6 +414,16 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
       (reserve) => reserve.id == _reserveId,
       orElse: () => reserves.first,
     );
+  }
+
+  void _selectSuggestion(ExpenseLabelSuggestion suggestion) {
+    setState(() {
+      _labelController.text = suggestion.label.trim();
+      _labelController.selection = TextSelection.collapsed(
+        offset: _labelController.text.length,
+      );
+      _nature = suggestion.nature;
+    });
   }
 
   Future<bool> _confirmRealReserveTransfer(
@@ -403,6 +472,14 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
     return false;
   }
 }
+
+String _natureLabel(AppLocalizations l10n, ExpenseNature nature) =>
+    switch (nature) {
+      ExpenseNature.necessary => l10n.expenseNatureNecessary,
+      ExpenseNature.pleasure => l10n.expenseNaturePleasure,
+      ExpenseNature.deferrable => l10n.expenseNatureDeferrable,
+      ExpenseNature.unexpected => l10n.expenseNatureUnexpected,
+    };
 
 Money _regularPart(Money amount, int count) =>
     Money.fromMinorUnits(amount.minorUnits ~/ count, amount.currency);

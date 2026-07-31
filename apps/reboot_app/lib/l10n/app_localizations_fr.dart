@@ -1134,4 +1134,50 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get healthDashboardOnTrack =>
       'Aucune alerte selon le délai et le seuil actuels.';
+
+  @override
+  String get expenseSuggestionsTitle => 'Raccourcis récents et fréquents';
+
+  @override
+  String get expenseNatureTitle => 'Nature facultative de la dépense';
+
+  @override
+  String get expenseNatureHelp =>
+      'Ce choix ne change jamais le montant de la semaine. Il sert uniquement à mieux comprendre vos tendances.';
+
+  @override
+  String get expenseNatureNecessary => 'Nécessaire';
+
+  @override
+  String get expenseNaturePleasure => 'Plaisir';
+
+  @override
+  String get expenseNatureDeferrable => 'Aurait pu attendre';
+
+  @override
+  String get expenseNatureUnexpected => 'Imprévu';
+
+  @override
+  String get expenseNatureSkipped =>
+      'Vous pouvez ne rien choisir : la dépense reste valide.';
+
+  @override
+  String expenseNatureSelected(String nature) {
+    return 'Choisi : $nature';
+  }
+
+  @override
+  String get expenseNatureUnqualified => 'Non qualifié';
+
+  @override
+  String expenseNatureDisplay(String nature) {
+    return 'Nature : $nature';
+  }
+
+  @override
+  String get trendNatureBreakdownTitle => 'À quoi le budget semaine a servi';
+
+  @override
+  String get trendNatureBreakdownHelp =>
+      'Qualifications facultatives sur les semaines terminées sélectionnées. Les dépenses non qualifiées restent visibles.';
 }

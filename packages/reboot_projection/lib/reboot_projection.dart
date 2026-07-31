@@ -3,6 +3,7 @@ library;
 
 export 'src/annualization.dart';
 export 'src/configuration_ledger.dart';
+export 'src/expense_insights.dart';
 export 'src/expense_ledger.dart';
 export 'src/health_ledger.dart';
 export 'src/projection_errors.dart';

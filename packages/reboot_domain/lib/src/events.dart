@@ -196,6 +196,39 @@ final class ExpenseRecordedPayload implements EventPayload {
   final ExpenseCycleAssignment cycleAssignment;
 }
 
+/// Small optional behavioral qualification used by REBOOT statistics.
+enum ExpenseNature {
+  /// Essential spending that could not reasonably be avoided.
+  necessary,
+
+  /// Deliberate enjoyment or discretionary spending.
+  pleasure,
+
+  /// Spending that could have waited for a later cycle.
+  deferrable,
+
+  /// An unplanned expense outside the usual rhythm.
+  unexpected,
+}
+
+/// Version 1 replacement fact for an expense's optional nature.
+final class ExpenseNatureSetPayload implements EventPayload {
+  /// Creates an explicit user-selected qualification.
+  const ExpenseNatureSetPayload({required this.nature});
+
+  @override
+  String get eventType => 'expense.nature-set';
+
+  @override
+  int get schemaVersion => 1;
+
+  @override
+  EntityKind get targetKind => EntityKind.expense;
+
+  /// Latest user-selected behavioral nature.
+  final ExpenseNature nature;
+}
+
 /// One virtual amount applied to a materialized weekly cycle.
 final class ExpenseAllocation {
   /// Creates a non-negative EUR allocation.

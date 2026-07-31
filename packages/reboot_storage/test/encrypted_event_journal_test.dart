@@ -107,6 +107,7 @@ void main() {
           label: 'Courses',
           purchaseDate: LocalDate(2026, 4, 5),
           allocationCycleCount: 3,
+          nature: ExpenseNature.necessary,
         ),
       );
       final reserve = await service.createReserve(
@@ -169,6 +170,7 @@ void main() {
       expect(restored.configuration.household, isNotNull);
       final expense = restored.expenses.activeExpenses.single;
       expect(expense.label, 'Courses');
+      expect(expense.nature, ExpenseNature.necessary);
       expect(expense.allocations!.map((part) => part.amount.minorUnits), [
         933,
         933,

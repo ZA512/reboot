@@ -65,6 +65,9 @@ final class EventPayloadJsonCodec {
             },
         ],
       },
+      ExpenseNatureSetPayload() => <String, Object?>{
+        'nature': payload.nature.name,
+      },
       ExpenseDeletedPayload() => const <String, Object?>{},
       ExpenseRefundedPayload() => <String, Object?>{
         'amount': _encodeMoney(payload.amount),
@@ -200,6 +203,12 @@ final class EventPayloadJsonCodec {
       ),
       'expense.recorded' => _decodeExpenseRecorded(map),
       'expense.allocations.planned' => _decodeExpenseAllocations(map),
+      'expense.nature-set' => ExpenseNatureSetPayload(
+        nature: _enumByName(
+          ExpenseNature.values,
+          _asString(map['nature'], 'nature'),
+        ),
+      ),
       'expense.deleted' => const ExpenseDeletedPayload(),
       'expense.refunded' => ExpenseRefundedPayload(
         amount: _decodeMoney(_asMap(map['amount'], 'amount')),

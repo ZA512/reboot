@@ -1925,6 +1925,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No alert under the current delay and threshold.'**
   String get healthDashboardOnTrack;
+
+  /// Derived quick expense suggestions heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent and frequent shortcuts'**
+  String get expenseSuggestionsTitle;
+
+  /// Optional expense qualification heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional spending nature'**
+  String get expenseNatureTitle;
+
+  /// Expense nature optionality explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This never changes the weekly amount. It only makes your trends easier to understand.'**
+  String get expenseNatureHelp;
+
+  /// Necessary expense nature.
+  ///
+  /// In en, this message translates to:
+  /// **'Necessary'**
+  String get expenseNatureNecessary;
+
+  /// Pleasure expense nature.
+  ///
+  /// In en, this message translates to:
+  /// **'Pleasure'**
+  String get expenseNaturePleasure;
+
+  /// Deferrable expense nature.
+  ///
+  /// In en, this message translates to:
+  /// **'Could wait'**
+  String get expenseNatureDeferrable;
+
+  /// Unexpected expense nature.
+  ///
+  /// In en, this message translates to:
+  /// **'Unexpected'**
+  String get expenseNatureUnexpected;
+
+  /// Unqualified expense reassurance.
+  ///
+  /// In en, this message translates to:
+  /// **'You can leave this blank; the expense remains valid.'**
+  String get expenseNatureSkipped;
+
+  /// Selected expense nature.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected: {nature}'**
+  String expenseNatureSelected(String nature);
+
+  /// Unqualified expense insight label.
+  ///
+  /// In en, this message translates to:
+  /// **'Not qualified'**
+  String get expenseNatureUnqualified;
+
+  /// Expense nature display line.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature: {nature}'**
+  String expenseNatureDisplay(String nature);
+
+  /// Expense nature breakdown heading.
+  ///
+  /// In en, this message translates to:
+  /// **'How weekly spending was used'**
+  String get trendNatureBreakdownTitle;
+
+  /// Expense nature breakdown explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional qualifications across the selected completed weeks. Unqualified spending is kept visible.'**
+  String get trendNatureBreakdownHelp;
 }
 
 class _AppLocalizationsDelegate

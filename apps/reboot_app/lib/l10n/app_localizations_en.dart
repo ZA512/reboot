@@ -1129,4 +1129,50 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get healthDashboardOnTrack =>
       'No alert under the current delay and threshold.';
+
+  @override
+  String get expenseSuggestionsTitle => 'Recent and frequent shortcuts';
+
+  @override
+  String get expenseNatureTitle => 'Optional spending nature';
+
+  @override
+  String get expenseNatureHelp =>
+      'This never changes the weekly amount. It only makes your trends easier to understand.';
+
+  @override
+  String get expenseNatureNecessary => 'Necessary';
+
+  @override
+  String get expenseNaturePleasure => 'Pleasure';
+
+  @override
+  String get expenseNatureDeferrable => 'Could wait';
+
+  @override
+  String get expenseNatureUnexpected => 'Unexpected';
+
+  @override
+  String get expenseNatureSkipped =>
+      'You can leave this blank; the expense remains valid.';
+
+  @override
+  String expenseNatureSelected(String nature) {
+    return 'Selected: $nature';
+  }
+
+  @override
+  String get expenseNatureUnqualified => 'Not qualified';
+
+  @override
+  String expenseNatureDisplay(String nature) {
+    return 'Nature: $nature';
+  }
+
+  @override
+  String get trendNatureBreakdownTitle => 'How weekly spending was used';
+
+  @override
+  String get trendNatureBreakdownHelp =>
+      'Optional qualifications across the selected completed weeks. Unqualified spending is kept visible.';
 }

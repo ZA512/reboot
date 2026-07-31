@@ -101,6 +101,58 @@ void main() {
       expect(harness.service.expenses.activeExpenses, hasLength(2));
     });
 
+    test(
+      'qualifies atomically and derives reusable labels and shares',
+      () async {
+        final harness = await _Harness.initialized();
+        await harness.service.recordExpense(
+          RecordExpenseCommand(
+            amount: _eur(1000),
+            label: 'Courses',
+            purchaseDate: LocalDate(2026, 4, 5),
+            nature: ExpenseNature.necessary,
+          ),
+        );
+        final latest = await harness.service.recordExpense(
+          RecordExpenseCommand(
+            amount: _eur(2000),
+            label: 'courses',
+            purchaseDate: LocalDate(2026, 4, 5),
+            nature: ExpenseNature.pleasure,
+          ),
+        );
+        await harness.service.recordExpense(
+          RecordExpenseCommand(
+            amount: _eur(3000),
+            label: 'Divers',
+            purchaseDate: LocalDate(2026, 4, 5),
+          ),
+        );
+
+        expect(latest.expense.nature, ExpenseNature.pleasure);
+        expect(harness.journal.entries, hasLength(9));
+        final suggestions = harness.service.expenseSuggestions();
+        expect(suggestions.first.useCount, 2);
+        expect(suggestions.first.nature, ExpenseNature.pleasure);
+
+        final breakdown = harness.service.buildExpenseNatureBreakdown([
+          LocalDate(2026, 4, 4),
+        ]);
+        expect(breakdown.total.minorUnits, 6000);
+        expect(breakdown.unqualified.minorUnits, 3000);
+
+        final restored = await LocalRebootService.restore(
+          journal: harness.journal,
+          clock: const _FixedClock(),
+          identities: _SequentialIdentities(100),
+        );
+        expect(
+          restored.expenses.expenses[latest.expenseId]!.nature,
+          ExpenseNature.pleasure,
+        );
+      },
+    );
+
     test('tombstones the complete expense and allocation plan', () async {
       final harness = await _Harness.initialized();
       final recorded = await harness.service.recordExpense(

@@ -73,6 +73,14 @@ void main() {
     });
   });
 
+  test('ExpenseNatureSetPayload remains optional and targets one expense', () {
+    const payload = ExpenseNatureSetPayload(nature: ExpenseNature.deferrable);
+
+    expect(payload.eventType, 'expense.nature-set');
+    expect(payload.targetKind, EntityKind.expense);
+    expect(payload.nature, ExpenseNature.deferrable);
+  });
+
   group('ExpenseAllocationsPlannedPayload', () {
     test('splits 28 EUR exactly across three ordered cycles', () {
       final payload = ExpenseAllocationsPlannedPayload.evenly(

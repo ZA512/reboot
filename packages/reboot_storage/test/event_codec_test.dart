@@ -129,6 +129,7 @@ List<EventPayload> _allPayloads() {
       expenseAmount: _eur(4250),
       cycleStarts: [LocalDate(2026, 4, 4), LocalDate(2026, 4, 11)],
     ),
+    const ExpenseNatureSetPayload(nature: ExpenseNature.necessary),
     const ExpenseDeletedPayload(),
     ExpenseRefundedPayload(
       amount: _eur(2000),

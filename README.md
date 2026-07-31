@@ -56,6 +56,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Tendances glissantes sur 4, 8, 16, 32 et 52 semaines et alertes graduées
 - [x] Réserves réelles ou virtuelles et financement des grosses dépenses
 - [x] Remboursements et suivi Santé facultatif
+- [x] Raccourcis de saisie, qualification facultative et répartition des dépenses
 
 ## Licence
 
