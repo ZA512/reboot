@@ -111,6 +111,47 @@ void main() {
         ledger.household!.policyForCycleStarting(LocalDate(2026, 4, 13)),
         nextPolicy,
       );
+
+      final cycles = ledger.household!.cyclesFromDate(
+        LocalDate(2026, 4, 12),
+        count: 3,
+      );
+      expect(cycles.map((cycle) => cycle.start), [
+        LocalDate(2026, 4, 4),
+        LocalDate(2026, 4, 13),
+        LocalDate(2026, 4, 20),
+      ]);
+      expect(cycles.map((cycle) => cycle.dateCount), [9, 7, 7]);
+      expect(cycles.first.kind, WeeklyCycleKind.transition);
+      expect(cycles[1].policy, nextPolicy);
+    });
+
+    test('changes time zone on a normal boundary without a transition', () {
+      final nextPolicy = CyclePolicy(
+        version: 2,
+        effectiveFrom: LocalDate(2026, 4, 15),
+        anchorWeekday: Weekday.saturday,
+        timeZone: IanaTimeZoneId('America/Montreal'),
+      );
+      final ledger = ConfigurationLedger.replay([
+        _householdEntry(1),
+        _entry(
+          position: 2,
+          eventIdentity: 2,
+          businessDate: LocalDate(2026, 4, 15),
+          target: _reference(EntityKind.household, _householdId),
+          payload: HouseholdCyclePolicyChangedPayload(nextPolicy: nextPolicy),
+        ),
+      ]);
+
+      final before = ledger.household!.cycleContaining(LocalDate(2026, 4, 17));
+      final after = ledger.household!.cycleContaining(LocalDate(2026, 4, 18));
+
+      expect(before.start, LocalDate(2026, 4, 11));
+      expect(before.policy, _initialPolicy);
+      expect(after.start, LocalDate(2026, 4, 18));
+      expect(after.kind, WeeklyCycleKind.normal);
+      expect(after.policy, nextPolicy);
     });
 
     test('is idempotent by event UUID', () {

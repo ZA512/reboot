@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 import 'package:reboot_projection/reboot_projection.dart';
 import 'package:reboot_storage/reboot_storage.dart';
@@ -78,6 +79,50 @@ void main() {
   });
 
   group('append-only journal', () {
+    test('persists and restores the application command flow', () async {
+      final journal = await RebootEventJournal.open(
+        filePath: databasePath,
+        key: _key(7),
+      );
+      final service = await LocalRebootService.restore(journal: journal);
+      await service.initializeHousehold(
+        InitializeHouseholdCommand(
+          householdKind: HouseholdKind.sharedMainAccount,
+          onboardingDate: LocalDate(2026, 4, 1),
+          anchorWeekday: Weekday.saturday,
+          timeZone: IanaTimeZoneId('Europe/Paris'),
+          firstCycleChoice: FirstCycleStartChoice.nextAnchor,
+        ),
+      );
+      await service.recordExpense(
+        RecordExpenseCommand(
+          amount: Money.fromMinorUnits(2800, Currency.eur),
+          label: 'Courses',
+          purchaseDate: LocalDate(2026, 4, 5),
+          allocationCycleCount: 3,
+        ),
+      );
+      await service.close();
+
+      final reopenedJournal = await RebootEventJournal.open(
+        filePath: databasePath,
+        key: _key(7),
+      );
+      final restored = await LocalRebootService.restore(
+        journal: reopenedJournal,
+      );
+
+      expect(restored.configuration.household, isNotNull);
+      final expense = restored.expenses.activeExpenses.single;
+      expect(expense.label, 'Courses');
+      expect(expense.allocations!.map((part) => part.amount.minorUnits), [
+        933,
+        933,
+        934,
+      ]);
+      await restored.close();
+    });
+
     test('assigns monotone positions and replays both projections', () async {
       final journal = await RebootEventJournal.open(
         filePath: databasePath,

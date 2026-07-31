@@ -47,7 +47,8 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Annualisation des revenus, charges, réserves et objectifs
 - [x] Événements et projection de configuration du foyer
 - [x] Journal local SQLite chiffré, append-only et rejouable
-- [ ] Cas d’usage et orchestration applicative
+- [x] Cas d’usage locaux initiaux et orchestration applicative
+- [ ] Onboarding et saisie rapide dans l’application Flutter
 
 ## Licence
 

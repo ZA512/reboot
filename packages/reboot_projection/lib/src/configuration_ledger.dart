@@ -66,6 +66,60 @@ final class ProjectedHousehold {
     return result;
   }
 
+  /// Materializes the historical cycle containing [date].
+  ///
+  /// Scheduled anchor changes create their explicit transition cycle instead
+  /// of pretending that every cycle always contains seven dates.
+  WeeklyCycle cycleContaining(LocalDate date) {
+    if (date.isBefore(firstCycleStart)) {
+      throw StateError('Date $date precedes the household configuration.');
+    }
+
+    var currentPolicy = cyclePolicies.first;
+    for (final nextPolicy in cyclePolicies.skip(1)) {
+      if (currentPolicy.anchorWeekday == nextPolicy.anchorWeekday) {
+        if (date.isBefore(nextPolicy.firstNormalCycleStart)) {
+          return CycleCalendar.normalCycleContaining(
+            date: date,
+            policy: currentPolicy,
+          );
+        }
+      } else {
+        final change = CycleCalendar.changeAnchor(
+          previousPolicy: currentPolicy,
+          nextPolicy: nextPolicy,
+        );
+        if (date.isBefore(change.transition.start)) {
+          return CycleCalendar.normalCycleContaining(
+            date: date,
+            policy: currentPolicy,
+          );
+        }
+        if (change.transition.contains(date)) {
+          return change.transition;
+        }
+      }
+      currentPolicy = nextPolicy;
+    }
+
+    return CycleCalendar.normalCycleContaining(
+      date: date,
+      policy: currentPolicy,
+    );
+  }
+
+  /// Returns [count] gap-free cycles beginning with the one containing [date].
+  List<WeeklyCycle> cyclesFromDate(LocalDate date, {required int count}) {
+    if (count < 1) {
+      throw RangeError.range(count, 1, null, 'count');
+    }
+    final cycles = <WeeklyCycle>[cycleContaining(date)];
+    while (cycles.length < count) {
+      cycles.add(cycleContaining(cycles.last.endExclusive));
+    }
+    return List<WeeklyCycle>.unmodifiable(cycles);
+  }
+
   ProjectedHousehold _changedBy(EventRecord event) {
     final payload = event.payload as HouseholdCyclePolicyChangedPayload;
     final next = payload.nextPolicy;
