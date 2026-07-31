@@ -163,6 +163,41 @@ final class SetAnnualCommitmentsCommand {
   final LocalDate businessDate;
 }
 
+/// Sets the initial trajectory strategy and its explicit annual amounts.
+final class SetTrajectoryPlanCommand {
+  /// Creates one complete plan snapshot.
+  const SetTrajectoryPlanCommand({
+    required this.strategy,
+    required this.reserveContributions,
+    required this.projectContributions,
+    required this.safetyMargin,
+    required this.effectiveFromCycleStart,
+    required this.businessDate,
+    this.overdraftExitGoal,
+  });
+
+  /// Balance, cushion, or time-bound overdraft exit.
+  final TrajectoryStrategy strategy;
+
+  /// Ordinary annual reserve contribution.
+  final Money reserveContributions;
+
+  /// Annual contribution to named projects.
+  final Money projectContributions;
+
+  /// Explicit annual conservative margin.
+  final Money safetyMargin;
+
+  /// First weekly cycle using the plan.
+  final LocalDate effectiveFromCycleStart;
+
+  /// Civil confirmation date.
+  final LocalDate businessDate;
+
+  /// Required only for an overdraft-exit strategy.
+  final OverdraftExitGoal? overdraftExitGoal;
+}
+
 /// Schedules a new day or time zone without rewriting historical cycles.
 final class ChangeCyclePolicyCommand {
   /// Creates the command.
@@ -414,6 +449,33 @@ final class LocalRebootService {
           reserveContributions: command.reserveContributions,
           projectContributions: command.projectContributions,
           safetyMargin: command.safetyMargin,
+        ),
+      );
+      await _appendValidated([event]);
+      return _configuration.annualCommitments.last;
+    });
+  }
+
+  /// Persists the user's complete initial trajectory strategy.
+  Future<AnnualCommitmentsRevision> setTrajectoryPlan(
+    SetTrajectoryPlanCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final planId =
+          _configuration.annualBudgetPlanId ?? _identities.nextEntityId();
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(kind: EntityKind.annualBudgetPlan, id: planId),
+        payload: TrajectoryPlanSetPayload(
+          effectiveFromCycleStart: command.effectiveFromCycleStart,
+          strategy: command.strategy,
+          reserveContributions: command.reserveContributions,
+          projectContributions: command.projectContributions,
+          safetyMargin: command.safetyMargin,
+          overdraftExitGoal: command.overdraftExitGoal,
         ),
       );
       await _appendValidated([event]);

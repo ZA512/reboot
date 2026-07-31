@@ -32,6 +32,21 @@ final class EventPayloadJsonCodec {
         'projectContributions': _encodeMoney(payload.projectContributions),
         'safetyMargin': _encodeMoney(payload.safetyMargin),
       },
+      TrajectoryPlanSetPayload() => <String, Object?>{
+        'effectiveFromCycleStart': payload.effectiveFromCycleStart.toString(),
+        'strategy': payload.strategy.name,
+        'reserveContributions': _encodeMoney(payload.reserveContributions),
+        'projectContributions': _encodeMoney(payload.projectContributions),
+        'safetyMargin': _encodeMoney(payload.safetyMargin),
+        'overdraftExitGoal': switch (payload.overdraftExitGoal) {
+          final goal? => <String, Object?>{
+            'currentOverdraftDepth': _encodeMoney(goal.currentOverdraftDepth),
+            'targetCushion': _encodeMoney(goal.targetCushion),
+            'targetDate': goal.targetDate.toString(),
+          },
+          null => null,
+        },
+      },
       ExpenseRecordedPayload() => <String, Object?>{
         'amount': _encodeMoney(payload.amount),
         'label': payload.label,
@@ -117,12 +132,45 @@ final class EventPayloadJsonCodec {
         ),
         safetyMargin: _decodeMoney(_asMap(map['safetyMargin'], 'safetyMargin')),
       ),
+      'trajectory-plan.set' => TrajectoryPlanSetPayload(
+        effectiveFromCycleStart: _decodeDate(
+          map['effectiveFromCycleStart'],
+          'effectiveFromCycleStart',
+        ),
+        strategy: _enumByName(
+          TrajectoryStrategy.values,
+          _asString(map['strategy'], 'strategy'),
+        ),
+        reserveContributions: _decodeMoney(
+          _asMap(map['reserveContributions'], 'reserveContributions'),
+        ),
+        projectContributions: _decodeMoney(
+          _asMap(map['projectContributions'], 'projectContributions'),
+        ),
+        safetyMargin: _decodeMoney(_asMap(map['safetyMargin'], 'safetyMargin')),
+        overdraftExitGoal: switch (map['overdraftExitGoal']) {
+          final value? => _decodeOverdraftExitGoal(
+            _asMap(value, 'overdraftExitGoal'),
+          ),
+          null => null,
+        },
+      ),
       'expense.recorded' => _decodeExpenseRecorded(map),
       'expense.allocations.planned' => _decodeExpenseAllocations(map),
       'expense.deleted' => const ExpenseDeletedPayload(),
       _ => throw UnsupportedStoredEventException(eventType, schemaVersion),
     };
   }
+}
+
+OverdraftExitGoal _decodeOverdraftExitGoal(Map<String, Object?> map) {
+  return OverdraftExitGoal(
+    currentOverdraftDepth: _decodeMoney(
+      _asMap(map['currentOverdraftDepth'], 'currentOverdraftDepth'),
+    ),
+    targetCushion: _decodeMoney(_asMap(map['targetCushion'], 'targetCushion')),
+    targetDate: _decodeDate(map['targetDate'], 'targetDate'),
+  );
 }
 
 Map<String, Object?> _encodeCyclePolicy(CyclePolicy policy) {

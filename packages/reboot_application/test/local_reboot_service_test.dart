@@ -237,6 +237,47 @@ void main() {
       },
     );
 
+    test('persists and projects an overdraft-exit trajectory', () async {
+      final harness = await _Harness.initialized();
+      await harness.service.createCashFlow(
+        CreateCashFlowCommand(
+          definition: _monthlyFlow(
+            title: 'Salaire 1',
+            direction: CashFlowDirection.income,
+            minorUnits: 300000,
+          ),
+          effectiveFromCycleStart: LocalDate(2026, 4, 4),
+          businessDate: LocalDate(2026, 4, 1),
+        ),
+      );
+      final revision = await harness.service.setTrajectoryPlan(
+        SetTrajectoryPlanCommand(
+          strategy: TrajectoryStrategy.overdraftExit,
+          reserveContributions: _eur(0),
+          projectContributions: _eur(0),
+          safetyMargin: _eur(0),
+          overdraftExitGoal: OverdraftExitGoal(
+            currentOverdraftDepth: _eur(100000),
+            targetCushion: _eur(50000),
+            targetDate: LocalDate(2026, 10, 1),
+          ),
+          effectiveFromCycleStart: LocalDate(2026, 4, 4),
+          businessDate: LocalDate(2026, 4, 1),
+        ),
+      );
+
+      final projection = harness.service.buildAnnualBudget(
+        LocalDate(2026, 4, 4),
+      );
+      expect(revision.strategy, TrajectoryStrategy.overdraftExit);
+      expect(revision.overdraftExitGoal!.totalToRecover, _eur(150000));
+      expect(projection.overdraftRecovery, isNotNull);
+      expect(
+        harness.journal.entries.last.event.eventType,
+        'trajectory-plan.set',
+      );
+    });
+
     test('preserves cash-flow replacements and future tombstones', () async {
       final harness = await _Harness.initialized();
       final cashFlowId = await harness.service.createCashFlow(

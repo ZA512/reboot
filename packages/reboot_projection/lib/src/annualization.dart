@@ -159,6 +159,7 @@ final class AnnualBudgetProjection {
     required this.recommendedWeeklyBudget,
     required this.unallocatedAnnualMargin,
     required this.deficit,
+    required this.overdraftRecovery,
   });
 
   /// The exact 52-cycle rolling horizon.
@@ -191,11 +192,39 @@ final class AnnualBudgetProjection {
   /// Positive amount missing when capacity is negative, otherwise zero.
   final Money deficit;
 
+  /// Time-bound weekly recovery requirement, when selected by the user.
+  final OverdraftRecoveryProjection? overdraftRecovery;
+
   /// Start of the first included cycle.
   LocalDate get start => cycles.first.start;
 
   /// End of the final included cycle, excluded from the horizon.
   LocalDate get endExclusive => cycles.last.endExclusive;
+}
+
+/// Explainable weekly effort required by an overdraft-exit target.
+final class OverdraftRecoveryProjection {
+  const OverdraftRecoveryProjection({
+    required this.goal,
+    required this.cycleCount,
+    required this.requiredPerCycle,
+    required this.shortfallPerCycle,
+  });
+
+  /// User-confirmed balance improvement target.
+  final OverdraftExitGoal goal;
+
+  /// REBOOT cycles available before the confirmation date.
+  final int cycleCount;
+
+  /// Exact cent-rounded-up amount kept each cycle until the target.
+  final Money requiredPerCycle;
+
+  /// Amount by which the goal exceeds current weekly capacity.
+  final Money shortfallPerCycle;
+
+  /// Whether the current assumptions can support the requested date.
+  bool get isFeasible => shortfallPerCycle.isZero;
 }
 
 /// Pure annualization rules for REBOOT's rolling 52-cycle trajectory.
@@ -207,6 +236,7 @@ abstract final class AnnualizationEngine {
     required List<WeeklyCycle> cycles,
     required Iterable<CashFlowDefinition> cashFlows,
     required AnnualBudgetDeductions deductions,
+    OverdraftExitGoal? overdraftExitGoal,
   }) {
     _validateCycles(cycles);
     final horizon = List<WeeklyCycle>.unmodifiable(cycles);
@@ -235,6 +265,13 @@ abstract final class AnnualizationEngine {
     final capacity = income - outflows - deductions.total;
     final zero = Money.zero(deductions.currency);
     if (capacity.isNegative) {
+      final recovery = overdraftExitGoal == null
+          ? null
+          : _projectRecovery(
+              cycles: horizon,
+              goal: overdraftExitGoal,
+              availablePerCycle: zero,
+            );
       return AnnualBudgetProjection(
         cycles: horizon,
         cashFlows: List.unmodifiable(annualized),
@@ -246,13 +283,27 @@ abstract final class AnnualizationEngine {
         recommendedWeeklyBudget: zero,
         unallocatedAnnualMargin: zero,
         deficit: -capacity,
+        overdraftRecovery: recovery,
       );
     }
 
-    final gross = Money.fromMinorUnits(
+    final baseGross = Money.fromMinorUnits(
       capacity.minorUnits ~/ _cycleCount,
       capacity.currency,
     );
+    final recovery = overdraftExitGoal == null
+        ? null
+        : _projectRecovery(
+            cycles: horizon,
+            goal: overdraftExitGoal,
+            availablePerCycle: baseGross,
+          );
+    final recoveryWithinCapacity = recovery == null
+        ? zero
+        : recovery.requiredPerCycle.compareTo(baseGross) > 0
+        ? baseGross
+        : recovery.requiredPerCycle;
+    final gross = baseGross - recoveryWithinCapacity;
     final recommendation = gross.roundDownToMajorUnit();
     final margin = capacity - recommendation * _cycleCount;
     return AnnualBudgetProjection(
@@ -266,6 +317,41 @@ abstract final class AnnualizationEngine {
       recommendedWeeklyBudget: recommendation,
       unallocatedAnnualMargin: margin,
       deficit: zero,
+      overdraftRecovery: recovery,
+    );
+  }
+
+  static OverdraftRecoveryProjection _projectRecovery({
+    required List<WeeklyCycle> cycles,
+    required OverdraftExitGoal goal,
+    required Money availablePerCycle,
+  }) {
+    if (!goal.targetDate.isAfter(cycles.first.start) ||
+        goal.targetDate.isAfter(cycles.last.endExclusive)) {
+      throw ArgumentError.value(
+        goal.targetDate,
+        'targetDate',
+        'The overdraft target must fall inside the 52-cycle horizon.',
+      );
+    }
+    final cycleCount = cycles
+        .where((cycle) => cycle.start.isBefore(goal.targetDate))
+        .length;
+    final total = BigInt.from(goal.totalToRecover.minorUnits);
+    final divisor = BigInt.from(cycleCount);
+    final requiredMinorUnits = (total + divisor - BigInt.one) ~/ divisor;
+    final required = Money.fromMinorUnits(
+      requiredMinorUnits.toInt(),
+      goal.totalToRecover.currency,
+    );
+    final shortfall = required.compareTo(availablePerCycle) > 0
+        ? required - availablePerCycle
+        : Money.zero(required.currency);
+    return OverdraftRecoveryProjection(
+      goal: goal,
+      cycleCount: cycleCount,
+      requiredPerCycle: required,
+      shortfallPerCycle: shortfall,
     );
   }
 

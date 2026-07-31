@@ -2,6 +2,12 @@ import 'package:reboot_domain/reboot_domain.dart';
 
 /// Parses a user-entered positive EUR amount without binary floating point.
 Money? parsePositiveEuroAmount(String source) {
+  final amount = parseNonNegativeEuroAmount(source);
+  return amount == null || amount.isZero ? null : amount;
+}
+
+/// Parses an exact non-negative EUR amount, including zero.
+Money? parseNonNegativeEuroAmount(String source) {
   final normalized = source
       .trim()
       .replaceAll(RegExp(r'[\s\u00a0\u202f]'), '')
@@ -18,8 +24,7 @@ Money? parsePositiveEuroAmount(String source) {
     _ => BigInt.parse(fractionSource),
   };
   final minorUnits = whole * BigInt.from(100) + fraction;
-  if (minorUnits <= BigInt.zero ||
-      minorUnits > BigInt.from(Money.maxMinorUnits)) {
+  if (minorUnits > BigInt.from(Money.maxMinorUnits)) {
     return null;
   }
   return Money.fromMinorUnits(minorUnits.toInt(), Currency.eur);

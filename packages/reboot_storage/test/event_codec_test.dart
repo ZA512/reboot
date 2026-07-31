@@ -104,6 +104,18 @@ List<EventPayload> _allPayloads() {
       projectContributions: _eur(60000),
       safetyMargin: _eur(24000),
     ),
+    TrajectoryPlanSetPayload(
+      effectiveFromCycleStart: LocalDate(2026, 4, 4),
+      strategy: TrajectoryStrategy.overdraftExit,
+      reserveContributions: _eur(120000),
+      projectContributions: _eur(60000),
+      safetyMargin: _eur(24000),
+      overdraftExitGoal: OverdraftExitGoal(
+        currentOverdraftDepth: _eur(100000),
+        targetCushion: _eur(50000),
+        targetDate: LocalDate(2026, 10, 1),
+      ),
+    ),
     ExpenseRecordedPayload(
       amount: _eur(4250),
       label: 'Courses',

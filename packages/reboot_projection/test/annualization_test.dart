@@ -99,6 +99,61 @@ void main() {
       expect(projection.deficit.isZero, isTrue);
     });
 
+    test('reduces the current budget to meet an overdraft target', () {
+      final cycles = _cycles();
+      final projection = AnnualizationEngine.project(
+        cycles: cycles,
+        cashFlows: [
+          CashFlowDefinition.fixed(
+            title: 'Annual capacity',
+            direction: CashFlowDirection.income,
+            schedule: CustomDateSchedule([cycles.first.start]),
+            amountPerOccurrence: _eur(1040000),
+          ),
+        ],
+        deductions: AnnualBudgetDeductions(currency: Currency.eur),
+        overdraftExitGoal: OverdraftExitGoal(
+          currentOverdraftDepth: _eur(100000),
+          targetCushion: _eur(50000),
+          targetDate: LocalDate(2026, 7, 4),
+        ),
+      );
+
+      expect(projection.overdraftRecovery!.cycleCount, 26);
+      expect(projection.overdraftRecovery!.requiredPerCycle.minorUnits, 5770);
+      expect(projection.overdraftRecovery!.isFeasible, isTrue);
+      expect(projection.grossWeeklyCapacity.minorUnits, 14230);
+      expect(projection.recommendedWeeklyBudget.minorUnits, 14200);
+    });
+
+    test(
+      'exposes an impossible overdraft target without a negative budget',
+      () {
+        final cycles = _cycles();
+        final projection = AnnualizationEngine.project(
+          cycles: cycles,
+          cashFlows: [
+            CashFlowDefinition.fixed(
+              title: 'Annual capacity',
+              direction: CashFlowDirection.income,
+              schedule: CustomDateSchedule([cycles.first.start]),
+              amountPerOccurrence: _eur(260000),
+            ),
+          ],
+          deductions: AnnualBudgetDeductions(currency: Currency.eur),
+          overdraftExitGoal: OverdraftExitGoal(
+            currentOverdraftDepth: _eur(100000),
+            targetCushion: _eur(50000),
+            targetDate: LocalDate(2026, 7, 4),
+          ),
+        );
+
+        expect(projection.recommendedWeeklyBudget.isZero, isTrue);
+        expect(projection.overdraftRecovery!.shortfallPerCycle.minorUnits, 770);
+        expect(projection.overdraftRecovery!.isFeasible, isFalse);
+      },
+    );
+
     test('shows zero budget and an explicit deficit for negative capacity', () {
       final projection = _project([
         CashFlowDefinition.fixed(

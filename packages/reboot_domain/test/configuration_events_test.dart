@@ -112,6 +112,55 @@ void main() {
       );
     });
   });
+
+  group('TrajectoryPlanSetPayload', () {
+    test('keeps the overdraft recovery goal explicit', () {
+      final payload = TrajectoryPlanSetPayload(
+        effectiveFromCycleStart: _cycleStart,
+        strategy: TrajectoryStrategy.overdraftExit,
+        reserveContributions: _eur(120000),
+        projectContributions: _eur(60000),
+        safetyMargin: _eur(24000),
+        overdraftExitGoal: OverdraftExitGoal(
+          currentOverdraftDepth: _eur(100000),
+          targetCushion: _eur(50000),
+          targetDate: LocalDate(2026, 10, 1),
+        ),
+      );
+
+      expect(payload.eventType, 'trajectory-plan.set');
+      expect(payload.strategy, TrajectoryStrategy.overdraftExit);
+      expect(payload.overdraftExitGoal!.totalToRecover, _eur(150000));
+    });
+
+    test('requires a goal only for overdraft exit', () {
+      expect(
+        () => TrajectoryPlanSetPayload(
+          effectiveFromCycleStart: _cycleStart,
+          strategy: TrajectoryStrategy.overdraftExit,
+          reserveContributions: _eur(0),
+          projectContributions: _eur(0),
+          safetyMargin: _eur(0),
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => TrajectoryPlanSetPayload(
+          effectiveFromCycleStart: _cycleStart,
+          strategy: TrajectoryStrategy.balance,
+          reserveContributions: _eur(0),
+          projectContributions: _eur(0),
+          safetyMargin: _eur(0),
+          overdraftExitGoal: OverdraftExitGoal(
+            currentOverdraftDepth: _eur(100),
+            targetCushion: _eur(0),
+            targetDate: LocalDate(2026, 10, 1),
+          ),
+        ),
+        throwsArgumentError,
+      );
+    });
+  });
 }
 
 final LocalDate _cycleStart = LocalDate(2026, 4, 4);

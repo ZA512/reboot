@@ -18,6 +18,12 @@ void main() {
     expect(parsePositiveEuroAmount('EUR 10'), isNull);
   });
 
+  test('accepts zero only through the non-negative parser', () {
+    expect(parseNonNegativeEuroAmount('0')!.isZero, isTrue);
+    expect(parseNonNegativeEuroAmount('0,00')!.isZero, isTrue);
+    expect(parsePositiveEuroAmount('0'), isNull);
+  });
+
   test('rejects values outside signed 64-bit minor units', () {
     expect(parsePositiveEuroAmount('92233720368547758,08'), isNull);
   });

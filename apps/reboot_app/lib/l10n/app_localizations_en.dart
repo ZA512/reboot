@@ -348,4 +348,169 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get suggestionOtherOutflow => 'Other charge';
+
+  @override
+  String get trajectorySetupTitle =>
+      'Choose the result you want REBOOT to create';
+
+  @override
+  String get trajectorySetupIntro =>
+      'Your income and charges define the available capacity. The choices below decide how much stays outside everyday weekly spending.';
+
+  @override
+  String get strategyBalanceTitle => 'Balance';
+
+  @override
+  String get strategyBalanceBody =>
+      'Use the available capacity without saving an extra cushion in the background. Explicit projects and safety amounts still remain possible.';
+
+  @override
+  String get strategyCushionTitle => 'Build a cushion';
+
+  @override
+  String get strategyCushionBody =>
+      'Choose how much you want to add to your reserve over the next 52 REBOOT cycles.';
+
+  @override
+  String get strategyOverdraftTitle => 'Exit an overdraft';
+
+  @override
+  String get strategyOverdraftBody =>
+      'Set the current overdraft, the positive cushion you want, and the date when you want to reach it.';
+
+  @override
+  String get annualCushionLabel => 'Amount added to the reserve over 52 cycles';
+
+  @override
+  String get annualCushionHelp =>
+      'This amount is divided across the rolling REBOOT year.';
+
+  @override
+  String get currentOverdraftLabel => 'Current overdraft depth';
+
+  @override
+  String get currentOverdraftHelp =>
+      'Enter 1,000 if the account is currently at −1,000.';
+
+  @override
+  String get targetCushionLabel => 'Desired positive cushion';
+
+  @override
+  String get targetCushionHelp =>
+      'Enter zero if your only objective is to return to balance.';
+
+  @override
+  String get overdraftTargetDateLabel => 'Target date';
+
+  @override
+  String get dateUnavailable => 'Date unavailable';
+
+  @override
+  String get overdraftConfirmationHelp =>
+      'At this date, REBOOT asks you to confirm the real result. It will not increase your weekly budget automatically.';
+
+  @override
+  String get otherAnnualGoalsTitle => 'Projects and safety';
+
+  @override
+  String get otherAnnualGoalsBody =>
+      'These optional annual amounts are separate from charges and from the selected strategy.';
+
+  @override
+  String get annualProjectsLabel =>
+      'Projects and planned purchases over 52 cycles';
+
+  @override
+  String get annualProjectsHelp =>
+      'For example, an object, a trip, or planned replacement.';
+
+  @override
+  String get annualSafetyLabel => 'Additional safety margin over 52 cycles';
+
+  @override
+  String get annualSafetyHelp =>
+      'Keep zero if you do not want an additional conservative margin.';
+
+  @override
+  String get noAutomaticMargin =>
+      'REBOOT never adds or changes this margin without your confirmation.';
+
+  @override
+  String get invalidNonNegativeAmount =>
+      'Enter zero or a positive amount, with no more than two decimals.';
+
+  @override
+  String get emptyRecoveryGoal =>
+      'The overdraft and target cushion cannot both be zero.';
+
+  @override
+  String get calculateWeeklyBudget => 'Calculate my weekly budget';
+
+  @override
+  String get trajectorySaving => 'Calculating the trajectory…';
+
+  @override
+  String get trajectorySetupError =>
+      'The trajectory could not be saved. Nothing was partially recorded. Check the target date and try again.';
+
+  @override
+  String get firstWeeklyBudgetTitle => 'Your first REBOOT budget';
+
+  @override
+  String weeklyBudgetFrom(String date) {
+    return 'For each week from $date';
+  }
+
+  @override
+  String get recommendedWeeklyBudget => 'Recommended weekly spending budget';
+
+  @override
+  String weeklyRoundingHelp(String amount) {
+    return 'Exact capacity: $amount per cycle, rounded down to a whole euro.';
+  }
+
+  @override
+  String annualDeficit(String amount) {
+    return 'The current assumptions leave an annual deficit of $amount. No spending budget can be recommended yet.';
+  }
+
+  @override
+  String overdraftRecoverySummary(String amount, int cycleCount, String date) {
+    return 'Keep $amount per cycle for $cycleCount cycles to target $date. REBOOT will ask you to confirm the result then.';
+  }
+
+  @override
+  String overdraftRecoveryImpossible(String amount) {
+    return 'The selected date requires $amount more per cycle than the available capacity. Choose a later date or revise the assumptions.';
+  }
+
+  @override
+  String get annualCalculationTitle => 'Rolling 52-cycle calculation';
+
+  @override
+  String get annualIncome => 'Expected income';
+
+  @override
+  String get annualOutflows => 'Expected charges';
+
+  @override
+  String get annualReserves => 'Reserve contribution';
+
+  @override
+  String get annualProjects => 'Projects';
+
+  @override
+  String get annualSafety => 'Safety margin';
+
+  @override
+  String get annualSteerableCapacity => 'Steerable annual capacity';
+
+  @override
+  String selectedTrajectory(String strategy) {
+    return 'Selected trajectory: $strategy';
+  }
+
+  @override
+  String get quickExpenseNext =>
+      'The next product step will turn this recommendation into the live remaining amount and quick expense entry.';
 }

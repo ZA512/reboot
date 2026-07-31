@@ -3,6 +3,7 @@ import 'cycles.dart';
 import 'events.dart';
 import 'local_date.dart';
 import 'money.dart';
+import 'trajectory.dart';
 
 /// Household shape supported by the first REBOOT product.
 enum HouseholdKind {
@@ -174,6 +175,56 @@ final class AnnualCommitmentsSetPayload implements EventPayload {
 
   /// Additional visible conservative margin over 52 cycles.
   final Money safetyMargin;
+}
+
+/// Version 1 complete strategy and annual commitment snapshot.
+final class TrajectoryPlanSetPayload implements EventPayload {
+  /// Creates a fully explicit trajectory plan.
+  TrajectoryPlanSetPayload({
+    required this.effectiveFromCycleStart,
+    required this.strategy,
+    required this.reserveContributions,
+    required this.projectContributions,
+    required this.safetyMargin,
+    this.overdraftExitGoal,
+  }) {
+    _requireNonNegativeEur(reserveContributions, 'reserveContributions');
+    _requireNonNegativeEur(projectContributions, 'projectContributions');
+    _requireNonNegativeEur(safetyMargin, 'safetyMargin');
+    if ((strategy == TrajectoryStrategy.overdraftExit) !=
+        (overdraftExitGoal != null)) {
+      throw ArgumentError(
+        'Only an overdraft-exit strategy carries an overdraft goal.',
+      );
+    }
+  }
+
+  @override
+  String get eventType => 'trajectory-plan.set';
+
+  @override
+  int get schemaVersion => 1;
+
+  @override
+  EntityKind get targetKind => EntityKind.annualBudgetPlan;
+
+  /// First weekly cycle using this plan.
+  final LocalDate effectiveFromCycleStart;
+
+  /// Balance, cushion, or overdraft-exit mode.
+  final TrajectoryStrategy strategy;
+
+  /// Total directed to ordinary reserves over 52 cycles.
+  final Money reserveContributions;
+
+  /// Total directed to named projects over 52 cycles.
+  final Money projectContributions;
+
+  /// Additional visible conservative margin over 52 cycles.
+  final Money safetyMargin;
+
+  /// Time-bound recovery target, only in overdraft-exit mode.
+  final OverdraftExitGoal? overdraftExitGoal;
 }
 
 void _requireNonNegativeEur(Money amount, String name) {

@@ -721,6 +721,276 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other charge'**
   String get suggestionOtherOutflow;
+
+  /// Initial trajectory strategy screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the result you want REBOOT to create'**
+  String get trajectorySetupTitle;
+
+  /// Trajectory setup explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Your income and charges define the available capacity. The choices below decide how much stays outside everyday weekly spending.'**
+  String get trajectorySetupIntro;
+
+  /// Neutral trajectory strategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get strategyBalanceTitle;
+
+  /// Balance strategy explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the available capacity without saving an extra cushion in the background. Explicit projects and safety amounts still remain possible.'**
+  String get strategyBalanceBody;
+
+  /// Annual reserve-building strategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Build a cushion'**
+  String get strategyCushionTitle;
+
+  /// Cushion strategy explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how much you want to add to your reserve over the next 52 REBOOT cycles.'**
+  String get strategyCushionBody;
+
+  /// Time-bound overdraft recovery strategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit an overdraft'**
+  String get strategyOverdraftTitle;
+
+  /// Overdraft strategy explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the current overdraft, the positive cushion you want, and the date when you want to reach it.'**
+  String get strategyOverdraftBody;
+
+  /// Annual cushion contribution input.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount added to the reserve over 52 cycles'**
+  String get annualCushionLabel;
+
+  /// Annual cushion input help.
+  ///
+  /// In en, this message translates to:
+  /// **'This amount is divided across the rolling REBOOT year.'**
+  String get annualCushionHelp;
+
+  /// Positive depth below zero.
+  ///
+  /// In en, this message translates to:
+  /// **'Current overdraft depth'**
+  String get currentOverdraftLabel;
+
+  /// Overdraft sign convention help.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter 1,000 if the account is currently at −1,000.'**
+  String get currentOverdraftHelp;
+
+  /// Positive target balance after recovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Desired positive cushion'**
+  String get targetCushionLabel;
+
+  /// Target cushion help.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter zero if your only objective is to return to balance.'**
+  String get targetCushionHelp;
+
+  /// Overdraft recovery deadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Target date'**
+  String get overdraftTargetDateLabel;
+
+  /// Fallback while device date is unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Date unavailable'**
+  String get dateUnavailable;
+
+  /// No silent post-recovery change explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'At this date, REBOOT asks you to confirm the real result. It will not increase your weekly budget automatically.'**
+  String get overdraftConfirmationHelp;
+
+  /// Other annual deductions section.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects and safety'**
+  String get otherAnnualGoalsTitle;
+
+  /// Other annual deductions explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'These optional annual amounts are separate from charges and from the selected strategy.'**
+  String get otherAnnualGoalsBody;
+
+  /// Annual project contribution input.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects and planned purchases over 52 cycles'**
+  String get annualProjectsLabel;
+
+  /// Annual project contribution help.
+  ///
+  /// In en, this message translates to:
+  /// **'For example, an object, a trip, or planned replacement.'**
+  String get annualProjectsHelp;
+
+  /// Explicit annual safety input.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional safety margin over 52 cycles'**
+  String get annualSafetyLabel;
+
+  /// Annual safety input help.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep zero if you do not want an additional conservative margin.'**
+  String get annualSafetyHelp;
+
+  /// Explicit margin confirmation rule.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT never adds or changes this margin without your confirmation.'**
+  String get noAutomaticMargin;
+
+  /// Exact non-negative EUR parsing error.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter zero or a positive amount, with no more than two decimals.'**
+  String get invalidNonNegativeAmount;
+
+  /// Empty overdraft goal validation.
+  ///
+  /// In en, this message translates to:
+  /// **'The overdraft and target cushion cannot both be zero.'**
+  String get emptyRecoveryGoal;
+
+  /// Saves trajectory and opens first recommendation.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculate my weekly budget'**
+  String get calculateWeeklyBudget;
+
+  /// Trajectory save progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculating the trajectory…'**
+  String get trajectorySaving;
+
+  /// Generic trajectory setup failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The trajectory could not be saved. Nothing was partially recorded. Check the target date and try again.'**
+  String get trajectorySetupError;
+
+  /// First recommendation screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first REBOOT budget'**
+  String get firstWeeklyBudgetTitle;
+
+  /// First effective weekly budget date.
+  ///
+  /// In en, this message translates to:
+  /// **'For each week from {date}'**
+  String weeklyBudgetFrom(String date);
+
+  /// Primary weekly recommendation label.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended weekly spending budget'**
+  String get recommendedWeeklyBudget;
+
+  /// Whole-euro recommendation explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact capacity: {amount} per cycle, rounded down to a whole euro.'**
+  String weeklyRoundingHelp(String amount);
+
+  /// Negative annual capacity warning.
+  ///
+  /// In en, this message translates to:
+  /// **'The current assumptions leave an annual deficit of {amount}. No spending budget can be recommended yet.'**
+  String annualDeficit(String amount);
+
+  /// Feasible overdraft recovery explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep {amount} per cycle for {cycleCount} cycles to target {date}. REBOOT will ask you to confirm the result then.'**
+  String overdraftRecoverySummary(String amount, int cycleCount, String date);
+
+  /// Infeasible overdraft recovery warning.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected date requires {amount} more per cycle than the available capacity. Choose a later date or revise the assumptions.'**
+  String overdraftRecoveryImpossible(String amount);
+
+  /// Annual calculation breakdown title.
+  ///
+  /// In en, this message translates to:
+  /// **'Rolling 52-cycle calculation'**
+  String get annualCalculationTitle;
+
+  /// Annual income total.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected income'**
+  String get annualIncome;
+
+  /// Annual outflow total.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected charges'**
+  String get annualOutflows;
+
+  /// Annual reserve deduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserve contribution'**
+  String get annualReserves;
+
+  /// Annual project deduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Projects'**
+  String get annualProjects;
+
+  /// Annual safety deduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety margin'**
+  String get annualSafety;
+
+  /// Annual capacity after deductions.
+  ///
+  /// In en, this message translates to:
+  /// **'Steerable annual capacity'**
+  String get annualSteerableCapacity;
+
+  /// Selected strategy summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected trajectory: {strategy}'**
+  String selectedTrajectory(String strategy);
+
+  /// Temporary roadmap note on first dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'The next product step will turn this recommendation into the live remaining amount and quick expense entry.'**
+  String get quickExpenseNext;
 }
 
 class _AppLocalizationsDelegate

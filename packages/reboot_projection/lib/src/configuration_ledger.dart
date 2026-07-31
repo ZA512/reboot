@@ -297,6 +297,8 @@ final class AnnualCommitmentsRevision {
     required this.safetyMargin,
     required this.eventId,
     required this.recordedAtUtc,
+    this.strategy = TrajectoryStrategy.balance,
+    this.overdraftExitGoal,
   });
 
   /// First cycle affected by this snapshot.
@@ -316,6 +318,12 @@ final class AnnualCommitmentsRevision {
 
   /// Audit instant.
   final DateTime recordedAtUtc;
+
+  /// Explicit reason for keeping capacity outside weekly spending.
+  final TrajectoryStrategy strategy;
+
+  /// Time-bound recovery goal in overdraft-exit mode.
+  final OverdraftExitGoal? overdraftExitGoal;
 
   /// Converts this domain event projection into annualization input.
   AnnualBudgetDeductions toDeductions(Currency currency) {
@@ -427,6 +435,7 @@ final class ConfigurationLedger {
       deductions:
           commitments?.toDeductions(configuredHousehold.currency) ??
           AnnualBudgetDeductions(currency: configuredHousehold.currency),
+      overdraftExitGoal: commitments?.overdraftExitGoal,
     );
   }
 
@@ -578,6 +587,54 @@ final class ConfigurationLedger {
                 safetyMargin: payload.safetyMargin,
                 eventId: entry.event.id,
                 recordedAtUtc: entry.event.recordedAtUtc,
+              ),
+            );
+          case TrajectoryPlanSetPayload():
+            final payload = entry.event.payload as TrajectoryPlanSetPayload;
+            _requireConfiguredCycleStart(
+              configuredHousehold,
+              payload.effectiveFromCycleStart,
+              'Trajectory plan',
+            );
+            if (payload.overdraftExitGoal case final goal?
+                when !goal.targetDate.isAfter(entry.event.businessDate)) {
+              throw const ProjectionConflictException(
+                'An overdraft target must be after its confirmation date.',
+              );
+            }
+            if (nextPlanId != null && nextPlanId != entry.event.target.id) {
+              throw const ProjectionConflictException(
+                'The journal contains multiple annual budget plans.',
+              );
+            }
+            if (nextCommitments.isNotEmpty) {
+              final previous = nextCommitments.last;
+              if (payload.effectiveFromCycleStart.isBefore(
+                entry.event.businessDate,
+              )) {
+                throw const ProjectionConflictException(
+                  'A trajectory plan cannot change retroactively.',
+                );
+              }
+              if (payload.effectiveFromCycleStart.isBefore(
+                previous.effectiveFromCycleStart,
+              )) {
+                throw const ProjectionConflictException(
+                  'Trajectory effective dates cannot move backwards.',
+                );
+              }
+            }
+            nextPlanId = entry.event.target.id;
+            nextCommitments.add(
+              AnnualCommitmentsRevision(
+                effectiveFromCycleStart: payload.effectiveFromCycleStart,
+                reserveContributions: payload.reserveContributions,
+                projectContributions: payload.projectContributions,
+                safetyMargin: payload.safetyMargin,
+                eventId: entry.event.id,
+                recordedAtUtc: entry.event.recordedAtUtc,
+                strategy: payload.strategy,
+                overdraftExitGoal: payload.overdraftExitGoal,
               ),
             );
           default:

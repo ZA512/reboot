@@ -219,6 +219,8 @@ Le parcours demande également :
 - les réserves principales ;
 - les dépenses annuelles et irrégulières connues.
 
+La stratégie **Équilibre** n’ajoute aucune épargne implicite. La stratégie **Coussin** retire du quotidien une contribution annuelle explicitement choisie. La stratégie **Sortie de découvert** demande le découvert actuel, le coussin positif souhaité et une date cible ; elle calcule un effort par cycle arrondi au centime supérieur. À la date cible, l’utilisateur doit confirmer le résultat avant toute hausse du budget semaine. Une cible incompatible avec la capacité disponible produit un avertissement explicite, sans budget négatif.
+
 Le premier cycle commence par défaut au prochain jour REBOOT. L’utilisateur peut reprendre depuis l’occurrence précédente s’il saisit toutes les dépenses déjà réalisées.
 
 ## 9. Cycles hebdomadaires

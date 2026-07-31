@@ -262,7 +262,89 @@ void main() {
 
     expect(service.configuration.cashFlows, hasLength(2));
     expect(journal.entries, hasLength(3));
-    expect(find.text('Votre profil REBOOT commun est prêt.'), findsOneWidget);
+    expect(
+      find.text('Choisissez le résultat que REBOOT doit créer'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('saves a balance trajectory and shows the first weekly budget', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final journal = _MemoryJournal();
+    final service = await LocalRebootService.restore(journal: journal);
+    await service.initializeHousehold(
+      InitializeHouseholdCommand(
+        householdKind: HouseholdKind.sharedMainAccount,
+        onboardingDate: LocalDate(2026, 4, 1),
+        anchorWeekday: Weekday.saturday,
+        timeZone: IanaTimeZoneId('Europe/Paris'),
+        firstCycleChoice: FirstCycleStartChoice.nextAnchor,
+      ),
+    );
+    await service.createCashFlows(
+      CreateCashFlowsCommand(
+        definitions: [
+          _monthlyFlow(
+            title: 'Salaire 1',
+            direction: CashFlowDirection.income,
+            minorUnits: 300000,
+          ),
+          _monthlyFlow(
+            title: 'Logement',
+            direction: CashFlowDirection.outflow,
+            minorUnits: 120000,
+          ),
+        ],
+        effectiveFromCycleStart: LocalDate(2026, 4, 4),
+        businessDate: LocalDate(2026, 4, 1),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 4, 1),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Équilibre'), findsOneWidget);
+    final calculate = find.text('Calculer mon budget semaine');
+    await tester.scrollUntilVisible(
+      calculate,
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.drag(find.byType(ListView), const Offset(0, -160));
+    await tester.pumpAndSettle();
+    await tester.tap(calculate);
+    await tester.pumpAndSettle();
+
+    expect(service.configuration.annualCommitments, hasLength(1));
+    expect(
+      service.configuration.annualCommitments.single.strategy,
+      TrajectoryStrategy.balance,
+    );
+    expect(
+      service
+          .buildAnnualBudget(LocalDate(2026, 4, 4))
+          .recommendedWeeklyBudget
+          .minorUnits,
+      41500,
+    );
+    expect(find.text('Votre premier budget REBOOT'), findsOneWidget);
+    expect(find.textContaining('415'), findsWidgets);
+    expect(journal.entries, hasLength(4));
   });
 
   testWidgets('does not expose a device time-zone failure', (tester) async {
@@ -330,4 +412,21 @@ final class _MemoryJournal implements LocalEventJournal {
 
   @override
   Future<List<LocalJournalEntry>> readAll() async => List.of(_entries);
+}
+
+CashFlowDefinition _monthlyFlow({
+  required String title,
+  required CashFlowDirection direction,
+  required int minorUnits,
+}) {
+  return CashFlowDefinition.fixed(
+    title: title,
+    direction: direction,
+    schedule: RecurringSchedule(
+      firstOccurrence: LocalDate(2026, 4, 30),
+      frequency: RecurrenceFrequency.monthly,
+    ),
+    amountPerOccurrence: Money.fromMinorUnits(minorUnits, Currency.eur),
+    lastConfirmedOn: LocalDate(2026, 4, 1),
+  );
 }

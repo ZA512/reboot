@@ -132,6 +132,14 @@ Le parcours demande ensuite :
 - la stratégie : équilibre, coussin ou sortie de découvert ;
 - les réserves et principaux imprévus à préparer.
 
+Les trois stratégies produisent des engagements explicites :
+
+- **Équilibre** : REBOOT n’ajoute aucune épargne cachée. Seuls les projets et marges saisis volontairement sont retirés du budget semaine.
+- **Coussin** : l’utilisateur indique la somme qu’il veut ajouter à sa réserve pendant les 52 prochains cycles.
+- **Sortie de découvert** : l’utilisateur indique la profondeur positive du découvert actuel, le coussin positif souhaité et une date cible. REBOOT additionne le découvert et le coussin, puis divise ce besoin par le nombre de cycles disponibles en arrondissant l’effort au centime supérieur.
+
+À la date cible d’une sortie de découvert, REBOOT demande de confirmer le solde réel. Le budget semaine ne remonte jamais automatiquement : l’utilisateur confirme d’abord l’objectif, puis choisit de passer à l’équilibre ou de poursuivre l’effort dans un coussin. Si la capacité disponible ne permet pas d’atteindre la date choisie, REBOOT affiche l’insuffisance par cycle et recommande une date plus tardive ou une révision des hypothèses.
+
 ### Démarrage du premier cycle
 
 REBOOT ne crée pas automatiquement un cycle partiel au milieu de la semaine.
