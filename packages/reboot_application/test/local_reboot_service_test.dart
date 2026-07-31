@@ -237,6 +237,62 @@ void main() {
       },
     );
 
+    test(
+      'builds a live horizon without carrying a weekly difference',
+      () async {
+        final harness = await _Harness.initialized();
+        await harness.service.createCashFlows(
+          CreateCashFlowsCommand(
+            definitions: [
+              _monthlyFlow(
+                title: 'Salaire 1',
+                direction: CashFlowDirection.income,
+                minorUnits: 300000,
+              ),
+              _monthlyFlow(
+                title: 'Logement',
+                direction: CashFlowDirection.outflow,
+                minorUnits: 120000,
+              ),
+            ],
+            effectiveFromCycleStart: LocalDate(2026, 4, 4),
+            businessDate: LocalDate(2026, 4, 1),
+          ),
+        );
+        await harness.service.setTrajectoryPlan(
+          SetTrajectoryPlanCommand(
+            strategy: TrajectoryStrategy.balance,
+            reserveContributions: _eur(0),
+            projectContributions: _eur(0),
+            safetyMargin: _eur(0),
+            effectiveFromCycleStart: LocalDate(2026, 4, 4),
+            businessDate: LocalDate(2026, 4, 1),
+          ),
+        );
+        await harness.service.recordExpense(
+          RecordExpenseCommand(
+            amount: _eur(15000),
+            label: 'Réparation',
+            purchaseDate: LocalDate(2026, 4, 5),
+            allocationCycleCount: 3,
+          ),
+        );
+
+        final projection = harness.service.buildRollingBudget(
+          LocalDate(2026, 4, 7),
+        );
+
+        expect(projection.cycles, hasLength(52));
+        expect(projection.cycles.first.cycle.start, LocalDate(2026, 4, 4));
+        expect(projection.cycles.first.budget.minorUnits, 41500);
+        expect(projection.cycles.first.allocatedExpenses.minorUnits, 5000);
+        expect(projection.cycles.first.remaining.minorUnits, 36500);
+        expect(projection.cycles[1].budget.minorUnits, 41500);
+        expect(projection.cycles[1].remaining.minorUnits, 36500);
+        expect(projection.cycles[3].remaining.minorUnits, 41500);
+      },
+    );
+
     test('persists and projects an overdraft-exit trajectory', () async {
       final harness = await _Harness.initialized();
       await harness.service.createCashFlow(

@@ -513,4 +513,166 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get quickExpenseNext =>
       'The next product step will turn this recommendation into the live remaining amount and quick expense entry.';
+
+  @override
+  String get refreshDashboard => 'Refresh';
+
+  @override
+  String get remainingThisWeek => 'You can still spend';
+
+  @override
+  String get upcomingWeeklyBudget => 'Your upcoming weekly budget';
+
+  @override
+  String firstCyclePending(String date) {
+    return 'Your first REBOOT week starts on $date. Expense entry will open then.';
+  }
+
+  @override
+  String availableFrom(String date) {
+    return 'Available from $date';
+  }
+
+  @override
+  String untilNextReboot(String date) {
+    return 'until your next REBOOT on $date';
+  }
+
+  @override
+  String dailyGuide(String amount, int dayCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      dayCount,
+      locale: localeName,
+      other: 'About $amount per day for the $dayCount remaining days',
+      one: 'About $amount for the remaining day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get weeklyOverBudget =>
+      'This week is over budget. The next weekly budget will not change automatically.';
+
+  @override
+  String get weeklyBudgetMetric => 'Weekly budget';
+
+  @override
+  String get weeklySpentMetric => 'Allocated';
+
+  @override
+  String get thisWeekExpenses => 'This week\'s expenses';
+
+  @override
+  String get expensesAvailableAfterStart =>
+      'You will be able to record expenses once the first REBOOT week starts.';
+
+  @override
+  String get noExpenseYet => 'No expense has reduced this week yet.';
+
+  @override
+  String get noCarryoverReminder =>
+      'Spending less or more never changes the next weekly budget automatically. You remain in control of any compensation or transfer to a reserve.';
+
+  @override
+  String get addExpense => 'Add an expense';
+
+  @override
+  String get dashboardDateError =>
+      'The current local date could not be verified. Your financial data remains unchanged.';
+
+  @override
+  String get quickExpenseTitle => 'Quick expense';
+
+  @override
+  String get quickExpenseIntro =>
+      'Record it now so everyone using the weekly budget sees the correct remaining amount.';
+
+  @override
+  String get expenseAmountLabel => 'Amount paid';
+
+  @override
+  String get expenseLabel => 'What or where?';
+
+  @override
+  String get expenseLabelHint => 'Groceries, cinema, Vinted…';
+
+  @override
+  String get expenseDate => 'Purchase date';
+
+  @override
+  String get expenseAllocationTitle => 'Impact on the weekly budget';
+
+  @override
+  String get expenseAllocationHelp =>
+      'Use one week normally. A large exceptional expense can be spread virtually over up to 12 weeks; the payment itself remains a single real transaction.';
+
+  @override
+  String get expenseCycleCount => 'Spread over';
+
+  @override
+  String cycleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '1 week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String expenseAllocationPreview(
+    String regularAmount,
+    int regularCount,
+    String lastAmount,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      regularCount,
+      locale: localeName,
+      other: '$regularAmount on each of the first $regularCount weeks',
+      one: '$regularAmount on the first week',
+    );
+    return '$_temp0, then $lastAmount on the final week to absorb rounding.';
+  }
+
+  @override
+  String get expenseCommitmentWarning =>
+      'At least one affected week would have more than 50% of its budget already committed. REBOOT does not block you, but the method recommends using a reserve or a longer plan.';
+
+  @override
+  String get saveExpense => 'Record the expense';
+
+  @override
+  String get quickExpenseSaving => 'Recording…';
+
+  @override
+  String get quickExpenseError =>
+      'The expense could not be recorded. Nothing was saved partially; try again.';
+
+  @override
+  String splitExpenseDetail(String amount, int count, String date) {
+    return '$amount paid · spread over $count weeks · $date';
+  }
+
+  @override
+  String get deleteExpenseTitle => 'Delete this erroneous entry?';
+
+  @override
+  String get deleteExpenseBody =>
+      'The expense will no longer count in the weekly balance. Its audit history remains in the local journal.';
+
+  @override
+  String deleteSplitExpenseBody(int count) {
+    return 'All $count weekly installments will be removed together. Its audit history remains in the local journal.';
+  }
+
+  @override
+  String get deleteExpense => 'Delete';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get deleteExpenseError =>
+      'The expense could not be deleted. Try again.';
 }

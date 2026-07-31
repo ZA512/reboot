@@ -536,6 +536,34 @@ final class LocalRebootService {
     return _configuration.buildAnnualBudget(cycles);
   }
 
+  /// Projects the live weekly balances from the cycle containing [asOfDate].
+  ///
+  /// Before the first configured cycle, the horizon starts on that first
+  /// boundary. Every cycle deliberately receives the same current weekly
+  /// recommendation: an underspend or overspend never changes the next one.
+  Rolling52Projection buildRollingBudget(LocalDate asOfDate) {
+    _requireOpen();
+    final household = _configuration.household;
+    if (household == null) {
+      throw const IncompleteConfigurationException(
+        'The household must be initialized before projecting a budget.',
+      );
+    }
+    final projectionStart = asOfDate.isBefore(household.firstCycleStart)
+        ? household.firstCycleStart
+        : household.cycleContaining(asOfDate).start;
+    final cycles = household.cyclesFromDate(projectionStart, count: 52);
+    final annualBudget = _configuration.buildAnnualBudget(cycles);
+    return Rolling52Projection.build(
+      cycles: cycles,
+      budgetsByCycleStart: {
+        for (final cycle in cycles)
+          cycle.start: annualBudget.recommendedWeeklyBudget,
+      },
+      expenseLedger: _expenses,
+    );
+  }
+
   /// Records a real expense and its complete 1-to-12-cycle allocation atomically.
   Future<ExpenseRecordingResult> recordExpense(RecordExpenseCommand command) {
     return _runExclusive(() async {

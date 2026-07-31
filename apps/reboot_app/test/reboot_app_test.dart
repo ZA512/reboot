@@ -342,9 +342,86 @@ void main() {
           .minorUnits,
       41500,
     );
-    expect(find.text('Votre premier budget REBOOT'), findsOneWidget);
+    expect(find.text('Votre prochain budget semaine'), findsOneWidget);
     expect(find.textContaining('415'), findsWidgets);
+    expect(find.byKey(const ValueKey('add-expense')), findsNothing);
+    expect(find.textContaining('commence le samedi 4 avril'), findsOneWidget);
     expect(journal.entries, hasLength(4));
+  });
+
+  testWidgets('records, splits, displays, and deletes a quick expense', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final journal = _MemoryJournal();
+    final service = await _readyService(journal);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 4, 5),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Vous pouvez encore dépenser'), findsOneWidget);
+    expect(find.byKey(const ValueKey('weekly-remaining')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('add-expense')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const ValueKey('expense-amount')), '150');
+    await tester.enterText(
+      find.byKey(const ValueKey('expense-label')),
+      'Réparation',
+    );
+    await tester.tap(find.byKey(const ValueKey('expense-cycle-count')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('3 semaines').last);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('save-expense')),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const ValueKey('save-expense')));
+    await tester.pumpAndSettle();
+
+    final projection = service.buildRollingBudget(LocalDate(2026, 4, 5));
+    expect(projection.cycles.first.remaining.minorUnits, 36500);
+    expect(find.text('Réparation'), findsOneWidget);
+    expect(journal.entries, hasLength(6));
+
+    await tester.tap(find.byIcon(Icons.delete_outline));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'Les 3 parts hebdomadaires seront toutes retirées ensemble. '
+        'Leur historique d’audit restera dans le journal local.',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.widgetWithText(FilledButton, 'Supprimer'));
+    await tester.pumpAndSettle();
+
+    expect(service.expenses.activeExpenses, isEmpty);
+    expect(
+      service
+          .buildRollingBudget(LocalDate(2026, 4, 5))
+          .cycles
+          .first
+          .remaining
+          .minorUnits,
+      41500,
+    );
+    expect(journal.entries, hasLength(7));
   });
 
   testWidgets('does not expose a device time-zone failure', (tester) async {
@@ -429,4 +506,46 @@ CashFlowDefinition _monthlyFlow({
     amountPerOccurrence: Money.fromMinorUnits(minorUnits, Currency.eur),
     lastConfirmedOn: LocalDate(2026, 4, 1),
   );
+}
+
+Future<LocalRebootService> _readyService(_MemoryJournal journal) async {
+  final service = await LocalRebootService.restore(journal: journal);
+  await service.initializeHousehold(
+    InitializeHouseholdCommand(
+      householdKind: HouseholdKind.sharedMainAccount,
+      onboardingDate: LocalDate(2026, 4, 1),
+      anchorWeekday: Weekday.saturday,
+      timeZone: IanaTimeZoneId('Europe/Paris'),
+      firstCycleChoice: FirstCycleStartChoice.nextAnchor,
+    ),
+  );
+  await service.createCashFlows(
+    CreateCashFlowsCommand(
+      definitions: [
+        _monthlyFlow(
+          title: 'Salaire 1',
+          direction: CashFlowDirection.income,
+          minorUnits: 300000,
+        ),
+        _monthlyFlow(
+          title: 'Logement',
+          direction: CashFlowDirection.outflow,
+          minorUnits: 120000,
+        ),
+      ],
+      effectiveFromCycleStart: LocalDate(2026, 4, 4),
+      businessDate: LocalDate(2026, 4, 1),
+    ),
+  );
+  await service.setTrajectoryPlan(
+    SetTrajectoryPlanCommand(
+      strategy: TrajectoryStrategy.balance,
+      reserveContributions: Money.zero(Currency.eur),
+      projectContributions: Money.zero(Currency.eur),
+      safetyMargin: Money.zero(Currency.eur),
+      effectiveFromCycleStart: LocalDate(2026, 4, 4),
+      businessDate: LocalDate(2026, 4, 1),
+    ),
+  );
+  return service;
 }

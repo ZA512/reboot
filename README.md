@@ -4,7 +4,7 @@
 
 REBOOT est une application mobile de pilotage du reste à vivre hebdomadaire. Elle est conçue pour fonctionner en local, hors ligne, avec un calcul soutenable sur 52 semaines et une synchronisation chiffrée facultative.
 
-Le projet est actuellement en **Phase 0 — Fondation**.
+Le projet est actuellement en **Phase 1 — Application locale**.
 
 ## Documentation
 
@@ -48,7 +48,12 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Événements et projection de configuration du foyer
 - [x] Journal local SQLite chiffré, append-only et rejouable
 - [x] Cas d’usage locaux initiaux et orchestration applicative
-- [ ] Onboarding et saisie rapide dans l’application Flutter
+- [x] Onboarding Flutter : foyer, jour REBOOT et premier cycle
+- [x] Configuration manuelle des revenus et charges
+- [x] Choix de trajectoire et premier budget hebdomadaire
+- [x] Tableau de bord du restant hebdomadaire en direct
+- [x] Saisie rapide, étalement exact sur 1 à 12 semaines et suppression d’erreur
+- [ ] Tendances glissantes, réserves et grosses dépenses
 
 ## Licence
 

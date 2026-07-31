@@ -991,6 +991,238 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The next product step will turn this recommendation into the live remaining amount and quick expense entry.'**
   String get quickExpenseNext;
+
+  /// Refreshes the device date and dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refreshDashboard;
+
+  /// Headline above the live remaining amount.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still spend'**
+  String get remainingThisWeek;
+
+  /// Headline before the first cycle starts.
+  ///
+  /// In en, this message translates to:
+  /// **'Your upcoming weekly budget'**
+  String get upcomingWeeklyBudget;
+
+  /// Explains a pending first cycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first REBOOT week starts on {date}. Expense entry will open then.'**
+  String firstCyclePending(String date);
+
+  /// Date when an upcoming budget opens.
+  ///
+  /// In en, this message translates to:
+  /// **'Available from {date}'**
+  String availableFrom(String date);
+
+  /// End boundary for the live amount.
+  ///
+  /// In en, this message translates to:
+  /// **'until your next REBOOT on {date}'**
+  String untilNextReboot(String date);
+
+  /// Optional daily spending guide.
+  ///
+  /// In en, this message translates to:
+  /// **'{dayCount, plural, =1{About {amount} for the remaining day} other{About {amount} per day for the {dayCount} remaining days}}'**
+  String dailyGuide(String amount, int dayCount);
+
+  /// Live negative weekly balance explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This week is over budget. The next weekly budget will not change automatically.'**
+  String get weeklyOverBudget;
+
+  /// Weekly budget metric label.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly budget'**
+  String get weeklyBudgetMetric;
+
+  /// Weekly allocations metric label.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocated'**
+  String get weeklySpentMetric;
+
+  /// Current cycle expense list title.
+  ///
+  /// In en, this message translates to:
+  /// **'This week\'s expenses'**
+  String get thisWeekExpenses;
+
+  /// Expense empty state before first cycle.
+  ///
+  /// In en, this message translates to:
+  /// **'You will be able to record expenses once the first REBOOT week starts.'**
+  String get expensesAvailableAfterStart;
+
+  /// Current cycle expense empty state.
+  ///
+  /// In en, this message translates to:
+  /// **'No expense has reduced this week yet.'**
+  String get noExpenseYet;
+
+  /// Core no-carryover method reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending less or more never changes the next weekly budget automatically. You remain in control of any compensation or transfer to a reserve.'**
+  String get noCarryoverReminder;
+
+  /// Opens quick expense entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an expense'**
+  String get addExpense;
+
+  /// Safe dashboard device-date error.
+  ///
+  /// In en, this message translates to:
+  /// **'The current local date could not be verified. Your financial data remains unchanged.'**
+  String get dashboardDateError;
+
+  /// Quick expense screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick expense'**
+  String get quickExpenseTitle;
+
+  /// Real-time entry rationale.
+  ///
+  /// In en, this message translates to:
+  /// **'Record it now so everyone using the weekly budget sees the correct remaining amount.'**
+  String get quickExpenseIntro;
+
+  /// Real expense amount field.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount paid'**
+  String get expenseAmountLabel;
+
+  /// Free expense label field.
+  ///
+  /// In en, this message translates to:
+  /// **'What or where?'**
+  String get expenseLabel;
+
+  /// Examples for an expense label.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries, cinema, Vinted…'**
+  String get expenseLabelHint;
+
+  /// Real purchase date label.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase date'**
+  String get expenseDate;
+
+  /// Virtual allocation section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Impact on the weekly budget'**
+  String get expenseAllocationTitle;
+
+  /// Explains real payment versus virtual allocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use one week normally. A large exceptional expense can be spread virtually over up to 12 weeks; the payment itself remains a single real transaction.'**
+  String get expenseAllocationHelp;
+
+  /// Allocation cycle count field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Spread over'**
+  String get expenseCycleCount;
+
+  /// Localized number of allocation weeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week} other{{count} weeks}}'**
+  String cycleCount(int count);
+
+  /// Exact installment and rounding preview.
+  ///
+  /// In en, this message translates to:
+  /// **'{regularCount, plural, =1{{regularAmount} on the first week} other{{regularAmount} on each of the first {regularCount} weeks}}, then {lastAmount} on the final week to absorb rounding.'**
+  String expenseAllocationPreview(
+    String regularAmount,
+    int regularCount,
+    String lastAmount,
+  );
+
+  /// Non-blocking high commitment warning.
+  ///
+  /// In en, this message translates to:
+  /// **'At least one affected week would have more than 50% of its budget already committed. REBOOT does not block you, but the method recommends using a reserve or a longer plan.'**
+  String get expenseCommitmentWarning;
+
+  /// Quick expense submit button.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the expense'**
+  String get saveExpense;
+
+  /// Quick expense progress label.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording…'**
+  String get quickExpenseSaving;
+
+  /// Generic atomic expense failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The expense could not be recorded. Nothing was saved partially; try again.'**
+  String get quickExpenseError;
+
+  /// Current list detail for a split expense.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} paid · spread over {count} weeks · {date}'**
+  String splitExpenseDetail(String amount, int count, String date);
+
+  /// Expense deletion confirmation title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this erroneous entry?'**
+  String get deleteExpenseTitle;
+
+  /// Single expense deletion consequence.
+  ///
+  /// In en, this message translates to:
+  /// **'The expense will no longer count in the weekly balance. Its audit history remains in the local journal.'**
+  String get deleteExpenseBody;
+
+  /// Split expense deletion consequence.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} weekly installments will be removed together. Its audit history remains in the local journal.'**
+  String deleteSplitExpenseBody(int count);
+
+  /// Expense deletion action.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get deleteExpense;
+
+  /// Cancels a destructive confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Generic expense deletion failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The expense could not be deleted. Try again.'**
+  String get deleteExpenseError;
 }
 
 class _AppLocalizationsDelegate
