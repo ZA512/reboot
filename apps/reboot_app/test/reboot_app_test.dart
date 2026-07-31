@@ -382,6 +382,13 @@ void main() {
       find.byKey(const ValueKey('expense-label')),
       'Réparation',
     );
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('expense-cycle-count')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -180));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('expense-cycle-count')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('3 semaines').last);
@@ -396,6 +403,11 @@ void main() {
 
     final projection = service.buildRollingBudget(LocalDate(2026, 4, 5));
     expect(projection.cycles.first.remaining.minorUnits, 36500);
+    await tester.scrollUntilVisible(
+      find.text('Réparation'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Réparation'), findsOneWidget);
     expect(journal.entries, hasLength(6));
 
@@ -422,6 +434,87 @@ void main() {
       41500,
     );
     expect(journal.entries, hasLength(7));
+  });
+
+  testWidgets('uses a real reserve without reducing the weekly budget', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final journal = _MemoryJournal();
+    final service = await _readyService(journal);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 4, 5),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final weeklyBefore = service
+        .buildRollingBudget(LocalDate(2026, 4, 5))
+        .cycles
+        .first
+        .remaining;
+
+    await tester.tap(find.text('Créer votre première réserve'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('create-reserve')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('reserve-name')),
+      'Imprévus',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('reserve-opening-balance')),
+      '500',
+    );
+    await tester.tap(find.text('Réserve virtuelle'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Compte de réserve réel').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('confirm-create-reserve')));
+    await tester.pumpAndSettle();
+
+    expect(service.reserves.reserves.values.single.balance.minorUnits, 50000);
+    await tester.tap(find.widgetWithText(FilledButton, 'Utiliser'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('expense-amount')), '125');
+    await tester.enterText(
+      find.byKey(const ValueKey('expense-label')),
+      'Vétérinaire',
+    );
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('save-expense')),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const ValueKey('save-expense')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Rappel de virement'), findsOneWidget);
+    expect(
+      find.textContaining('REBOOT n’effectuera ni ne vérifiera'),
+      findsOneWidget,
+    );
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'J’ai compris, enregistrer'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(service.reserves.reserves.values.single.balance.minorUnits, 37500);
+    expect(service.expenses.activeExpenses, isEmpty);
+    expect(
+      service.buildRollingBudget(LocalDate(2026, 4, 5)).cycles.first.remaining,
+      weeklyBefore,
+    );
   });
 
   testWidgets('separates a strong latest-week alert from a healthy trend', (
@@ -455,7 +548,19 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Une correction mérite d’être envisagée'), findsOneWidget);
-    await tester.tap(find.text('Une correction mérite d’être envisagée'));
+    await tester.scrollUntilVisible(
+      find.text('Une correction mérite d’être envisagée'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -180));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.ancestor(
+        of: find.text('Une correction mérite d’être envisagée'),
+        matching: find.byType(ListTile),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Tendances hebdomadaires'), findsOneWidget);

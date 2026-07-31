@@ -800,4 +800,135 @@ class AppLocalizationsFr extends AppLocalizations {
   String trendSurplusSuggestion(String amount) {
     return 'Vous avez un surplus observé de $amount. Vous pouvez le virer vers une réserve ou un projet ; le choix reste le vôtre.';
   }
+
+  @override
+  String get reservesTitle => 'Réserves';
+
+  @override
+  String get reservesIntro =>
+      'Une réserve protège une dépense exceptionnelle sans réduire le budget semaine. REBOOT suit ce que vous déclarez ; il ne lit pas le solde bancaire.';
+
+  @override
+  String get noReserveYet =>
+      'Créez une réserve pour les imprévus, la santé, un véhicule ou un autre objectif que vous souhaitez protéger.';
+
+  @override
+  String get createReserve => 'Créer une réserve';
+
+  @override
+  String get createFirstReserve => 'Créer votre première réserve';
+
+  @override
+  String reservesSummary(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count réserves · $amount',
+      one: '1 réserve · $amount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reservesSummaryHelp =>
+      'Les comptes réels et allocations virtuelles restent distincts des dépenses de la semaine.';
+
+  @override
+  String totalReserves(String amount) {
+    return 'Total déclaré des réserves : $amount';
+  }
+
+  @override
+  String get reserveName => 'Nom de la réserve';
+
+  @override
+  String get reserveKind => 'Type de réserve';
+
+  @override
+  String get realReserve => 'Compte de réserve réel';
+
+  @override
+  String get virtualReserve => 'Réserve virtuelle';
+
+  @override
+  String get reserveOpeningBalance => 'Montant disponible actuellement';
+
+  @override
+  String get reserveOpeningBalanceHelp =>
+      'Saisissez uniquement ce qui existe aujourd’hui. Cela ne crée aucun revenu et ne change pas votre budget semaine.';
+
+  @override
+  String get addReserveFunds => 'Ajouter des fonds';
+
+  @override
+  String get useReserve => 'Utiliser';
+
+  @override
+  String get reserveFundingAmount => 'Montant affecté';
+
+  @override
+  String get reserveFundingLabel => 'Motif';
+
+  @override
+  String get reserveFundingHint =>
+      'Surplus hebdomadaire, cadeau, virement manuel…';
+
+  @override
+  String get confirmReserveFunding => 'Enregistrer les fonds';
+
+  @override
+  String get reserveHistory => 'Mouvements récents';
+
+  @override
+  String get reversedReserveMovement => 'Saisie erronée annulée';
+
+  @override
+  String get reverseReserveMovement => 'Annuler la saisie';
+
+  @override
+  String get reverseReserveMovementTitle => 'Annuler cette saisie erronée ?';
+
+  @override
+  String get reverseReserveMovementBody =>
+      'Son effet sur la réserve sera neutralisé, mais les deux événements resteront dans l’historique d’audit.';
+
+  @override
+  String get reserveMutationError =>
+      'La réserve n’a pas pu être mise à jour. Aucun changement partiel n’a été enregistré.';
+
+  @override
+  String get expenseFundingTitle => 'Comment cette dépense est-elle financée ?';
+
+  @override
+  String get weeklyBudgetFunding => 'Budget semaine';
+
+  @override
+  String get reserveFunding => 'Une réserve';
+
+  @override
+  String get createReserveBeforeUse =>
+      'Créez d’abord une réserve depuis le tableau de bord pour utiliser ce financement.';
+
+  @override
+  String get selectReserve => 'Réserve à utiliser';
+
+  @override
+  String get reserveExpenseNoWeeklyImpact =>
+      'Cette dépense réduit uniquement la réserve sélectionnée. Elle ne change ni cette semaine ni la suivante.';
+
+  @override
+  String insufficientReserveBalance(String amount) {
+    return 'La réserve déclarée contient seulement $amount. Choisissez une autre réserve ou utilisez l’étalement hebdomadaire.';
+  }
+
+  @override
+  String get realReserveTransferTitle => 'Rappel de virement';
+
+  @override
+  String realReserveTransferBody(String amount, String reserveName) {
+    return 'Cette dépense réduira $reserveName de $amount. Pensez à virer $amount de ce compte de réserve vers le compte principal si le paiement y a été effectué. REBOOT n’effectuera ni ne vérifiera le virement.';
+  }
+
+  @override
+  String get confirmReserveExpense => 'J’ai compris, enregistrer';
 }

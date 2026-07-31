@@ -72,6 +72,9 @@ enum EntityKind {
 
   /// A real household expense transaction.
   expense,
+
+  /// One named real or virtual household reserve.
+  reserve,
 }
 
 /// Typed target of an immutable event.

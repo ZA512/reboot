@@ -11,6 +11,8 @@ import '../expenses/quick_expense_controller.dart';
 import '../expenses/quick_expense_screen.dart';
 import '../infrastructure/device_context_providers.dart';
 import '../l10n/app_localizations.dart';
+import '../reserves/reserve_controller.dart';
+import '../reserves/reserves_screen.dart';
 import '../trends/trends_screen.dart';
 
 /// Live answer to the daily question: how much can the household still spend?
@@ -24,6 +26,7 @@ final class WeeklyDashboardScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final deviceContext = ref.watch(onboardingDeviceContextProvider);
     final mutation = ref.watch(quickExpenseControllerProvider);
+    ref.watch(reserveControllerProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
@@ -211,6 +214,28 @@ final class _DashboardBody extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.savings_outlined),
+              title: Text(
+                service.reserves.reserves.isEmpty
+                    ? l10n.createFirstReserve
+                    : l10n.reservesSummary(
+                        _formatMoney(context, service.reserves.totalBalance),
+                        service.reserves.reserves.length,
+                      ),
+              ),
+              subtitle: Text(l10n.reservesSummaryHelp),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      ReservesScreen(service: service, today: today),
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           _TrendSummaryCard(

@@ -795,4 +795,134 @@ class AppLocalizationsEn extends AppLocalizations {
   String trendSurplusSuggestion(String amount) {
     return 'You have a $amount observed surplus. You could move it to a reserve or a project; the choice remains yours.';
   }
+
+  @override
+  String get reservesTitle => 'Reserves';
+
+  @override
+  String get reservesIntro =>
+      'A reserve protects an exceptional expense without reducing the weekly budget. REBOOT tracks what you declare; it does not read the bank balance.';
+
+  @override
+  String get noReserveYet =>
+      'Create a reserve for emergencies, health, a vehicle, or another goal you want to protect.';
+
+  @override
+  String get createReserve => 'Create a reserve';
+
+  @override
+  String get createFirstReserve => 'Create your first reserve';
+
+  @override
+  String reservesSummary(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reserves · $amount',
+      one: '1 reserve · $amount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reservesSummaryHelp =>
+      'Real accounts and virtual allocations remain distinct from weekly spending.';
+
+  @override
+  String totalReserves(String amount) {
+    return 'Total declared reserves: $amount';
+  }
+
+  @override
+  String get reserveName => 'Reserve name';
+
+  @override
+  String get reserveKind => 'Reserve type';
+
+  @override
+  String get realReserve => 'Real reserve account';
+
+  @override
+  String get virtualReserve => 'Virtual reserve';
+
+  @override
+  String get reserveOpeningBalance => 'Current available amount';
+
+  @override
+  String get reserveOpeningBalanceHelp =>
+      'Enter only what is available now. This does not create income or change your weekly budget.';
+
+  @override
+  String get addReserveFunds => 'Add funds';
+
+  @override
+  String get useReserve => 'Use';
+
+  @override
+  String get reserveFundingAmount => 'Amount assigned';
+
+  @override
+  String get reserveFundingLabel => 'Reason';
+
+  @override
+  String get reserveFundingHint => 'Weekly surplus, gift, manual transfer…';
+
+  @override
+  String get confirmReserveFunding => 'Record the funds';
+
+  @override
+  String get reserveHistory => 'Recent movements';
+
+  @override
+  String get reversedReserveMovement => 'Erroneous entry reversed';
+
+  @override
+  String get reverseReserveMovement => 'Reverse the entry';
+
+  @override
+  String get reverseReserveMovementTitle => 'Reverse this erroneous entry?';
+
+  @override
+  String get reverseReserveMovementBody =>
+      'Its effect on the reserve will be neutralized, while both events remain in the audit history.';
+
+  @override
+  String get reserveMutationError =>
+      'The reserve could not be updated. No partial change was saved.';
+
+  @override
+  String get expenseFundingTitle => 'How is this expense funded?';
+
+  @override
+  String get weeklyBudgetFunding => 'Weekly budget';
+
+  @override
+  String get reserveFunding => 'A reserve';
+
+  @override
+  String get createReserveBeforeUse =>
+      'Create a reserve from the dashboard before using this funding choice.';
+
+  @override
+  String get selectReserve => 'Reserve to use';
+
+  @override
+  String get reserveExpenseNoWeeklyImpact =>
+      'This expense reduces only the selected reserve. It does not change this week or the next one.';
+
+  @override
+  String insufficientReserveBalance(String amount) {
+    return 'The declared reserve contains only $amount. Choose another reserve or use the weekly spread.';
+  }
+
+  @override
+  String get realReserveTransferTitle => 'Transfer reminder';
+
+  @override
+  String realReserveTransferBody(String amount, String reserveName) {
+    return 'This expense will reduce $reserveName by $amount. Remember to transfer $amount from that reserve account to the main account if the payment was made there. REBOOT will not perform or verify the transfer.';
+  }
+
+  @override
+  String get confirmReserveExpense => 'I understand, record it';
 }

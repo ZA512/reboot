@@ -66,6 +66,22 @@ final class EventPayloadJsonCodec {
         ],
       },
       ExpenseDeletedPayload() => const <String, Object?>{},
+      ReserveCreatedPayload() => <String, Object?>{
+        'name': payload.name,
+        'kind': payload.kind.name,
+        'openingBalance': _encodeMoney(payload.openingBalance),
+      },
+      ReserveFundsAddedPayload() => <String, Object?>{
+        'amount': _encodeMoney(payload.amount),
+        'label': payload.label,
+      },
+      ReserveExpenseRecordedPayload() => <String, Object?>{
+        'amount': _encodeMoney(payload.amount),
+        'label': payload.label,
+      },
+      ReserveMovementReversedPayload() => <String, Object?>{
+        'movementEventId': payload.movementEventId.value,
+      },
       _ => throw UnsupportedStoredEventException(
         payload.eventType,
         payload.schemaVersion,
@@ -158,6 +174,26 @@ final class EventPayloadJsonCodec {
       'expense.recorded' => _decodeExpenseRecorded(map),
       'expense.allocations.planned' => _decodeExpenseAllocations(map),
       'expense.deleted' => const ExpenseDeletedPayload(),
+      'reserve.created' => ReserveCreatedPayload(
+        name: _asString(map['name'], 'name'),
+        kind: _enumByName(ReserveKind.values, _asString(map['kind'], 'kind')),
+        openingBalance: _decodeMoney(
+          _asMap(map['openingBalance'], 'openingBalance'),
+        ),
+      ),
+      'reserve.funds-added' => ReserveFundsAddedPayload(
+        amount: _decodeMoney(_asMap(map['amount'], 'amount')),
+        label: _asString(map['label'], 'label'),
+      ),
+      'reserve.expense-recorded' => ReserveExpenseRecordedPayload(
+        amount: _decodeMoney(_asMap(map['amount'], 'amount')),
+        label: _asString(map['label'], 'label'),
+      ),
+      'reserve.movement-reversed' => ReserveMovementReversedPayload(
+        movementEventId: EventId(
+          _asString(map['movementEventId'], 'movementEventId'),
+        ),
+      ),
       _ => throw UnsupportedStoredEventException(eventType, schemaVersion),
     };
   }

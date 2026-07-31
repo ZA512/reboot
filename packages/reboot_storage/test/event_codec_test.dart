@@ -130,6 +130,16 @@ List<EventPayload> _allPayloads() {
       cycleStarts: [LocalDate(2026, 4, 4), LocalDate(2026, 4, 11)],
     ),
     const ExpenseDeletedPayload(),
+    ReserveCreatedPayload(
+      name: 'Imprévus',
+      kind: ReserveKind.real,
+      openingBalance: _eur(50000),
+    ),
+    ReserveFundsAddedPayload(amount: _eur(12000), label: 'Surplus'),
+    ReserveExpenseRecordedPayload(amount: _eur(8000), label: 'Vétérinaire'),
+    ReserveMovementReversedPayload(
+      movementEventId: EventId('018f2b8a-7d3c-7a1b-8c4d-1234567890ab'),
+    ),
   ];
 }
 

@@ -109,6 +109,22 @@ void main() {
           allocationCycleCount: 3,
         ),
       );
+      final reserve = await service.createReserve(
+        CreateReserveCommand(
+          name: 'Imprévus',
+          kind: ReserveKind.real,
+          openingBalance: Money.fromMinorUnits(50000, Currency.eur),
+          businessDate: LocalDate(2026, 4, 5),
+        ),
+      );
+      await service.useReserve(
+        UseReserveCommand(
+          reserveId: reserve.id,
+          amount: Money.fromMinorUnits(12000, Currency.eur),
+          label: 'Vétérinaire',
+          purchaseDate: LocalDate(2026, 4, 6),
+        ),
+      );
       await service.close();
 
       final reopenedJournal = await RebootEventJournal.open(
@@ -127,6 +143,9 @@ void main() {
         933,
         934,
       ]);
+      final restoredReserve = restored.reserves.reserves.values.single;
+      expect(restoredReserve.kind, ReserveKind.real);
+      expect(restoredReserve.balance.minorUnits, 38000);
       await restored.close();
     });
 

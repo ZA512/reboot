@@ -490,6 +490,113 @@ void main() {
       ]);
     });
   });
+
+  group('LocalRebootService reserves', () {
+    test('creates, funds, spends, reverses, and restores a reserve', () async {
+      final harness = await _Harness.initialized();
+      final created = await harness.service.createReserve(
+        CreateReserveCommand(
+          name: ' Imprévus ',
+          kind: ReserveKind.virtual,
+          openingBalance: _eur(50000),
+          businessDate: LocalDate(2026, 4, 1),
+        ),
+      );
+      await harness.service.addReserveFunds(
+        AddReserveFundsCommand(
+          reserveId: created.id,
+          amount: _eur(10000),
+          label: ' Surplus ',
+          businessDate: LocalDate(2026, 4, 8),
+        ),
+      );
+      final usage = await harness.service.useReserve(
+        UseReserveCommand(
+          reserveId: created.id,
+          amount: _eur(15000),
+          label: ' Vétérinaire ',
+          purchaseDate: LocalDate(2026, 4, 9),
+        ),
+      );
+
+      expect(created.name, 'Imprévus');
+      expect(usage.reserve.balance.minorUnits, 45000);
+      expect(usage.requiresBankTransfer, isFalse);
+      expect(harness.service.expenses.activeExpenses, isEmpty);
+
+      await harness.service.reverseReserveMovement(
+        ReverseReserveMovementCommand(
+          reserveId: created.id,
+          movementEventId: usage.movement.eventId,
+          businessDate: LocalDate(2026, 4, 10),
+        ),
+      );
+      expect(
+        harness.service.reserves.reserves[created.id]!.balance.minorUnits,
+        60000,
+      );
+
+      final restored = await LocalRebootService.restore(
+        journal: harness.journal,
+        clock: const _FixedClock(),
+        identities: _SequentialIdentities(100),
+      );
+      expect(restored.reserves.reserves[created.id]!.balance.minorUnits, 60000);
+      expect(
+        restored.reserves.reserves[created.id]!.movements.last.isReversed,
+        isTrue,
+      );
+    });
+
+    test('requires a transfer reminder for real reserves', () async {
+      final harness = await _Harness.initialized();
+      final reserve = await harness.service.createReserve(
+        CreateReserveCommand(
+          name: 'Compte secours',
+          kind: ReserveKind.real,
+          openingBalance: _eur(20000),
+          businessDate: LocalDate(2026, 4, 1),
+        ),
+      );
+
+      final result = await harness.service.useReserve(
+        UseReserveCommand(
+          reserveId: reserve.id,
+          amount: _eur(5000),
+          label: 'Réparation',
+          purchaseDate: LocalDate(2026, 4, 5),
+        ),
+      );
+
+      expect(result.requiresBankTransfer, isTrue);
+    });
+
+    test('does not append a reserve expense beyond its balance', () async {
+      final harness = await _Harness.initialized();
+      final reserve = await harness.service.createReserve(
+        CreateReserveCommand(
+          name: 'Secours',
+          kind: ReserveKind.real,
+          openingBalance: _eur(5000),
+          businessDate: LocalDate(2026, 4, 1),
+        ),
+      );
+      final entryCount = harness.journal.entries.length;
+
+      await expectLater(
+        harness.service.useReserve(
+          UseReserveCommand(
+            reserveId: reserve.id,
+            amount: _eur(5001),
+            label: 'Trop élevé',
+            purchaseDate: LocalDate(2026, 4, 5),
+          ),
+        ),
+        throwsA(isA<InsufficientReserveBalanceException>()),
+      );
+      expect(harness.journal.entries, hasLength(entryCount));
+    });
+  });
 }
 
 InitializeHouseholdCommand _initialize(FirstCycleStartChoice choice) {

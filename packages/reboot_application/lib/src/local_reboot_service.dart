@@ -259,6 +259,77 @@ final class ExpenseRecordingResult {
   final ProjectedExpense expense;
 }
 
+/// Creates one named real or virtual reserve.
+final class CreateReserveCommand {
+  const CreateReserveCommand({
+    required this.name,
+    required this.kind,
+    required this.openingBalance,
+    required this.businessDate,
+  });
+
+  final String name;
+  final ReserveKind kind;
+  final Money openingBalance;
+  final LocalDate businessDate;
+}
+
+/// Records money explicitly assigned to an existing reserve.
+final class AddReserveFundsCommand {
+  const AddReserveFundsCommand({
+    required this.reserveId,
+    required this.amount,
+    required this.label,
+    required this.businessDate,
+  });
+
+  final EntityId reserveId;
+  final Money amount;
+  final String label;
+  final LocalDate businessDate;
+}
+
+/// Records one real expense financed by a reserve, not the weekly budget.
+final class UseReserveCommand {
+  const UseReserveCommand({
+    required this.reserveId,
+    required this.amount,
+    required this.label,
+    required this.purchaseDate,
+  });
+
+  final EntityId reserveId;
+  final Money amount;
+  final String label;
+  final LocalDate purchaseDate;
+}
+
+/// Result of a reserve-funded expense.
+final class ReserveUsageResult {
+  const ReserveUsageResult({
+    required this.reserve,
+    required this.movement,
+    required this.requiresBankTransfer,
+  });
+
+  final ProjectedReserve reserve;
+  final ProjectedReserveMovement movement;
+  final bool requiresBankTransfer;
+}
+
+/// Reverses one erroneous reserve credit or expense without deleting history.
+final class ReverseReserveMovementCommand {
+  const ReverseReserveMovementCommand({
+    required this.reserveId,
+    required this.movementEventId,
+    required this.businessDate,
+  });
+
+  final EntityId reserveId;
+  final EventId movementEventId;
+  final LocalDate businessDate;
+}
+
 /// Local-first command boundary owning one journal and its live projections.
 ///
 /// All mutations are serialized to prevent two rapid UI actions from deriving
@@ -271,6 +342,7 @@ final class LocalRebootService {
     this._identities,
     this._configuration,
     this._expenses,
+    this._reserves,
   );
 
   /// Restores all observable state from the append-only journal.
@@ -286,6 +358,7 @@ final class LocalRebootService {
       identities ?? UuidV7RebootIdentityGenerator(),
       ConfigurationLedger.replay(entries),
       ExpenseLedger.replay(entries),
+      ReserveLedger.replay(entries),
     );
   }
 
@@ -294,6 +367,7 @@ final class LocalRebootService {
   final RebootIdentityGenerator _identities;
   ConfigurationLedger _configuration;
   ExpenseLedger _expenses;
+  ReserveLedger _reserves;
   Future<void> _commandTail = Future<void>.value();
   bool _closed = false;
 
@@ -302,6 +376,9 @@ final class LocalRebootService {
 
   /// Current expense projection, including deleted history.
   ExpenseLedger get expenses => _expenses;
+
+  /// Current named reserves and their event-derived balances.
+  ReserveLedger get reserves => _reserves;
 
   /// Establishes the household exactly once.
   Future<HouseholdInitializationResult> initializeHousehold(
@@ -701,6 +778,104 @@ final class LocalRebootService {
     });
   }
 
+  /// Starts tracking one reserve without changing income or weekly spending.
+  Future<ProjectedReserve> createReserve(CreateReserveCommand command) {
+    return _runExclusive(() async {
+      _requireOpen();
+      if (_configuration.household == null) {
+        throw const IncompleteConfigurationException(
+          'The household must be initialized before creating reserves.',
+        );
+      }
+      final reserveId = _identities.nextEntityId();
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(kind: EntityKind.reserve, id: reserveId),
+        payload: ReserveCreatedPayload(
+          name: command.name.trim(),
+          kind: command.kind,
+          openingBalance: command.openingBalance,
+        ),
+      );
+      await _appendValidated([event]);
+      return _reserves.reserves[reserveId]!;
+    });
+  }
+
+  /// Records an explicit transfer-like credit into a reserve.
+  Future<ProjectedReserve> addReserveFunds(AddReserveFundsCommand command) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(
+          kind: EntityKind.reserve,
+          id: command.reserveId,
+        ),
+        payload: ReserveFundsAddedPayload(
+          amount: command.amount,
+          label: command.label.trim(),
+        ),
+      );
+      await _appendValidated([event]);
+      return _reserves.reserves[command.reserveId]!;
+    });
+  }
+
+  /// Records an expense against a reserve with no weekly allocation.
+  Future<ReserveUsageResult> useReserve(UseReserveCommand command) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.purchaseDate,
+        target: EntityReference(
+          kind: EntityKind.reserve,
+          id: command.reserveId,
+        ),
+        payload: ReserveExpenseRecordedPayload(
+          amount: command.amount,
+          label: command.label.trim(),
+        ),
+      );
+      await _appendValidated([event]);
+      final reserve = _reserves.reserves[command.reserveId]!;
+      return ReserveUsageResult(
+        reserve: reserve,
+        movement: reserve.movements.last,
+        requiresBankTransfer: reserve.kind == ReserveKind.real,
+      );
+    });
+  }
+
+  /// Corrects one erroneous reserve movement while retaining its audit trail.
+  Future<ProjectedReserve> reverseReserveMovement(
+    ReverseReserveMovementCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(
+          kind: EntityKind.reserve,
+          id: command.reserveId,
+        ),
+        payload: ReserveMovementReversedPayload(
+          movementEventId: command.movementEventId,
+        ),
+      );
+      await _appendValidated([event]);
+      return _reserves.reserves[command.reserveId]!;
+    });
+  }
+
   /// Closes the owned journal after all earlier commands have completed.
   Future<void> close() {
     return _runExclusive(() async {
@@ -715,6 +890,7 @@ final class LocalRebootService {
   Future<void> _appendValidated(List<EventRecord> events) async {
     var nextConfiguration = _configuration;
     var nextExpenses = _expenses;
+    var nextReserves = _reserves;
     var nextPosition = _configuration.lastPosition?.value ?? 0;
     for (final event in events) {
       nextPosition++;
@@ -724,6 +900,7 @@ final class LocalRebootService {
       );
       nextConfiguration = nextConfiguration.apply(provisional);
       nextExpenses = nextExpenses.apply(provisional);
+      nextReserves = nextReserves.apply(provisional);
     }
 
     final appended = await _journal.appendAll(events);
@@ -732,12 +909,15 @@ final class LocalRebootService {
     }
     var committedConfiguration = _configuration;
     var committedExpenses = _expenses;
+    var committedReserves = _reserves;
     for (final entry in appended) {
       committedConfiguration = committedConfiguration.apply(entry);
       committedExpenses = committedExpenses.apply(entry);
+      committedReserves = committedReserves.apply(entry);
     }
     _configuration = committedConfiguration;
     _expenses = committedExpenses;
+    _reserves = committedReserves;
   }
 
   Future<T> _runExclusive<T>(Future<T> Function() action) {

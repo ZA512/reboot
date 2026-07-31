@@ -1373,6 +1373,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You have a {amount} observed surplus. You could move it to a reserve or a project; the choice remains yours.'**
   String trendSurplusSuggestion(String amount);
+
+  /// Reserve management screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserves'**
+  String get reservesTitle;
+
+  /// Reserve behavior and trust boundary.
+  ///
+  /// In en, this message translates to:
+  /// **'A reserve protects an exceptional expense without reducing the weekly budget. REBOOT tracks what you declare; it does not read the bank balance.'**
+  String get reservesIntro;
+
+  /// Empty reserve list explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a reserve for emergencies, health, a vehicle, or another goal you want to protect.'**
+  String get noReserveYet;
+
+  /// Reserve creation action.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a reserve'**
+  String get createReserve;
+
+  /// Dashboard reserve empty-state link.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first reserve'**
+  String get createFirstReserve;
+
+  /// Dashboard reserve count and total.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 reserve · {amount}} other{{count} reserves · {amount}}}'**
+  String reservesSummary(String amount, int count);
+
+  /// Dashboard reserve behavior reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Real accounts and virtual allocations remain distinct from weekly spending.'**
+  String get reservesSummaryHelp;
+
+  /// Combined reserve balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Total declared reserves: {amount}'**
+  String totalReserves(String amount);
+
+  /// Reserve name field.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserve name'**
+  String get reserveName;
+
+  /// Reserve kind field.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserve type'**
+  String get reserveKind;
+
+  /// A reserve backed by a separate bank account.
+  ///
+  /// In en, this message translates to:
+  /// **'Real reserve account'**
+  String get realReserve;
+
+  /// An internal allocation in the main account.
+  ///
+  /// In en, this message translates to:
+  /// **'Virtual reserve'**
+  String get virtualReserve;
+
+  /// Declared reserve opening balance field.
+  ///
+  /// In en, this message translates to:
+  /// **'Current available amount'**
+  String get reserveOpeningBalance;
+
+  /// Opening balance accounting explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter only what is available now. This does not create income or change your weekly budget.'**
+  String get reserveOpeningBalanceHelp;
+
+  /// Records an explicit reserve credit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add funds'**
+  String get addReserveFunds;
+
+  /// Starts a reserve-funded expense.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get useReserve;
+
+  /// Reserve credit amount field.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount assigned'**
+  String get reserveFundingAmount;
+
+  /// Reserve credit label field.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get reserveFundingLabel;
+
+  /// Reserve credit label examples.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly surplus, gift, manual transfer…'**
+  String get reserveFundingHint;
+
+  /// Confirms a reserve credit.
+  ///
+  /// In en, this message translates to:
+  /// **'Record the funds'**
+  String get confirmReserveFunding;
+
+  /// Reserve movement history title.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent movements'**
+  String get reserveHistory;
+
+  /// Audit label for a corrected reserve movement.
+  ///
+  /// In en, this message translates to:
+  /// **'Erroneous entry reversed'**
+  String get reversedReserveMovement;
+
+  /// Reserve movement correction action.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse the entry'**
+  String get reverseReserveMovement;
+
+  /// Reserve movement correction confirmation title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse this erroneous entry?'**
+  String get reverseReserveMovementTitle;
+
+  /// Reserve movement correction consequence.
+  ///
+  /// In en, this message translates to:
+  /// **'Its effect on the reserve will be neutralized, while both events remain in the audit history.'**
+  String get reverseReserveMovementBody;
+
+  /// Generic atomic reserve mutation failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The reserve could not be updated. No partial change was saved.'**
+  String get reserveMutationError;
+
+  /// Expense funding source section title.
+  ///
+  /// In en, this message translates to:
+  /// **'How is this expense funded?'**
+  String get expenseFundingTitle;
+
+  /// Weekly allocation funding choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly budget'**
+  String get weeklyBudgetFunding;
+
+  /// Reserve funding choice.
+  ///
+  /// In en, this message translates to:
+  /// **'A reserve'**
+  String get reserveFunding;
+
+  /// No-reserve explanation in quick expense entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a reserve from the dashboard before using this funding choice.'**
+  String get createReserveBeforeUse;
+
+  /// Reserve selection field.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserve to use'**
+  String get selectReserve;
+
+  /// No-weekly-impact reserve expense explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This expense reduces only the selected reserve. It does not change this week or the next one.'**
+  String get reserveExpenseNoWeeklyImpact;
+
+  /// Reserve balance validation.
+  ///
+  /// In en, this message translates to:
+  /// **'The declared reserve contains only {amount}. Choose another reserve or use the weekly spread.'**
+  String insufficientReserveBalance(String amount);
+
+  /// Real reserve expense reminder title.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer reminder'**
+  String get realReserveTransferTitle;
+
+  /// Real reserve bank transfer reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'This expense will reduce {reserveName} by {amount}. Remember to transfer {amount} from that reserve account to the main account if the payment was made there. REBOOT will not perform or verify the transfer.'**
+  String realReserveTransferBody(String amount, String reserveName);
+
+  /// Confirms a real-reserve expense after reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand, record it'**
+  String get confirmReserveExpense;
 }
 
 class _AppLocalizationsDelegate

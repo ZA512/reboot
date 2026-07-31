@@ -641,7 +641,8 @@ final class ConfigurationLedger {
             throw UnsupportedEventException(entry.event.eventType);
         }
       case EntityKind.expense:
-        // Expense facts share the global journal but do not alter configuration.
+      case EntityKind.reserve:
+        // Operational facts share the journal but do not alter configuration.
         break;
     }
 

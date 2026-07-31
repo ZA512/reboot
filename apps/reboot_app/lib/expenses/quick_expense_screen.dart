@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
+import 'package:reboot_projection/reboot_projection.dart';
 
 import '../financial_setup/euro_amount_parser.dart';
 import '../l10n/app_localizations.dart';
+import '../reserves/reserve_controller.dart';
 import 'quick_expense_controller.dart';
+
+enum _ExpenseFunding { weeklyBudget, reserve }
 
 /// Minimal real-time expense entry for the weekly budget.
 final class QuickExpenseScreen extends ConsumerStatefulWidget {
@@ -14,11 +18,15 @@ final class QuickExpenseScreen extends ConsumerStatefulWidget {
   const QuickExpenseScreen({
     required this.service,
     required this.today,
+    this.initialReserveId,
     super.key,
   });
 
   final LocalRebootService service;
   final LocalDate today;
+
+  /// Opens directly on one reserve when launched from reserve management.
+  final EntityId? initialReserveId;
 
   @override
   ConsumerState<QuickExpenseScreen> createState() => _QuickExpenseScreenState();
@@ -30,11 +38,17 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
   final _labelController = TextEditingController();
   late LocalDate _purchaseDate;
   int _cycleCount = 1;
+  late _ExpenseFunding _funding;
+  EntityId? _reserveId;
 
   @override
   void initState() {
     super.initState();
     _purchaseDate = widget.today;
+    _reserveId = widget.initialReserveId;
+    _funding = _reserveId == null
+        ? _ExpenseFunding.weeklyBudget
+        : _ExpenseFunding.reserve;
   }
 
   @override
@@ -48,10 +62,20 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final mutation = ref.watch(quickExpenseControllerProvider);
+    final reserveMutation = ref.watch(reserveControllerProvider);
+    final reserves = widget.service.reserves.reserves.values.toList()
+      ..sort((left, right) => left.name.compareTo(right.name));
+    final selectedReserve = _selectedReserve(reserves);
     final amount = parsePositiveEuroAmount(_amountController.text);
-    final warning = amount == null
+    final warning = amount == null || _funding == _ExpenseFunding.reserve
         ? false
         : _exceedsHalfBudget(amount, _cycleCount);
+    final insufficientReserve =
+        _funding == _ExpenseFunding.reserve &&
+        amount != null &&
+        selectedReserve != null &&
+        amount.minorUnits > selectedReserve.balance.minorUnits;
+    final busy = mutation.isLoading || reserveMutation.isLoading;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.quickExpenseTitle)),
       body: SafeArea(
@@ -101,70 +125,142 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
                 title: Text(l10n.expenseDate),
                 subtitle: Text(_formatDate(context, _purchaseDate)),
                 trailing: const Icon(Icons.edit_calendar_outlined),
-                onTap: mutation.isLoading ? null : _chooseDate,
+                onTap: busy ? null : _chooseDate,
               ),
               const Divider(),
               Text(
-                l10n.expenseAllocationTitle,
+                l10n.expenseFundingTitle,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              const SizedBox(height: 4),
-              Text(l10n.expenseAllocationHelp),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<int>(
-                key: const ValueKey('expense-cycle-count'),
-                initialValue: _cycleCount,
-                decoration: InputDecoration(
-                  labelText: l10n.expenseCycleCount,
-                  border: const OutlineInputBorder(),
-                ),
-                items: [
-                  for (var count = 1; count <= 12; count++)
-                    DropdownMenuItem(
-                      value: count,
-                      child: Text(l10n.cycleCount(count)),
-                    ),
+              const SizedBox(height: 8),
+              SegmentedButton<_ExpenseFunding>(
+                segments: [
+                  ButtonSegment(
+                    value: _ExpenseFunding.weeklyBudget,
+                    icon: const Icon(Icons.calendar_view_week_outlined),
+                    label: Text(l10n.weeklyBudgetFunding),
+                  ),
+                  ButtonSegment(
+                    value: _ExpenseFunding.reserve,
+                    icon: const Icon(Icons.savings_outlined),
+                    label: Text(l10n.reserveFunding),
+                  ),
                 ],
-                onChanged: mutation.isLoading
+                selected: {_funding},
+                onSelectionChanged: busy || reserves.isEmpty
                     ? null
-                    : (value) => setState(() => _cycleCount = value ?? 1),
+                    : (selection) => setState(() {
+                        _funding = selection.single;
+                        _reserveId ??= reserves.first.id;
+                      }),
               ),
-              if (amount != null && _cycleCount > 1) ...[
+              if (reserves.isEmpty) ...[
+                const SizedBox(height: 8),
+                Text(l10n.createReserveBeforeUse),
+              ],
+              if (_funding == _ExpenseFunding.reserve) ...[
                 const SizedBox(height: 12),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      l10n.expenseAllocationPreview(
-                        _formatMoney(
-                          context,
-                          _regularPart(amount, _cycleCount),
+                DropdownButtonFormField<EntityId>(
+                  key: const ValueKey('expense-reserve'),
+                  initialValue: selectedReserve?.id,
+                  decoration: InputDecoration(
+                    labelText: l10n.selectReserve,
+                    border: const OutlineInputBorder(),
+                  ),
+                  items: [
+                    for (final reserve in reserves)
+                      DropdownMenuItem(
+                        value: reserve.id,
+                        child: Text(
+                          '${reserve.name} · '
+                          '${_formatMoney(context, reserve.balance)}',
                         ),
-                        _cycleCount - 1,
-                        _formatMoney(context, _lastPart(amount, _cycleCount)),
+                      ),
+                  ],
+                  validator: (value) =>
+                      value == null ? l10n.requiredField : null,
+                  onChanged: busy
+                      ? null
+                      : (value) => setState(() => _reserveId = value),
+                ),
+                const SizedBox(height: 8),
+                Text(l10n.reserveExpenseNoWeeklyImpact),
+                if (insufficientReserve) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.insufficientReserveBalance(
+                      _formatMoney(context, selectedReserve.balance),
+                    ),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ],
+              ],
+              if (_funding == _ExpenseFunding.weeklyBudget) ...[
+                const Divider(),
+                Text(
+                  l10n.expenseAllocationTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(l10n.expenseAllocationHelp),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<int>(
+                  key: const ValueKey('expense-cycle-count'),
+                  initialValue: _cycleCount,
+                  decoration: InputDecoration(
+                    labelText: l10n.expenseCycleCount,
+                    border: const OutlineInputBorder(),
+                  ),
+                  items: [
+                    for (var count = 1; count <= 12; count++)
+                      DropdownMenuItem(
+                        value: count,
+                        child: Text(l10n.cycleCount(count)),
+                      ),
+                  ],
+                  onChanged: busy
+                      ? null
+                      : (value) => setState(() => _cycleCount = value ?? 1),
+                ),
+                if (amount != null && _cycleCount > 1) ...[
+                  const SizedBox(height: 12),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        l10n.expenseAllocationPreview(
+                          _formatMoney(
+                            context,
+                            _regularPart(amount, _cycleCount),
+                          ),
+                          _cycleCount - 1,
+                          _formatMoney(context, _lastPart(amount, _cycleCount)),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-              if (warning) ...[
-                const SizedBox(height: 12),
-                Card(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.warning_amber),
-                        const SizedBox(width: 12),
-                        Expanded(child: Text(l10n.expenseCommitmentWarning)),
-                      ],
+                ],
+                if (warning) ...[
+                  const SizedBox(height: 12),
+                  Card(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.warning_amber),
+                          const SizedBox(width: 12),
+                          Expanded(child: Text(l10n.expenseCommitmentWarning)),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
-              if (mutation.hasError) ...[
+              if (mutation.hasError || reserveMutation.hasError) ...[
                 const SizedBox(height: 12),
                 Text(
                   l10n.quickExpenseError,
@@ -174,18 +270,14 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
               const SizedBox(height: 24),
               FilledButton.icon(
                 key: const ValueKey('save-expense'),
-                onPressed: mutation.isLoading ? null : _submit,
-                icon: mutation.isLoading
+                onPressed: busy || insufficientReserve ? null : _submit,
+                icon: busy
                     ? const SizedBox.square(
                         dimension: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.check),
-                label: Text(
-                  mutation.isLoading
-                      ? l10n.quickExpenseSaving
-                      : l10n.saveExpense,
-                ),
+                label: Text(busy ? l10n.quickExpenseSaving : l10n.saveExpense),
               ),
             ],
           ),
@@ -221,17 +313,78 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    final amount = parsePositiveEuroAmount(_amountController.text)!;
+    if (_funding == _ExpenseFunding.reserve) {
+      final reserve = widget.service.reserves.reserves[_reserveId];
+      if (reserve == null || amount.minorUnits > reserve.balance.minorUnits) {
+        return;
+      }
+      if (reserve.kind == ReserveKind.real &&
+          !await _confirmRealReserveTransfer(reserve, amount)) {
+        return;
+      }
+      final accepted = await ref
+          .read(reserveControllerProvider.notifier)
+          .use(
+            UseReserveCommand(
+              reserveId: reserve.id,
+              amount: amount,
+              label: _labelController.text,
+              purchaseDate: _purchaseDate,
+            ),
+          );
+      if (accepted && mounted) Navigator.of(context).pop();
+      return;
+    }
     final accepted = await ref
         .read(quickExpenseControllerProvider.notifier)
         .record(
           RecordExpenseCommand(
-            amount: parsePositiveEuroAmount(_amountController.text)!,
+            amount: amount,
             label: _labelController.text,
             purchaseDate: _purchaseDate,
             allocationCycleCount: _cycleCount,
           ),
         );
     if (accepted && mounted) Navigator.of(context).pop();
+  }
+
+  ProjectedReserve? _selectedReserve(List<ProjectedReserve> reserves) {
+    if (reserves.isEmpty) return null;
+    return reserves.firstWhere(
+      (reserve) => reserve.id == _reserveId,
+      orElse: () => reserves.first,
+    );
+  }
+
+  Future<bool> _confirmRealReserveTransfer(
+    ProjectedReserve reserve,
+    Money amount,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    return await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(l10n.realReserveTransferTitle),
+            content: Text(
+              l10n.realReserveTransferBody(
+                _formatMoney(context, amount),
+                reserve.name,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(l10n.confirmReserveExpense),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   bool _exceedsHalfBudget(Money amount, int count) {
