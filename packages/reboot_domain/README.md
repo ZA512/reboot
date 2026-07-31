@@ -14,4 +14,5 @@ Implemented foundations:
 - explicit short or long transitions when the anchor weekday changes;
 - fixed and variable cash flows with civil recurrence schedules;
 - already-received bonus pools that cannot include future expected money;
+- versioned household, cycle-policy, cash-flow, and commitment events;
 - immutable, versioned expense events and separate local journal positions.

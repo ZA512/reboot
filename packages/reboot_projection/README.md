@@ -14,4 +14,7 @@ Implemented foundations:
 - exact-date annualization of fixed and variable incomes and outflows;
 - prudent 90% income and 110% outflow estimates with deterministic rounding;
 - whole-euro weekly recommendations with the retained annual margin exposed;
-- exact allocation of already-received bonus pools until their renewal date.
+- exact allocation of already-received bonus pools until their renewal date;
+- replayable household configuration with future-effective replacements and
+  tombstones;
+- annual recommendations rebuilt directly from the shared global journal.

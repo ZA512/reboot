@@ -1,5 +1,7 @@
 import 'package:reboot_domain/reboot_domain.dart';
 
+import 'projection_errors.dart';
+
 /// Observable expense reconstructed solely from immutable journal events.
 final class ProjectedExpense {
   const ProjectedExpense._({
@@ -201,41 +203,45 @@ final class ExpenseLedger {
     }
 
     final nextExpenses = Map<EntityId, ProjectedExpense>.of(expenses);
-    switch (entry.event.payload) {
-      case ExpenseRecordedPayload():
-        if (nextExpenses.containsKey(entry.event.target.id)) {
-          throw ProjectionConflictException(
-            'Expense ${entry.event.target.id} was recorded more than once.',
+    if (entry.event.target.kind == EntityKind.expense) {
+      switch (entry.event.payload) {
+        case ExpenseRecordedPayload():
+          if (nextExpenses.containsKey(entry.event.target.id)) {
+            throw ProjectionConflictException(
+              'Expense ${entry.event.target.id} was recorded more than once.',
+            );
+          }
+          nextExpenses[entry.event.target.id] = ProjectedExpense._recorded(
+            entry.event,
           );
-        }
-        nextExpenses[entry.event.target.id] = ProjectedExpense._recorded(
-          entry.event,
-        );
-      case ExpenseAllocationsPlannedPayload():
-        final existing = nextExpenses[entry.event.target.id];
-        if (existing == null) {
-          throw ProjectionConflictException(
-            'Expense ${entry.event.target.id} was allocated before recording.',
+        case ExpenseAllocationsPlannedPayload():
+          final existing = nextExpenses[entry.event.target.id];
+          if (existing == null) {
+            throw ProjectionConflictException(
+              'Expense ${entry.event.target.id} was allocated before recording.',
+            );
+          }
+          nextExpenses[entry.event.target.id] = existing._allocatedBy(
+            entry.event,
           );
-        }
-        nextExpenses[entry.event.target.id] = existing._allocatedBy(
-          entry.event,
-        );
-      case ExpenseDeletedPayload():
-        final existing = nextExpenses[entry.event.target.id];
-        if (existing == null) {
-          throw ProjectionConflictException(
-            'Expense ${entry.event.target.id} was deleted before recording.',
+        case ExpenseDeletedPayload():
+          final existing = nextExpenses[entry.event.target.id];
+          if (existing == null) {
+            throw ProjectionConflictException(
+              'Expense ${entry.event.target.id} was deleted before recording.',
+            );
+          }
+          if (existing.isDeleted) {
+            throw ProjectionConflictException(
+              'Expense ${entry.event.target.id} received multiple tombstones.',
+            );
+          }
+          nextExpenses[entry.event.target.id] = existing._deletedBy(
+            entry.event,
           );
-        }
-        if (existing.isDeleted) {
-          throw ProjectionConflictException(
-            'Expense ${entry.event.target.id} received multiple tombstones.',
-          );
-        }
-        nextExpenses[entry.event.target.id] = existing._deletedBy(entry.event);
-      default:
-        throw UnsupportedEventException(entry.event.eventType);
+        default:
+          throw UnsupportedEventException(entry.event.eventType);
+      }
     }
 
     return ExpenseLedger._(
@@ -262,48 +268,4 @@ bool _allocationListsEqual(
     }
   }
   return true;
-}
-
-/// Indicates that local journal entries were not replayed monotonically.
-final class LocalJournalOrderException implements Exception {
-  /// Creates an ordering error.
-  const LocalJournalOrderException({
-    required this.previous,
-    required this.received,
-  });
-
-  /// Last accepted position.
-  final LocalJournalPosition previous;
-
-  /// Non-increasing position that was rejected.
-  final LocalJournalPosition received;
-
-  @override
-  String toString() {
-    return 'LocalJournalOrderException: position $received follows $previous';
-  }
-}
-
-/// Indicates contradictory immutable facts in one journal.
-final class ProjectionConflictException implements Exception {
-  /// Creates a conflict with a diagnostic [message].
-  const ProjectionConflictException(this.message);
-
-  /// Human-readable diagnostic for developers.
-  final String message;
-
-  @override
-  String toString() => 'ProjectionConflictException: $message';
-}
-
-/// Indicates that this projection does not understand an event schema.
-final class UnsupportedEventException implements Exception {
-  /// Creates an unsupported-event error for [eventType].
-  const UnsupportedEventException(this.eventType);
-
-  /// Stable event type rejected by the projection.
-  final String eventType;
-
-  @override
-  String toString() => 'UnsupportedEventException: $eventType';
 }

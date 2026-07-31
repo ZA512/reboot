@@ -61,6 +61,15 @@ void _requireCanonicalUuid(String value, String label) {
 
 /// Domain entity categories that may be targeted by events.
 enum EntityKind {
+  /// The one local household profile and its cycle-policy history.
+  household,
+
+  /// One recurring income or outflow assumption.
+  cashFlow,
+
+  /// The household's annual reserve, project, and safety commitments.
+  annualBudgetPlan,
+
   /// A real household expense transaction.
   expense,
 }
