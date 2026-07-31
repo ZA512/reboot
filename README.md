@@ -40,7 +40,8 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Six ADR de fondation acceptés
 - [x] Méthode REBOOT formalisée
 - [x] Création du workspace Flutter/Dart
-- [ ] Premiers types métier et tests de référence
+- [x] Type monétaire et tests de référence
+- [ ] Moteur de cycles civils et tests de changements d’heure
 
 ## Licence
 
