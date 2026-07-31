@@ -9,6 +9,7 @@ import 'package:reboot_projection/reboot_projection.dart';
 
 import '../expenses/quick_expense_controller.dart';
 import '../expenses/quick_expense_screen.dart';
+import '../financial_setup/cash_flow_management_screen.dart';
 import '../health/health_controller.dart';
 import '../health/health_screen.dart';
 import '../infrastructure/device_context_providers.dart';
@@ -236,6 +237,22 @@ final class _DashboardBody extends ConsumerWidget {
               ),
             ),
           ],
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              key: const ValueKey('open-assumptions'),
+              leading: const Icon(Icons.tune),
+              title: Text(l10n.assumptionsDashboardTitle),
+              subtitle: Text(l10n.assumptionsDashboardHelp),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      CashFlowManagementScreen(service: service, today: today),
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 12),
           Card(
             child: ListTile(

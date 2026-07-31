@@ -1175,4 +1175,80 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get trendNatureBreakdownHelp =>
       'Optional qualifications across the selected completed weeks. Unqualified spending is kept visible.';
+
+  @override
+  String get editCashFlowTitle => 'Change this assumption';
+
+  @override
+  String get saveCashFlowChange => 'Schedule this change';
+
+  @override
+  String get assumptionsTitle => 'Income and charges';
+
+  @override
+  String get assumptionsIntro =>
+      'Keep every durable income and unavoidable charge accurate. REBOOT preserves the past and recalculates only future weekly budgets.';
+
+  @override
+  String assumptionsEffectiveDate(String date) {
+    return 'Changes apply from $date';
+  }
+
+  @override
+  String get assumptionsCurrentWeekUnchanged =>
+      'The week already started never changes. A surplus or overspend is not carried over automatically.';
+
+  @override
+  String get currentWeeklyBudget => 'Current week';
+
+  @override
+  String get futureWeeklyBudget => 'From next REBOOT';
+
+  @override
+  String assumptionsDeficitWarning(String amount) {
+    return 'These assumptions are short by $amount over the next 52 weeks. The recommended weekly spending budget becomes zero.';
+  }
+
+  @override
+  String get assumptionsMutationError =>
+      'The change could not be scheduled. No partial update was recorded.';
+
+  @override
+  String get addAssumption => 'Add';
+
+  @override
+  String get editAssumption => 'Change';
+
+  @override
+  String assumptionChangesOn(String date) {
+    return 'New value from $date';
+  }
+
+  @override
+  String assumptionEndsOn(String date) {
+    return 'Ends on $date';
+  }
+
+  @override
+  String assumptionStartsOn(String date) {
+    return 'Starts on $date';
+  }
+
+  @override
+  String get deleteAssumptionTitle => 'End this assumption?';
+
+  @override
+  String deleteAssumptionBody(String date) {
+    return 'It will stop affecting the budget from $date. Earlier weeks and the local audit history remain unchanged.';
+  }
+
+  @override
+  String get frequencyCustomDates => 'Specific dates';
+
+  @override
+  String get assumptionsDashboardTitle => 'Income and charges';
+
+  @override
+  String get assumptionsDashboardHelp =>
+      'Update a lasting change; the current week remains unchanged.';
 }

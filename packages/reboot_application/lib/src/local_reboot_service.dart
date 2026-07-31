@@ -683,6 +683,25 @@ final class LocalRebootService {
     });
   }
 
+  /// First weekly boundary on which a configuration change may take effect.
+  ///
+  /// Before the household's first cycle, changes participate in that first
+  /// budget. Once a cycle has started, its accepted budget is immutable and a
+  /// durable assumption change starts at the following boundary.
+  LocalDate nextConfigurationCycleStart(LocalDate businessDate) {
+    _requireOpen();
+    final household = _configuration.household;
+    if (household == null) {
+      throw const IncompleteConfigurationException(
+        'The household must be initialized before changing configuration.',
+      );
+    }
+    if (businessDate.isBefore(household.firstCycleStart)) {
+      return household.firstCycleStart;
+    }
+    return household.cycleContaining(businessDate).endExclusive;
+  }
+
   /// Calculates the explainable 52-cycle recommendation from [firstCycleStart].
   AnnualBudgetProjection buildAnnualBudget(LocalDate firstCycleStart) {
     _requireOpen();

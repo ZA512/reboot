@@ -513,6 +513,26 @@ void main() {
       );
     });
 
+    test(
+      'keeps configuration changes out of the cycle already started',
+      () async {
+        final harness = await _Harness.initialized();
+
+        expect(
+          harness.service.nextConfigurationCycleStart(LocalDate(2026, 4, 1)),
+          LocalDate(2026, 4, 4),
+        );
+        expect(
+          harness.service.nextConfigurationCycleStart(LocalDate(2026, 4, 4)),
+          LocalDate(2026, 4, 11),
+        );
+        expect(
+          harness.service.nextConfigurationCycleStart(LocalDate(2026, 4, 10)),
+          LocalDate(2026, 4, 11),
+        );
+      },
+    );
+
     test('assigns expenses to an explicit anchor-change transition', () async {
       final harness = await _Harness.initialized();
       final next = await harness.service.changeCyclePolicy(

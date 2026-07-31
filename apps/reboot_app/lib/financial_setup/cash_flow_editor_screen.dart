@@ -7,12 +7,15 @@ import 'euro_amount_parser.dart';
 /// Full-screen editor for one exact recurring financial assumption.
 final class CashFlowEditorScreen extends StatefulWidget {
   /// Creates an editor prefilled from a localized suggestion.
-  const CashFlowEditorScreen({
+  CashFlowEditorScreen({
     required this.direction,
     required this.initialTitle,
     required this.businessDate,
+    this.initialDefinition,
     super.key,
-  });
+  }) : assert(
+         initialDefinition == null || initialDefinition.direction == direction,
+       );
 
   /// Money entering or leaving the household trajectory.
   final CashFlowDirection direction;
@@ -23,6 +26,9 @@ final class CashFlowEditorScreen extends StatefulWidget {
   /// Device-local date used as the default reference and confirmation date.
   final LocalDate businessDate;
 
+  /// Existing complete definition when the screen replaces an assumption.
+  final CashFlowDefinition? initialDefinition;
+
   @override
   State<CashFlowEditorScreen> createState() => _CashFlowEditorScreenState();
 }
@@ -30,8 +36,8 @@ final class CashFlowEditorScreen extends StatefulWidget {
 final class _CashFlowEditorScreenState extends State<CashFlowEditorScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
-  final _amountController = TextEditingController();
-  final _customAmountController = TextEditingController();
+  late final TextEditingController _amountController;
+  late final TextEditingController _customAmountController;
   AmountBehavior _behavior = AmountBehavior.fixed;
   VariableEstimateStrategy _strategy = VariableEstimateStrategy.prudent;
   RecurrenceFrequency _frequency = RecurrenceFrequency.monthly;
@@ -40,8 +46,29 @@ final class _CashFlowEditorScreenState extends State<CashFlowEditorScreen> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.initialTitle);
-    _referenceDate = widget.businessDate;
+    final initial = widget.initialDefinition;
+    _titleController = TextEditingController(
+      text: initial?.title ?? widget.initialTitle,
+    );
+    _amountController = TextEditingController(
+      text: initial == null
+          ? ''
+          : _editableEuro(initial.referenceAmountPerOccurrence),
+    );
+    _customAmountController = TextEditingController(
+      text: initial?.customAmountPerOccurrence == null
+          ? ''
+          : _editableEuro(initial!.customAmountPerOccurrence!),
+    );
+    _behavior = initial?.behavior ?? AmountBehavior.fixed;
+    _strategy = initial?.variableStrategy ?? VariableEstimateStrategy.prudent;
+    final schedule = initial?.schedule;
+    if (schedule is RecurringSchedule) {
+      _frequency = schedule.frequency;
+      _referenceDate = schedule.firstOccurrence;
+    } else {
+      _referenceDate = widget.businessDate;
+    }
   }
 
   @override
@@ -59,7 +86,9 @@ final class _CashFlowEditorScreenState extends State<CashFlowEditorScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.direction == CashFlowDirection.income
+          widget.initialDefinition != null
+              ? l10n.editCashFlowTitle
+              : widget.direction == CashFlowDirection.income
               ? l10n.addIncomeTitle
               : l10n.addOutflowTitle,
         ),
@@ -223,7 +252,11 @@ final class _CashFlowEditorScreenState extends State<CashFlowEditorScreen> {
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _submit,
-                child: Text(l10n.addThisCashFlow),
+                child: Text(
+                  widget.initialDefinition == null
+                      ? l10n.addThisCashFlow
+                      : l10n.saveCashFlowChange,
+                ),
               ),
             ],
           ),
@@ -291,6 +324,12 @@ final class _CashFlowEditorScreenState extends State<CashFlowEditorScreen> {
       VariableEstimateStrategy.custom => l10n.customStrategyHelp,
     };
   }
+}
+
+String _editableEuro(Money amount) {
+  final whole = amount.minorUnits ~/ 100;
+  final cents = amount.minorUnits % 100;
+  return cents == 0 ? '$whole' : '$whole.${cents.toString().padLeft(2, '0')}';
 }
 
 String _formatDate(BuildContext context, LocalDate date) {

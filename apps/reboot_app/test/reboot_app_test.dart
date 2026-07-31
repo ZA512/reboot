@@ -518,6 +518,143 @@ void main() {
     );
   });
 
+  testWidgets('schedules income and charge changes for the next REBOOT only', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final journal = _MemoryJournal();
+    final service = await _readyService(journal);
+    final currentCycle = LocalDate(2026, 4, 4);
+    final nextCycle = LocalDate(2026, 4, 11);
+    final currentBudget = service
+        .buildAnnualBudget(currentCycle)
+        .recommendedWeeklyBudget;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 4, 5),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('open-assumptions')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const ValueKey('open-assumptions')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Revenus et charges'), findsOneWidget);
+    expect(
+      find.textContaining('La semaine déjà commencée ne change jamais'),
+      findsOneWidget,
+    );
+
+    final salaryTile = find.ancestor(
+      of: find.text('Salaire 1'),
+      matching: find.byType(ListTile),
+    );
+    await tester.tap(
+      find.descendant(of: salaryTile, matching: find.byIcon(Icons.more_vert)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Modifier').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Modifier cette hypothèse'), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField).at(1), '3200');
+    await tester.scrollUntilVisible(
+      find.text('Planifier cette modification'),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Planifier cette modification'));
+    await tester.pumpAndSettle();
+
+    final salary = service.configuration.cashFlows.values.singleWhere(
+      (flow) =>
+          flow.definitionForCycleStarting(currentCycle)?.title == 'Salaire 1',
+    );
+    expect(salary.revisions, hasLength(2));
+    expect(salary.latestRevision.effectiveFromCycleStart, nextCycle);
+    expect(
+      salary
+          .definitionForCycleStarting(currentCycle)!
+          .referenceAmountPerOccurrence
+          .minorUnits,
+      300000,
+    );
+    expect(
+      salary
+          .definitionForCycleStarting(nextCycle)!
+          .referenceAmountPerOccurrence
+          .minorUnits,
+      320000,
+    );
+    expect(
+      service.buildAnnualBudget(currentCycle).recommendedWeeklyBudget,
+      currentBudget,
+    );
+    expect(
+      service.buildAnnualBudget(nextCycle).recommendedWeeklyBudget,
+      isNot(currentBudget),
+    );
+    expect(find.textContaining('Nouvelle valeur à partir du'), findsOneWidget);
+
+    final housingTile = find.ancestor(
+      of: find.text('Logement'),
+      matching: find.byType(ListTile),
+    );
+    final housingMenu = find.descendant(
+      of: housingTile,
+      matching: find.byIcon(Icons.more_vert),
+    );
+    await tester.ensureVisible(housingMenu);
+    await tester.pumpAndSettle();
+    await tester.tap(housingMenu);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Supprimer').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Mettre fin à cette hypothèse ?'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Supprimer'));
+    await tester.pumpAndSettle();
+
+    final housing = service.configuration.cashFlows.values.singleWhere(
+      (flow) =>
+          flow.definitionForCycleStarting(currentCycle)?.title == 'Logement',
+    );
+    expect(housing.definitionForCycleStarting(currentCycle), isNotNull);
+    expect(housing.definitionForCycleStarting(nextCycle), isNull);
+    expect(find.textContaining('Prend fin le'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(TextButton, 'Ajouter').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).at(0), 'Essence');
+    await tester.enterText(find.byType(TextFormField).at(1), '100');
+    await tester.scrollUntilVisible(
+      find.text('Ajouter cette ligne'),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Ajouter cette ligne'));
+    await tester.pumpAndSettle();
+
+    final fuel = service.configuration.cashFlows.values.singleWhere(
+      (flow) => flow.definitionForCycleStarting(nextCycle)?.title == 'Essence',
+    );
+    expect(fuel.definitionForCycleStarting(currentCycle), isNull);
+    expect(fuel.latestRevision.effectiveFromCycleStart, nextCycle);
+    expect(find.text('Essence'), findsOneWidget);
+  });
+
   testWidgets('uses a real reserve without reducing the weekly budget', (
     tester,
   ) async {

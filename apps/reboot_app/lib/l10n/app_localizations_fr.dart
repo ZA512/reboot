@@ -1180,4 +1180,80 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get trendNatureBreakdownHelp =>
       'Qualifications facultatives sur les semaines terminées sélectionnées. Les dépenses non qualifiées restent visibles.';
+
+  @override
+  String get editCashFlowTitle => 'Modifier cette hypothèse';
+
+  @override
+  String get saveCashFlowChange => 'Planifier cette modification';
+
+  @override
+  String get assumptionsTitle => 'Revenus et charges';
+
+  @override
+  String get assumptionsIntro =>
+      'Maintenez à jour chaque revenu durable et chaque charge incontournable. REBOOT conserve le passé et recalcule uniquement les futurs budgets semaine.';
+
+  @override
+  String assumptionsEffectiveDate(String date) {
+    return 'Les modifications s’appliquent à partir du $date';
+  }
+
+  @override
+  String get assumptionsCurrentWeekUnchanged =>
+      'La semaine déjà commencée ne change jamais. Un surplus ou un dépassement n’est pas reporté automatiquement.';
+
+  @override
+  String get currentWeeklyBudget => 'Semaine actuelle';
+
+  @override
+  String get futureWeeklyBudget => 'Dès le prochain REBOOT';
+
+  @override
+  String assumptionsDeficitWarning(String amount) {
+    return 'Ces hypothèses créent un manque de $amount sur les 52 prochaines semaines. Le budget semaine recommandé devient nul.';
+  }
+
+  @override
+  String get assumptionsMutationError =>
+      'La modification n’a pas pu être planifiée. Aucun changement partiel n’a été enregistré.';
+
+  @override
+  String get addAssumption => 'Ajouter';
+
+  @override
+  String get editAssumption => 'Modifier';
+
+  @override
+  String assumptionChangesOn(String date) {
+    return 'Nouvelle valeur à partir du $date';
+  }
+
+  @override
+  String assumptionEndsOn(String date) {
+    return 'Prend fin le $date';
+  }
+
+  @override
+  String assumptionStartsOn(String date) {
+    return 'Commence le $date';
+  }
+
+  @override
+  String get deleteAssumptionTitle => 'Mettre fin à cette hypothèse ?';
+
+  @override
+  String deleteAssumptionBody(String date) {
+    return 'Elle cessera d’affecter le budget à partir du $date. Les semaines précédentes et l’historique d’audit local restent inchangés.';
+  }
+
+  @override
+  String get frequencyCustomDates => 'Dates précises';
+
+  @override
+  String get assumptionsDashboardTitle => 'Revenus et charges';
+
+  @override
+  String get assumptionsDashboardHelp =>
+      'Déclarez un changement durable ; la semaine en cours reste inchangée.';
 }

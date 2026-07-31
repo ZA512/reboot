@@ -2003,6 +2003,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Optional qualifications across the selected completed weeks. Unqualified spending is kept visible.'**
   String get trendNatureBreakdownHelp;
+
+  /// Existing cash-flow editor title.
+  ///
+  /// In en, this message translates to:
+  /// **'Change this assumption'**
+  String get editCashFlowTitle;
+
+  /// Confirms a future-effective cash-flow replacement.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule this change'**
+  String get saveCashFlowChange;
+
+  /// Post-onboarding financial assumptions screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Income and charges'**
+  String get assumptionsTitle;
+
+  /// Financial assumptions management explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep every durable income and unavoidable charge accurate. REBOOT preserves the past and recalculates only future weekly budgets.'**
+  String get assumptionsIntro;
+
+  /// Next effective weekly boundary.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes apply from {date}'**
+  String assumptionsEffectiveDate(String date);
+
+  /// Immutable current weekly budget reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'The week already started never changes. A surplus or overspend is not carried over automatically.'**
+  String get assumptionsCurrentWeekUnchanged;
+
+  /// Current accepted weekly budget label.
+  ///
+  /// In en, this message translates to:
+  /// **'Current week'**
+  String get currentWeeklyBudget;
+
+  /// Future recalculated weekly budget label.
+  ///
+  /// In en, this message translates to:
+  /// **'From next REBOOT'**
+  String get futureWeeklyBudget;
+
+  /// Negative annual capacity warning.
+  ///
+  /// In en, this message translates to:
+  /// **'These assumptions are short by {amount} over the next 52 weeks. The recommended weekly spending budget becomes zero.'**
+  String assumptionsDeficitWarning(String amount);
+
+  /// Sanitized assumption mutation failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The change could not be scheduled. No partial update was recorded.'**
+  String get assumptionsMutationError;
+
+  /// Adds a recurring financial assumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addAssumption;
+
+  /// Edits a recurring financial assumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get editAssumption;
+
+  /// Pending cash-flow change status.
+  ///
+  /// In en, this message translates to:
+  /// **'New value from {date}'**
+  String assumptionChangesOn(String date);
+
+  /// Pending cash-flow deletion status.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends on {date}'**
+  String assumptionEndsOn(String date);
+
+  /// Future cash-flow creation status.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts on {date}'**
+  String assumptionStartsOn(String date);
+
+  /// Future cash-flow deletion confirmation title.
+  ///
+  /// In en, this message translates to:
+  /// **'End this assumption?'**
+  String get deleteAssumptionTitle;
+
+  /// Future cash-flow deletion confirmation body.
+  ///
+  /// In en, this message translates to:
+  /// **'It will stop affecting the budget from {date}. Earlier weeks and the local audit history remain unchanged.'**
+  String deleteAssumptionBody(String date);
+
+  /// Custom-date recurrence display label.
+  ///
+  /// In en, this message translates to:
+  /// **'Specific dates'**
+  String get frequencyCustomDates;
+
+  /// Dashboard navigation title for financial assumptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Income and charges'**
+  String get assumptionsDashboardTitle;
+
+  /// Dashboard navigation help for financial assumptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Update a lasting change; the current week remains unchanged.'**
+  String get assumptionsDashboardHelp;
 }
 
 class _AppLocalizationsDelegate

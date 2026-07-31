@@ -57,6 +57,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Réserves réelles ou virtuelles et financement des grosses dépenses
 - [x] Remboursements et suivi Santé facultatif
 - [x] Raccourcis de saisie, qualification facultative et répartition des dépenses
+- [x] Modification future des revenus et charges sans réécriture de la semaine en cours
 
 ## Licence
 
