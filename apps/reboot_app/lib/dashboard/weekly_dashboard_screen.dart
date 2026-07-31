@@ -18,6 +18,7 @@ import '../refunds/refund_controller.dart';
 import '../refunds/refunds_screen.dart';
 import '../reserves/reserve_controller.dart';
 import '../reserves/reserves_screen.dart';
+import '../trajectory_setup/trajectory_management_screen.dart';
 import '../trends/trends_screen.dart';
 
 /// Live answer to the daily question: how much can the household still spend?
@@ -249,6 +250,24 @@ final class _DashboardBody extends ConsumerWidget {
                 MaterialPageRoute<void>(
                   builder: (_) =>
                       CashFlowManagementScreen(service: service, today: today),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              key: const ValueKey('open-trajectory'),
+              leading: const Icon(Icons.route_outlined),
+              title: Text(l10n.trajectoryDashboardTitle),
+              subtitle: Text(l10n.trajectoryDashboardHelp),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => TrajectoryManagementScreen(
+                    service: service,
+                    today: today,
+                  ),
                 ),
               ),
             ),

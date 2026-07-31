@@ -1256,4 +1256,63 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get assumptionsDashboardHelp =>
       'Déclarez un changement durable ; la semaine en cours reste inchangée.';
+
+  @override
+  String get editTrajectoryTitle => 'Modifier la trajectoire';
+
+  @override
+  String editTrajectoryIntro(String date) {
+    return 'Choisissez les montants que REBOOT doit protéger du quotidien à partir du $date. La semaine déjà commencée reste inchangée.';
+  }
+
+  @override
+  String get saveTrajectoryChange => 'Planifier cette trajectoire';
+
+  @override
+  String get trajectoryManagementTitle => 'Trajectoire REBOOT';
+
+  @override
+  String get trajectoryManagementIntro =>
+      'Votre trajectoire protège de l’argent avant de calculer les dépenses du quotidien. Vous choisissez l’objectif ; REBOOT ne réaffecte jamais automatiquement un surplus.';
+
+  @override
+  String trajectoryChangeScheduled(String date) {
+    return 'Une nouvelle trajectoire est planifiée pour le $date';
+  }
+
+  @override
+  String trajectoryChangeEffective(String date) {
+    return 'Une modification s’appliquerait à partir du $date';
+  }
+
+  @override
+  String get currentTrajectoryTitle => 'Trajectoire de la semaine actuelle';
+
+  @override
+  String get acceptedTrajectoryTitle => 'Trajectoire acceptée';
+
+  @override
+  String get futureTrajectoryTitle => 'Prochaine trajectoire';
+
+  @override
+  String get changeTrajectory => 'Modifier la trajectoire';
+
+  @override
+  String get changeScheduledTrajectory => 'Modifier la trajectoire planifiée';
+
+  @override
+  String overdraftTargetSummary(String date) {
+    return 'Date cible : $date';
+  }
+
+  @override
+  String get noAnnualDeductions =>
+      'Aucun coussin, projet ou marge de sécurité supplémentaire n’est actuellement retiré.';
+
+  @override
+  String get trajectoryDashboardTitle => 'Trajectoire et objectifs';
+
+  @override
+  String get trajectoryDashboardHelp =>
+      'Consultez les montants protégés avant le calcul du budget semaine.';
 }

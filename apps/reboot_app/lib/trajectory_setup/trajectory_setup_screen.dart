@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reboot_domain/reboot_domain.dart';
+import 'package:reboot_projection/reboot_projection.dart';
 
 import '../financial_setup/euro_amount_parser.dart';
 import '../infrastructure/device_context_providers.dart';
@@ -10,10 +11,21 @@ import 'trajectory_setup_controller.dart';
 /// Collects the final explicit choices before calculating a weekly budget.
 final class TrajectorySetupScreen extends ConsumerStatefulWidget {
   /// Creates the trajectory step for the household's first 52-cycle horizon.
-  const TrajectorySetupScreen({required this.firstCycleStart, super.key});
+  const TrajectorySetupScreen({
+    required this.firstCycleStart,
+    this.initialRevision,
+    this.effectiveFromCycleStart,
+    super.key,
+  }) : assert(initialRevision == null || effectiveFromCycleStart != null);
 
   /// Start of the first configured REBOOT cycle.
   final LocalDate firstCycleStart;
+
+  /// Current or already planned values when revising an existing trajectory.
+  final AnnualCommitmentsRevision? initialRevision;
+
+  /// Future weekly boundary used only for a post-onboarding revision.
+  final LocalDate? effectiveFromCycleStart;
 
   @override
   ConsumerState<TrajectorySetupScreen> createState() =>
@@ -23,13 +35,40 @@ final class TrajectorySetupScreen extends ConsumerStatefulWidget {
 final class _TrajectorySetupScreenState
     extends ConsumerState<TrajectorySetupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _cushionController = TextEditingController(text: '0');
-  final _projectsController = TextEditingController(text: '0');
-  final _safetyController = TextEditingController(text: '0');
-  final _overdraftController = TextEditingController(text: '0');
-  final _targetCushionController = TextEditingController(text: '0');
-  TrajectoryStrategy _strategy = TrajectoryStrategy.balance;
+  late final TextEditingController _cushionController;
+  late final TextEditingController _projectsController;
+  late final TextEditingController _safetyController;
+  late final TextEditingController _overdraftController;
+  late final TextEditingController _targetCushionController;
+  late TrajectoryStrategy _strategy;
   LocalDate? _targetDate;
+
+  LocalDate get _horizonStart =>
+      widget.effectiveFromCycleStart ?? widget.firstCycleStart;
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialRevision;
+    final goal = initial?.overdraftExitGoal;
+    _strategy = initial?.strategy ?? TrajectoryStrategy.balance;
+    _cushionController = TextEditingController(
+      text: _editableEuro(initial?.reserveContributions),
+    );
+    _projectsController = TextEditingController(
+      text: _editableEuro(initial?.projectContributions),
+    );
+    _safetyController = TextEditingController(
+      text: _editableEuro(initial?.safetyMargin),
+    );
+    _overdraftController = TextEditingController(
+      text: _editableEuro(goal?.currentOverdraftDepth),
+    );
+    _targetCushionController = TextEditingController(
+      text: _editableEuro(goal?.targetCushion),
+    );
+    _targetDate = goal?.targetDate;
+  }
 
   @override
   void dispose() {
@@ -50,14 +89,23 @@ final class _TrajectorySetupScreenState
       AsyncData(:final value) => value.localDate,
       _ => null,
     };
-    if (_targetDate == null && businessDate != null) {
+    if (businessDate != null &&
+        (_targetDate == null ||
+            !_targetDate!.isAfter(businessDate) ||
+            _targetDate!.isAfter(_horizonStart.addDays(364)))) {
       final proposed = businessDate.addDays(182);
-      final horizonEnd = widget.firstCycleStart.addDays(364);
+      final horizonEnd = _horizonStart.addDays(364);
       _targetDate = proposed.isAfter(horizonEnd) ? horizonEnd : proposed;
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appTitle)),
+      appBar: AppBar(
+        title: Text(
+          widget.initialRevision == null
+              ? l10n.appTitle
+              : l10n.editTrajectoryTitle,
+        ),
+      ),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -69,7 +117,13 @@ final class _TrajectorySetupScreenState
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 8),
-              Text(l10n.trajectorySetupIntro),
+              Text(
+                widget.initialRevision == null
+                    ? l10n.trajectorySetupIntro
+                    : l10n.editTrajectoryIntro(
+                        _formatDate(context, _horizonStart),
+                      ),
+              ),
               const SizedBox(height: 24),
               _StrategyCard(
                 selected: _strategy == TrajectoryStrategy.balance,
@@ -199,7 +253,11 @@ final class _TrajectorySetupScreenState
                           Text(l10n.trajectorySaving),
                         ],
                       )
-                    : Text(l10n.calculateWeeklyBudget),
+                    : Text(
+                        widget.initialRevision == null
+                            ? l10n.calculateWeeklyBudget
+                            : l10n.saveTrajectoryChange,
+                      ),
               ),
             ],
           ),
@@ -229,9 +287,9 @@ final class _TrajectorySetupScreenState
         businessDate.addDays(1).day,
       ),
       lastDate: DateTime(
-        widget.firstCycleStart.addDays(364).year,
-        widget.firstCycleStart.addDays(364).month,
-        widget.firstCycleStart.addDays(364).day,
+        _horizonStart.addDays(364).year,
+        _horizonStart.addDays(364).month,
+        _horizonStart.addDays(364).day,
       ),
     );
     if (selected != null) {
@@ -239,7 +297,7 @@ final class _TrajectorySetupScreenState
     }
   }
 
-  void _submit(LocalDate businessDate) {
+  Future<void> _submit(LocalDate businessDate) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -266,17 +324,28 @@ final class _TrajectorySetupScreenState
         targetDate: _targetDate!,
       );
     }
-    ref
+    final accepted = await ref
         .read(trajectorySetupControllerProvider.notifier)
         .submit(
           strategy: _strategy,
           reserveContributions: reserve,
           projectContributions: project,
           safetyMargin: safety,
+          effectiveFromCycleStart: _horizonStart,
           businessDate: businessDate,
           overdraftExitGoal: goal,
         );
+    if (accepted && widget.initialRevision != null && mounted) {
+      Navigator.of(context).pop(true);
+    }
   }
+}
+
+String _editableEuro(Money? amount) {
+  if (amount == null) return '0';
+  final whole = amount.minorUnits ~/ 100;
+  final cents = amount.minorUnits % 100;
+  return cents == 0 ? '$whole' : '$whole.${cents.toString().padLeft(2, '0')}';
 }
 
 final class _MoneyField extends StatelessWidget {

@@ -1251,4 +1251,63 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get assumptionsDashboardHelp =>
       'Update a lasting change; the current week remains unchanged.';
+
+  @override
+  String get editTrajectoryTitle => 'Change the trajectory';
+
+  @override
+  String editTrajectoryIntro(String date) {
+    return 'Choose the amounts REBOOT should keep outside everyday spending from $date. The week already started remains unchanged.';
+  }
+
+  @override
+  String get saveTrajectoryChange => 'Schedule this trajectory';
+
+  @override
+  String get trajectoryManagementTitle => 'REBOOT trajectory';
+
+  @override
+  String get trajectoryManagementIntro =>
+      'Your trajectory protects money before calculating everyday weekly spending. You decide the goal; REBOOT never reallocates a surplus automatically.';
+
+  @override
+  String trajectoryChangeScheduled(String date) {
+    return 'A new trajectory is scheduled for $date';
+  }
+
+  @override
+  String trajectoryChangeEffective(String date) {
+    return 'A change would apply from $date';
+  }
+
+  @override
+  String get currentTrajectoryTitle => 'Current week’s trajectory';
+
+  @override
+  String get acceptedTrajectoryTitle => 'Accepted trajectory';
+
+  @override
+  String get futureTrajectoryTitle => 'Next trajectory';
+
+  @override
+  String get changeTrajectory => 'Change the trajectory';
+
+  @override
+  String get changeScheduledTrajectory => 'Change the scheduled trajectory';
+
+  @override
+  String overdraftTargetSummary(String date) {
+    return 'Target date: $date';
+  }
+
+  @override
+  String get noAnnualDeductions =>
+      'No cushion, project or additional safety margin is currently deducted.';
+
+  @override
+  String get trajectoryDashboardTitle => 'Trajectory and goals';
+
+  @override
+  String get trajectoryDashboardHelp =>
+      'Review the amounts protected before the weekly budget is calculated.';
 }

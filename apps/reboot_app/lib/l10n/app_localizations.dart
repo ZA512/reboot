@@ -2123,6 +2123,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Update a lasting change; the current week remains unchanged.'**
   String get assumptionsDashboardHelp;
+
+  /// Post-onboarding trajectory editor title.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the trajectory'**
+  String get editTrajectoryTitle;
+
+  /// Future trajectory editor explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the amounts REBOOT should keep outside everyday spending from {date}. The week already started remains unchanged.'**
+  String editTrajectoryIntro(String date);
+
+  /// Confirms a future trajectory revision.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule this trajectory'**
+  String get saveTrajectoryChange;
+
+  /// Trajectory review screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT trajectory'**
+  String get trajectoryManagementTitle;
+
+  /// Trajectory review explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trajectory protects money before calculating everyday weekly spending. You decide the goal; REBOOT never reallocates a surplus automatically.'**
+  String get trajectoryManagementIntro;
+
+  /// Pending trajectory status.
+  ///
+  /// In en, this message translates to:
+  /// **'A new trajectory is scheduled for {date}'**
+  String trajectoryChangeScheduled(String date);
+
+  /// Next possible trajectory change date.
+  ///
+  /// In en, this message translates to:
+  /// **'A change would apply from {date}'**
+  String trajectoryChangeEffective(String date);
+
+  /// Current trajectory card heading when a revision is pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Current week’s trajectory'**
+  String get currentTrajectoryTitle;
+
+  /// Current trajectory card heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted trajectory'**
+  String get acceptedTrajectoryTitle;
+
+  /// Pending trajectory card heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Next trajectory'**
+  String get futureTrajectoryTitle;
+
+  /// Starts a future trajectory revision.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the trajectory'**
+  String get changeTrajectory;
+
+  /// Replaces an already pending trajectory revision.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the scheduled trajectory'**
+  String get changeScheduledTrajectory;
+
+  /// Overdraft exit target summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Target date: {date}'**
+  String overdraftTargetSummary(String date);
+
+  /// Empty annual trajectory deductions state.
+  ///
+  /// In en, this message translates to:
+  /// **'No cushion, project or additional safety margin is currently deducted.'**
+  String get noAnnualDeductions;
+
+  /// Dashboard navigation title for trajectory management.
+  ///
+  /// In en, this message translates to:
+  /// **'Trajectory and goals'**
+  String get trajectoryDashboardTitle;
+
+  /// Dashboard navigation help for trajectory management.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the amounts protected before the weekly budget is calculated.'**
+  String get trajectoryDashboardHelp;
 }
 
 class _AppLocalizationsDelegate

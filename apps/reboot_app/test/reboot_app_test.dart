@@ -655,6 +655,85 @@ void main() {
     expect(find.text('Essence'), findsOneWidget);
   });
 
+  testWidgets('schedules a new trajectory without changing the current week', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    await tester.binding.setSurfaceSize(const Size(800, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final service = await _readyService(_MemoryJournal());
+    final currentCycle = LocalDate(2026, 4, 4);
+    final nextCycle = LocalDate(2026, 4, 11);
+    final currentBudget = service
+        .buildAnnualBudget(currentCycle)
+        .recommendedWeeklyBudget;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 4, 5),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('open-trajectory')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const ValueKey('open-trajectory')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Trajectoire REBOOT'), findsOneWidget);
+    expect(find.text('Trajectoire acceptée'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('edit-trajectory')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Modifier la trajectoire'), findsOneWidget);
+    await tester.tap(find.text('Construire un coussin'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).first, '5200');
+    await tester.scrollUntilVisible(
+      find.text('Planifier cette trajectoire'),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Planifier cette trajectoire'));
+    await tester.pumpAndSettle();
+
+    expect(service.configuration.annualCommitments, hasLength(2));
+    final current = service.configuration.commitmentsForCycleStarting(
+      currentCycle,
+    )!;
+    final future = service.configuration.commitmentsForCycleStarting(
+      nextCycle,
+    )!;
+    expect(current.strategy, TrajectoryStrategy.balance);
+    expect(future.strategy, TrajectoryStrategy.cushion);
+    expect(future.effectiveFromCycleStart, nextCycle);
+    expect(future.reserveContributions.minorUnits, 520000);
+    expect(
+      service.buildAnnualBudget(currentCycle).recommendedWeeklyBudget,
+      currentBudget,
+    );
+    expect(
+      service.buildAnnualBudget(nextCycle).recommendedWeeklyBudget.minorUnits,
+      currentBudget.minorUnits - 10000,
+    );
+    expect(find.text('Prochaine trajectoire'), findsOneWidget);
+    expect(
+      find.textContaining('Une nouvelle trajectoire est planifiée'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('uses a real reserve without reducing the weekly budget', (
     tester,
   ) async {
@@ -688,6 +767,8 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -100));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Créer votre première réserve'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('create-reserve')));

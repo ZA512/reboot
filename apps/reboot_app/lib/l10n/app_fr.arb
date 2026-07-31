@@ -336,5 +336,21 @@
   "deleteAssumptionBody": "Elle cessera d’affecter le budget à partir du {date}. Les semaines précédentes et l’historique d’audit local restent inchangés.",
   "frequencyCustomDates": "Dates précises",
   "assumptionsDashboardTitle": "Revenus et charges",
-  "assumptionsDashboardHelp": "Déclarez un changement durable ; la semaine en cours reste inchangée."
+  "assumptionsDashboardHelp": "Déclarez un changement durable ; la semaine en cours reste inchangée.",
+  "editTrajectoryTitle": "Modifier la trajectoire",
+  "editTrajectoryIntro": "Choisissez les montants que REBOOT doit protéger du quotidien à partir du {date}. La semaine déjà commencée reste inchangée.",
+  "saveTrajectoryChange": "Planifier cette trajectoire",
+  "trajectoryManagementTitle": "Trajectoire REBOOT",
+  "trajectoryManagementIntro": "Votre trajectoire protège de l’argent avant de calculer les dépenses du quotidien. Vous choisissez l’objectif ; REBOOT ne réaffecte jamais automatiquement un surplus.",
+  "trajectoryChangeScheduled": "Une nouvelle trajectoire est planifiée pour le {date}",
+  "trajectoryChangeEffective": "Une modification s’appliquerait à partir du {date}",
+  "currentTrajectoryTitle": "Trajectoire de la semaine actuelle",
+  "acceptedTrajectoryTitle": "Trajectoire acceptée",
+  "futureTrajectoryTitle": "Prochaine trajectoire",
+  "changeTrajectory": "Modifier la trajectoire",
+  "changeScheduledTrajectory": "Modifier la trajectoire planifiée",
+  "overdraftTargetSummary": "Date cible : {date}",
+  "noAnnualDeductions": "Aucun coussin, projet ou marge de sécurité supplémentaire n’est actuellement retiré.",
+  "trajectoryDashboardTitle": "Trajectoire et objectifs",
+  "trajectoryDashboardHelp": "Consultez les montants protégés avant le calcul du budget semaine."
 }

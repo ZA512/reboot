@@ -18,22 +18,22 @@ final class TrajectorySetupController extends AsyncNotifier<bool> {
   FutureOr<bool> build() => false;
 
   /// Persists the selected strategy from the household's first cycle.
-  Future<void> submit({
+  Future<bool> submit({
     required TrajectoryStrategy strategy,
     required Money reserveContributions,
     required Money projectContributions,
     required Money safetyMargin,
+    required LocalDate effectiveFromCycleStart,
     required LocalDate businessDate,
     OverdraftExitGoal? overdraftExitGoal,
   }) async {
     if (state.isLoading) {
-      return;
+      return false;
     }
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final service = await ref.read(localRebootServiceProvider.future);
-      final household = service.configuration.household;
-      if (household == null) {
+      if (service.configuration.household == null) {
         throw StateError('The household must exist before trajectory setup.');
       }
       await service.setTrajectoryPlan(
@@ -42,12 +42,13 @@ final class TrajectorySetupController extends AsyncNotifier<bool> {
           reserveContributions: reserveContributions,
           projectContributions: projectContributions,
           safetyMargin: safetyMargin,
-          effectiveFromCycleStart: household.firstCycleStart,
+          effectiveFromCycleStart: effectiveFromCycleStart,
           businessDate: businessDate,
           overdraftExitGoal: overdraftExitGoal,
         ),
       );
       return true;
     });
+    return !state.hasError;
   }
 }
