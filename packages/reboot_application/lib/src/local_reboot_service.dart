@@ -564,6 +564,64 @@ final class LocalRebootService {
     );
   }
 
+  /// Builds historical trends from completed cycles only, capped at 52.
+  ///
+  /// Every cycle is recomputed with the configuration revision that applied
+  /// at its own start. Exceptional anchor-change transitions are supplied to
+  /// the pure engine so it can exclude and report them explicitly.
+  TrendProjection buildTrends(LocalDate asOfDate) {
+    _requireOpen();
+    final household = _configuration.household;
+    if (household == null) {
+      throw const IncompleteConfigurationException(
+        'The household must be initialized before projecting trends.',
+      );
+    }
+    if (!asOfDate.isAfter(household.firstCycleStart)) {
+      return TrendProjection.build(const []);
+    }
+
+    final currentCycle = household.cycleContaining(asOfDate);
+    final reverseCompleted = <WeeklyCycle>[];
+    var normalCycleCount = 0;
+    var cursor = currentCycle.start.addDays(-1);
+    while (!cursor.isBefore(household.firstCycleStart) &&
+        normalCycleCount < 52) {
+      final cycle = household.cycleContaining(cursor);
+      reverseCompleted.add(cycle);
+      if (cycle.includedInNormalTrends) normalCycleCount++;
+      if (cycle.start == household.firstCycleStart) break;
+      cursor = cycle.start.addDays(-1);
+    }
+
+    final completed = reverseCompleted.reversed;
+    return TrendProjection.build([
+      for (final cycle in completed)
+        TrendCycleObservation(
+          cycle: cycle,
+          budget: _configuration
+              .buildAnnualBudget(
+                household.cyclesFromDate(cycle.start, count: 52),
+              )
+              .recommendedWeeklyBudget,
+          allocatedExpenses: _allocatedExpensesFor(cycle.start),
+        ),
+    ]);
+  }
+
+  Money _allocatedExpensesFor(LocalDate cycleStart) {
+    var total = Money.zero(Currency.eur);
+    for (final expense in _expenses.activeExpenses) {
+      for (final allocation
+          in expense.allocations ?? const <ExpenseAllocation>[]) {
+        if (allocation.cycleStart == cycleStart) {
+          total = total + allocation.amount;
+        }
+      }
+    }
+    return total;
+  }
+
   /// Records a real expense and its complete 1-to-12-cycle allocation atomically.
   Future<ExpenseRecordingResult> recordExpense(RecordExpenseCommand command) {
     return _runExclusive(() async {

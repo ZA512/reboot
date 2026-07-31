@@ -424,6 +424,56 @@ void main() {
     expect(journal.entries, hasLength(7));
   });
 
+  testWidgets('separates a strong latest-week alert from a healthy trend', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final journal = _MemoryJournal();
+    final service = await _readyService(journal);
+    await service.recordExpense(
+      RecordExpenseCommand(
+        amount: Money.fromMinorUnits(50000, Currency.eur),
+        label: 'Semaine exceptionnelle',
+        purchaseDate: LocalDate(2026, 5, 3),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 5, 9),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Une correction mérite d’être envisagée'), findsOneWidget);
+    await tester.tap(find.text('Une correction mérite d’être envisagée'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tendances hebdomadaires'), findsOneWidget);
+    expect(
+      find.textContaining('Dernière semaine : dépassement'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Trajectoire globale : +'), findsOneWidget);
+    expect(
+      find.textContaining('Le budget de la semaine suivante reste inchangé'),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('observed-trend-balance')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('does not expose a device time-zone failure', (tester) async {
     _useLocale(tester, const Locale('en'));
     final service = await LocalRebootService.restore(journal: _MemoryJournal());

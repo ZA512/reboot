@@ -680,4 +680,124 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get deleteExpenseError =>
       'La dépense n’a pas pu être supprimée. Réessayez.';
+
+  @override
+  String get trendsTitle => 'Tendances hebdomadaires';
+
+  @override
+  String get trendNoCompletedCycle =>
+      'Vos tendances apparaîtront après la fin de votre première semaine REBOOT.';
+
+  @override
+  String get trendAvailableAfterCycle =>
+      'Tendances disponibles après la première semaine terminée';
+
+  @override
+  String get trendObservedBalance => 'Balance observée';
+
+  @override
+  String trendCycleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sur $count semaines terminées',
+      one: 'Sur 1 semaine terminée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get trendStatusNone => 'La méthode est bien suivie';
+
+  @override
+  String get trendStatusVigilance => 'Gardez un œil sur la tendance';
+
+  @override
+  String get trendStatusStrong => 'Une correction mérite d’être envisagée';
+
+  @override
+  String trendSummary(String balance, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semaines terminées',
+      one: '1 semaine terminée',
+    );
+    return '$balance sur $_temp0';
+  }
+
+  @override
+  String get trendLatestOnTrack => 'Dernière semaine : budget respecté.';
+
+  @override
+  String trendLatestOverspend(String amount, String percent) {
+    return 'Dernière semaine : dépassement de $amount ($percent du budget de cette semaine).';
+  }
+
+  @override
+  String trendGlobalPositive(String amount) {
+    return 'Trajectoire globale : $amount sur les semaines observées.';
+  }
+
+  @override
+  String trendGlobalNegative(String amount, String percent) {
+    return 'Trajectoire globale : $amount ($percent des budgets observés).';
+  }
+
+  @override
+  String get trendBudgetUnchanged =>
+      'Le budget de la semaine suivante reste inchangé. Vous choisissez si et quand vous compensez.';
+
+  @override
+  String get trendWindowTitle => 'Choisissez la perspective';
+
+  @override
+  String trendWindowLabel(int count) {
+    return '$count semaines';
+  }
+
+  @override
+  String trendWindowBalance(int count) {
+    return 'Balance sur les $count dernières semaines';
+  }
+
+  @override
+  String trendObservedCount(int observed, int requested) {
+    return '$observed semaines terminées disponibles sur les $requested demandées';
+  }
+
+  @override
+  String get trendHistoricalBudget => 'Budgets applicables';
+
+  @override
+  String get trendAllocated => 'Dépenses affectées';
+
+  @override
+  String get trendCycleHistory => 'Historique semaine par semaine';
+
+  @override
+  String trendCyclePeriod(String start, String end) {
+    return 'Du $start au $end';
+  }
+
+  @override
+  String trendExcludedTransitions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count semaines de transition exceptionnelles restent visibles dans l’historique mais sont exclues des tendances normales.',
+      one:
+          '1 semaine de transition exceptionnelle reste visible dans l’historique mais est exclue des tendances normales.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get trendTransitionHistory => 'Transitions exceptionnelles';
+
+  @override
+  String trendSurplusSuggestion(String amount) {
+    return 'Vous avez un surplus observé de $amount. Vous pouvez le virer vers une réserve ou un projet ; le choix reste le vôtre.';
+  }
 }

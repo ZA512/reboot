@@ -11,6 +11,7 @@ import '../expenses/quick_expense_controller.dart';
 import '../expenses/quick_expense_screen.dart';
 import '../infrastructure/device_context_providers.dart';
 import '../l10n/app_localizations.dart';
+import '../trends/trends_screen.dart';
 
 /// Live answer to the daily question: how much can the household still spend?
 final class WeeklyDashboardScreen extends ConsumerWidget {
@@ -89,6 +90,7 @@ final class _DashboardBody extends ConsumerWidget {
     final household = service.configuration.household!;
     final pending = today.isBefore(household.firstCycleStart);
     final projection = service.buildRollingBudget(today);
+    final trends = service.buildTrends(today);
     final current = projection.cycles.first;
     final expenses =
         service.expenses.activeExpenses
@@ -210,6 +212,15 @@ final class _DashboardBody extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          _TrendSummaryCard(
+            trends: trends,
+            onOpen: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => TrendsScreen(service: service, today: today),
+              ),
+            ),
+          ),
           const SizedBox(height: 24),
           Text(
             l10n.thisWeekExpenses,
@@ -277,6 +288,60 @@ final class _DashboardBody extends ConsumerWidget {
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.deleteExpenseError)));
     }
+  }
+}
+
+final class _TrendSummaryCard extends StatelessWidget {
+  const _TrendSummaryCard({required this.trends, required this.onOpen});
+
+  final TrendProjection trends;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
+    if (trends.observedCycles.isEmpty) {
+      return Card(
+        child: ListTile(
+          leading: const Icon(Icons.insights_outlined),
+          title: Text(l10n.trendAvailableAfterCycle),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: onOpen,
+        ),
+      );
+    }
+    final (icon, color, status) = switch (trends.severity) {
+      TrendAlertSeverity.none => (
+        Icons.check_circle_outline,
+        colors.primary,
+        l10n.trendStatusNone,
+      ),
+      TrendAlertSeverity.vigilance => (
+        Icons.warning_amber_rounded,
+        colors.tertiary,
+        l10n.trendStatusVigilance,
+      ),
+      TrendAlertSeverity.strong => (
+        Icons.error_outline,
+        colors.error,
+        l10n.trendStatusStrong,
+      ),
+    };
+    return Card(
+      child: ListTile(
+        leading: Icon(icon, color: color),
+        title: Text(status),
+        subtitle: Text(
+          l10n.trendSummary(
+            _formatSignedMoney(context, trends.balance),
+            trends.observedCycles.length,
+          ),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onOpen,
+      ),
+    );
   }
 }
 
@@ -389,6 +454,11 @@ String _formatMoney(BuildContext context, Money money) =>
       name: money.currency.code,
       decimalDigits: 2,
     ).format(money.minorUnits / money.currency.minorUnitsPerMajorUnit);
+
+String _formatSignedMoney(BuildContext context, Money money) {
+  final formatted = _formatMoney(context, money.isNegative ? -money : money);
+  return money.isNegative ? '−$formatted' : '+$formatted';
+}
 
 String _formatDate(BuildContext context, LocalDate date) =>
     MaterialLocalizations.of(

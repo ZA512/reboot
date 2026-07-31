@@ -6,3 +6,4 @@ export 'src/configuration_ledger.dart';
 export 'src/expense_ledger.dart';
 export 'src/projection_errors.dart';
 export 'src/rolling_projection.dart';
+export 'src/trend_projection.dart';

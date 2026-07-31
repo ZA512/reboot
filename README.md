@@ -53,7 +53,8 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Choix de trajectoire et premier budget hebdomadaire
 - [x] Tableau de bord du restant hebdomadaire en direct
 - [x] Saisie rapide, étalement exact sur 1 à 12 semaines et suppression d’erreur
-- [ ] Tendances glissantes, réserves et grosses dépenses
+- [x] Tendances glissantes sur 4, 8, 16, 32 et 52 semaines et alertes graduées
+- [ ] Réserves et grosses dépenses
 
 ## Licence
 

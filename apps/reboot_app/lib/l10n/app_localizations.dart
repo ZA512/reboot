@@ -1223,6 +1223,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The expense could not be deleted. Try again.'**
   String get deleteExpenseError;
+
+  /// Completed REBOOT cycle trend screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly trends'**
+  String get trendsTitle;
+
+  /// Trend empty state before one cycle is complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trends will appear after your first REBOOT week is complete.'**
+  String get trendNoCompletedCycle;
+
+  /// Dashboard trend empty-state link.
+  ///
+  /// In en, this message translates to:
+  /// **'Trends available after the first completed week'**
+  String get trendAvailableAfterCycle;
+
+  /// Main completed-cycle balance label.
+  ///
+  /// In en, this message translates to:
+  /// **'Observed balance'**
+  String get trendObservedBalance;
+
+  /// Count of completed normal cycles in the main balance.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Over 1 completed week} other{Over {count} completed weeks}}'**
+  String trendCycleCount(int count);
+
+  /// No-alert trend status.
+  ///
+  /// In en, this message translates to:
+  /// **'The method is on track'**
+  String get trendStatusNone;
+
+  /// Five-to-fifteen-percent trend status.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep an eye on the trend'**
+  String get trendStatusVigilance;
+
+  /// At-least-fifteen-percent trend status.
+  ///
+  /// In en, this message translates to:
+  /// **'A correction deserves consideration'**
+  String get trendStatusStrong;
+
+  /// Compact dashboard trend summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{balance} over {count, plural, =1{1 completed week} other{{count} completed weeks}}'**
+  String trendSummary(String balance, int count);
+
+  /// Latest completed cycle has no overspend.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest week: within budget.'**
+  String get trendLatestOnTrack;
+
+  /// Latest-cycle overspend signal.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest week: {amount} over budget ({percent} of that week\'s budget).'**
+  String trendLatestOverspend(String amount, String percent);
+
+  /// Positive or neutral global trend detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall trajectory: {amount} across the observed weeks.'**
+  String trendGlobalPositive(String amount);
+
+  /// Negative global trend detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall trajectory: {amount} ({percent} of observed budgets).'**
+  String trendGlobalNegative(String amount, String percent);
+
+  /// No automatic trend compensation reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'The next weekly budget remains unchanged. You decide whether and when to compensate.'**
+  String get trendBudgetUnchanged;
+
+  /// Trend window selector title.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the perspective'**
+  String get trendWindowTitle;
+
+  /// Trend window choice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} weeks'**
+  String trendWindowLabel(int count);
+
+  /// Selected trend window balance label.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance over the last {count} weeks'**
+  String trendWindowBalance(int count);
+
+  /// Available history inside the selected window.
+  ///
+  /// In en, this message translates to:
+  /// **'{observed} of the requested {requested} completed weeks are available'**
+  String trendObservedCount(int observed, int requested);
+
+  /// Historical budget total label.
+  ///
+  /// In en, this message translates to:
+  /// **'Applicable budgets'**
+  String get trendHistoricalBudget;
+
+  /// Historical allocation total label.
+  ///
+  /// In en, this message translates to:
+  /// **'Allocated expenses'**
+  String get trendAllocated;
+
+  /// Historical trend list title.
+  ///
+  /// In en, this message translates to:
+  /// **'Week-by-week history'**
+  String get trendCycleHistory;
+
+  /// One historical cycle date range.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} to {end}'**
+  String trendCyclePeriod(String start, String end);
+
+  /// Anchor-change cycles excluded from trends.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 exceptional transition week is visible in history but excluded from normal trends.} other{{count} exceptional transition weeks are visible in history but excluded from normal trends.}}'**
+  String trendExcludedTransitions(int count);
+
+  /// Historical list of excluded anchor-change cycles.
+  ///
+  /// In en, this message translates to:
+  /// **'Exceptional transitions'**
+  String get trendTransitionHistory;
+
+  /// Suggestion after eight positive completed cycles.
+  ///
+  /// In en, this message translates to:
+  /// **'You have a {amount} observed surplus. You could move it to a reserve or a project; the choice remains yours.'**
+  String trendSurplusSuggestion(String amount);
 }
 
 class _AppLocalizationsDelegate

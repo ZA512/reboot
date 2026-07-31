@@ -293,6 +293,80 @@ void main() {
       },
     );
 
+    test('builds completed-cycle trends with historical budgets', () async {
+      final harness = await _Harness.initialized();
+      final flows = await harness.service.createCashFlows(
+        CreateCashFlowsCommand(
+          definitions: [
+            _monthlyFlow(
+              title: 'Salaire 1',
+              direction: CashFlowDirection.income,
+              minorUnits: 300000,
+            ),
+            _monthlyFlow(
+              title: 'Logement',
+              direction: CashFlowDirection.outflow,
+              minorUnits: 120000,
+            ),
+          ],
+          effectiveFromCycleStart: LocalDate(2026, 4, 4),
+          businessDate: LocalDate(2026, 4, 1),
+        ),
+      );
+      await harness.service.setTrajectoryPlan(
+        SetTrajectoryPlanCommand(
+          strategy: TrajectoryStrategy.balance,
+          reserveContributions: _eur(0),
+          projectContributions: _eur(0),
+          safetyMargin: _eur(0),
+          effectiveFromCycleStart: LocalDate(2026, 4, 4),
+          businessDate: LocalDate(2026, 4, 1),
+        ),
+      );
+      await harness.service.replaceCashFlow(
+        ReplaceCashFlowCommand(
+          cashFlowId: flows.first,
+          definition: _monthlyFlow(
+            title: 'Salaire 1',
+            direction: CashFlowDirection.income,
+            minorUnits: 400000,
+          ),
+          effectiveFromCycleStart: LocalDate(2026, 4, 25),
+          businessDate: LocalDate(2026, 4, 20),
+        ),
+      );
+      await harness.service.recordExpense(
+        RecordExpenseCommand(
+          amount: _eur(80000),
+          label: 'Semaine chargée',
+          purchaseDate: LocalDate(2026, 5, 3),
+        ),
+      );
+
+      final trends = harness.service.buildTrends(LocalDate(2026, 5, 9));
+
+      expect(trends.observedCycles, hasLength(5));
+      expect(trends.observedCycles.first.cycle.start, LocalDate(2026, 4, 4));
+      expect(trends.observedCycles.last.cycle.start, LocalDate(2026, 5, 2));
+      expect(trends.observedCycles.first.budget.minorUnits, 41500);
+      expect(trends.observedCycles.last.budget.minorUnits, 64600);
+      expect(trends.latestOverspend.minorUnits, 15400);
+      expect(trends.latestOverspendRatio?.severity, TrendAlertSeverity.strong);
+      expect(trends.cumulativeNegativeRatio, isNull);
+      expect(trends.severity, TrendAlertSeverity.strong);
+      expect(trends.window(4).observedCycles, hasLength(4));
+    });
+
+    test('returns no trend before one complete cycle exists', () async {
+      final harness = await _Harness.initialized();
+
+      final trends = harness.service.buildTrends(LocalDate(2026, 4, 4));
+
+      expect(trends.observedCycles, isEmpty);
+      expect(trends.balance, Money.zero(Currency.eur));
+      expect(trends.severity, TrendAlertSeverity.none);
+    });
+
     test('persists and projects an overdraft-exit trajectory', () async {
       final harness = await _Harness.initialized();
       await harness.service.createCashFlow(
