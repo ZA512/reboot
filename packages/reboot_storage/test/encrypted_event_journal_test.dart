@@ -101,7 +101,7 @@ void main() {
           firstCycleChoice: FirstCycleStartChoice.nextAnchor,
         ),
       );
-      await service.recordExpense(
+      final expenseResult = await service.recordExpense(
         RecordExpenseCommand(
           amount: Money.fromMinorUnits(2800, Currency.eur),
           label: 'Courses',
@@ -125,6 +125,37 @@ void main() {
           purchaseDate: LocalDate(2026, 4, 6),
         ),
       );
+      await service.recordExpenseRefund(
+        RecordExpenseRefundCommand(
+          expenseId: expenseResult.expenseId,
+          amount: Money.fromMinorUnits(800, Currency.eur),
+          receivedDate: LocalDate(2026, 4, 6),
+        ),
+      );
+      await service.configureHealthTracking(
+        ConfigureHealthTrackingCommand(
+          enabled: true,
+          delayWeeks: 4,
+          alertThreshold: Money.fromMinorUnits(5000, Currency.eur),
+          businessDate: LocalDate(2026, 4, 5),
+        ),
+      );
+      await service.recordHealthEntry(
+        RecordHealthEntryCommand(
+          kind: HealthEntryKind.expense,
+          amount: Money.fromMinorUnits(10000, Currency.eur),
+          label: 'Consultations',
+          businessDate: LocalDate(2026, 4, 5),
+        ),
+      );
+      await service.recordHealthEntry(
+        RecordHealthEntryCommand(
+          kind: HealthEntryKind.reimbursement,
+          amount: Money.fromMinorUnits(3000, Currency.eur),
+          label: 'Remboursements avril',
+          businessDate: LocalDate(2026, 4, 20),
+        ),
+      );
       await service.close();
 
       final reopenedJournal = await RebootEventJournal.open(
@@ -143,9 +174,14 @@ void main() {
         933,
         934,
       ]);
+      expect(expense.refundedAmount.minorUnits, 800);
       final restoredReserve = restored.reserves.reserves.values.single;
       expect(restoredReserve.kind, ReserveKind.real);
       expect(restoredReserve.balance.minorUnits, 38000);
+      expect(
+        restored.health.tracking!.estimatedRest(LocalDate(2026, 5, 3)),
+        Money.fromMinorUnits(7000, Currency.eur),
+      );
       await restored.close();
     });
 

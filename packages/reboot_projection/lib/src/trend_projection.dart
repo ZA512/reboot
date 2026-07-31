@@ -58,11 +58,15 @@ final class TrendCycleObservation {
     required this.cycle,
     required this.budget,
     required this.allocatedExpenses,
-  }) {
-    if (budget.isNegative || allocatedExpenses.isNegative) {
+    Money? trajectoryCredits,
+  }) : trajectoryCredits = trajectoryCredits ?? Money.zero(Currency.eur) {
+    if (budget.isNegative ||
+        allocatedExpenses.isNegative ||
+        this.trajectoryCredits.isNegative) {
       throw ArgumentError('Trend budgets and expenses must be non-negative.');
     }
-    if (budget.currency != allocatedExpenses.currency) {
+    if (budget.currency != allocatedExpenses.currency ||
+        budget.currency != this.trajectoryCredits.currency) {
       throw CurrencyMismatchException(
         budget.currency,
         allocatedExpenses.currency,
@@ -79,8 +83,14 @@ final class TrendCycleObservation {
   /// Active virtual allocations assigned to this cycle.
   final Money allocatedExpenses;
 
+  /// Refunds improving the trajectory without carrying into another week.
+  final Money trajectoryCredits;
+
+  /// Weekly discipline signal before trajectory-only credits.
+  Money get weeklyBalance => budget - allocatedExpenses;
+
   /// Signed historical difference, with no carryover.
-  Money get balance => budget - allocatedExpenses;
+  Money get balance => weeklyBalance + trajectoryCredits;
 }
 
 /// Aggregation over one user-selected normal-cycle window.
@@ -90,6 +100,7 @@ final class TrendWindowProjection {
     required this.observedCycles,
     required this.totalBudget,
     required this.totalAllocatedExpenses,
+    required this.totalTrajectoryCredits,
     required this.balance,
   });
 
@@ -105,6 +116,9 @@ final class TrendWindowProjection {
   /// Sum of allocations assigned to the selected cycles.
   final Money totalAllocatedExpenses;
 
+  /// Refund credits received in the selected window.
+  final Money totalTrajectoryCredits;
+
   /// Signed budget minus allocations.
   final Money balance;
 }
@@ -116,6 +130,7 @@ final class TrendProjection {
     required this.excludedTransitionCycles,
     required this.totalBudget,
     required this.totalAllocatedExpenses,
+    required this.totalTrajectoryCredits,
     required this.balance,
     required this.latestOverspend,
     required this.latestOverspendRatio,
@@ -146,9 +161,9 @@ final class TrendProjection {
     );
     final totals = _totals(observed);
     final latest = observed.lastOrNull;
-    final latestOverspend = latest == null || !latest.balance.isNegative
+    final latestOverspend = latest == null || !latest.weeklyBalance.isNegative
         ? Money.zero(Currency.eur)
-        : -latest.balance;
+        : -latest.weeklyBalance;
     final latestRatio =
         latest != null && latestOverspend.isPositive && latest.budget.isPositive
         ? TrendRatio(numerator: latestOverspend, denominator: latest.budget)
@@ -162,6 +177,7 @@ final class TrendProjection {
       excludedTransitionCycles: transitions,
       totalBudget: totals.budget,
       totalAllocatedExpenses: totals.allocated,
+      totalTrajectoryCredits: totals.credits,
       balance: totals.balance,
       latestOverspend: latestOverspend,
       latestOverspendRatio: latestRatio,
@@ -183,6 +199,9 @@ final class TrendProjection {
 
   /// Sum of all active allocations in the observed cycles.
   final Money totalAllocatedExpenses;
+
+  /// Refund credits improving the observed trajectory.
+  final Money totalTrajectoryCredits;
 
   /// Main observed balance over every available cycle, up to 52.
   final Money balance;
@@ -223,21 +242,29 @@ final class TrendProjection {
       observedCycles: selected,
       totalBudget: totals.budget,
       totalAllocatedExpenses: totals.allocated,
+      totalTrajectoryCredits: totals.credits,
       balance: totals.balance,
     );
   }
 }
 
-({Money budget, Money allocated, Money balance}) _totals(
+({Money budget, Money allocated, Money credits, Money balance}) _totals(
   Iterable<TrendCycleObservation> observations,
 ) {
   var budget = Money.zero(Currency.eur);
   var allocated = Money.zero(Currency.eur);
+  var credits = Money.zero(Currency.eur);
   for (final item in observations) {
     budget = budget + item.budget;
     allocated = allocated + item.allocatedExpenses;
+    credits = credits + item.trajectoryCredits;
   }
-  return (budget: budget, allocated: allocated, balance: budget - allocated);
+  return (
+    budget: budget,
+    allocated: allocated,
+    credits: credits,
+    balance: budget - allocated + credits,
+  );
 }
 
 TrendAlertSeverity _strongest(

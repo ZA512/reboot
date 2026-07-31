@@ -75,6 +75,9 @@ enum EntityKind {
 
   /// One named real or virtual household reserve.
   reserve,
+
+  /// Optional aggregate household health tracking.
+  healthTracking,
 }
 
 /// Typed target of an immutable event.

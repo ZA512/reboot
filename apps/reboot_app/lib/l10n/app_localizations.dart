@@ -1589,6 +1589,342 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I understand, record it'**
   String get confirmReserveExpense;
+
+  /// Refund management title.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds'**
+  String get refundsTitle;
+
+  /// Refund method explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach each refund to its original purchase. The installment plan is never rewritten, and a later refund improves the trajectory without increasing the current weekly budget.'**
+  String get refundsIntro;
+
+  /// Empty refund list.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no active purchase to refund yet.'**
+  String get noRefundableExpense;
+
+  /// Refund mutation error.
+  ///
+  /// In en, this message translates to:
+  /// **'The refund could not be saved. No partial change was recorded.'**
+  String get refundMutationError;
+
+  /// Same-cycle refund result.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} was restored to the original purchase week.'**
+  String refundRestoredOriginalCycle(String amount);
+
+  /// Later refund result.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trajectory improves by {amount}. This week\'s budget stays unchanged.'**
+  String refundImprovesTrajectory(String amount);
+
+  /// Refund reversal confirmation title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse this incorrect refund?'**
+  String get reverseRefundTitle;
+
+  /// Refund reversal confirmation body.
+  ///
+  /// In en, this message translates to:
+  /// **'Its effect will be neutralized, while both entries remain in the local audit history.'**
+  String get reverseRefundBody;
+
+  /// Refund reversal action.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse refund'**
+  String get reverseRefund;
+
+  /// Original purchase summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} paid on {date}'**
+  String refundExpenseSummary(String amount, String date);
+
+  /// Fully refunded purchase state.
+  ///
+  /// In en, this message translates to:
+  /// **'Fully refunded'**
+  String get fullyRefunded;
+
+  /// Record refund action.
+  ///
+  /// In en, this message translates to:
+  /// **'Record refund'**
+  String get recordRefund;
+
+  /// Remaining refundable amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Still refundable: {amount}'**
+  String refundableRemaining(String amount);
+
+  /// Refund history line.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} received on {date}'**
+  String refundHistoryLine(String amount, String date);
+
+  /// Reversed refund state.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect entry reversed'**
+  String get reversedRefund;
+
+  /// Refund dialog title.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund for {label}'**
+  String recordRefundFor(String label);
+
+  /// Refund amount field.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount received'**
+  String get refundAmount;
+
+  /// Refund amount validation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount above zero and no greater than {maximum}.'**
+  String invalidRefundAmount(String maximum);
+
+  /// Refund receipt date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date received'**
+  String get refundDate;
+
+  /// Same-cycle restored refund amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds restored this week: {amount}'**
+  String refundsRestoredThisCycle(String amount);
+
+  /// Same-cycle refund explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Only refunds from purchases assigned to this same week restore its remaining amount.'**
+  String get refundsRestoredThisCycleHelp;
+
+  /// Refund dashboard navigation help.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a product refund against its original purchase.'**
+  String get refundsDashboardHelp;
+
+  /// Expense refunded amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunded: {amount}'**
+  String expenseRefunded(String amount);
+
+  /// Refund trajectory credit metric.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund credits'**
+  String get trendRefundCredits;
+
+  /// Health tracking screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Health tracking'**
+  String get healthTitle;
+
+  /// Health tracking settings title.
+  ///
+  /// In en, this message translates to:
+  /// **'Health settings'**
+  String get healthSettings;
+
+  /// Health mutation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Health tracking could not be updated. No partial change was recorded.'**
+  String get healthMutationError;
+
+  /// Disabled configured health state.
+  ///
+  /// In en, this message translates to:
+  /// **'Health tracking is paused'**
+  String get healthTrackingDisabled;
+
+  /// Optional health feature title.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional health tracking'**
+  String get healthTrackingOptional;
+
+  /// Health tracking explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter both health expenses and reimbursements, individually or as occasional totals. No per-claim matching is required.'**
+  String get healthIntro;
+
+  /// Health disabled method warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Without this tracking, health costs may drift unnoticed. You can instead reduce your weekly budget by a cautious amount.'**
+  String get healthDisabledWarning;
+
+  /// Enable health tracking action.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable health tracking'**
+  String get enableHealthTracking;
+
+  /// Health estimate label.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated health amount still to cover'**
+  String get healthEstimatedRest;
+
+  /// Health estimate configuration summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses older than {weeks} weeks · alert above {threshold}'**
+  String healthEstimateSettings(int weeks, String threshold);
+
+  /// Health estimate alert title.
+  ///
+  /// In en, this message translates to:
+  /// **'This estimate deserves attention'**
+  String get healthAttentionTitle;
+
+  /// Health estimate method choices.
+  ///
+  /// In en, this message translates to:
+  /// **'You may cover it from a reserve, the current week, or a spread of up to 12 weeks—or wait. REBOOT never changes your budget automatically.'**
+  String get healthAttentionBody;
+
+  /// Add health expense action.
+  ///
+  /// In en, this message translates to:
+  /// **'Health expense'**
+  String get addHealthExpense;
+
+  /// Add health reimbursement action.
+  ///
+  /// In en, this message translates to:
+  /// **'Reimbursement received'**
+  String get addHealthReimbursement;
+
+  /// Add health regularization action.
+  ///
+  /// In en, this message translates to:
+  /// **'Already covered amount'**
+  String get addHealthRegularization;
+
+  /// Health regularization safety explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Record an already covered amount only after you actually compensated it from a reserve or reduced spending. A negative estimate never increases the weekly budget.'**
+  String get healthRegularizationHelp;
+
+  /// Health entry history heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Health history'**
+  String get healthHistory;
+
+  /// Empty health history.
+  ///
+  /// In en, this message translates to:
+  /// **'No health entry has been recorded since tracking began.'**
+  String get noHealthEntry;
+
+  /// Reversed health entry state.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect entry reversed'**
+  String get reversedHealthEntry;
+
+  /// Health reversal confirmation title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse this incorrect entry?'**
+  String get reverseHealthEntryTitle;
+
+  /// Health reversal confirmation body.
+  ///
+  /// In en, this message translates to:
+  /// **'Its effect will be neutralized, while both entries remain in the local audit history.'**
+  String get reverseHealthEntryBody;
+
+  /// Health reversal action.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse entry'**
+  String get reverseHealthEntry;
+
+  /// Health delay setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reimbursement delay in weeks'**
+  String get healthDelayWeeks;
+
+  /// Health delay validation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose between 1 and 52 weeks.'**
+  String get invalidHealthDelay;
+
+  /// Health alert threshold setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert threshold'**
+  String get healthAlertThreshold;
+
+  /// Save health settings action.
+  ///
+  /// In en, this message translates to:
+  /// **'Save settings'**
+  String get saveHealthSettings;
+
+  /// Health entry amount field.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get healthEntryAmount;
+
+  /// Health entry label field.
+  ///
+  /// In en, this message translates to:
+  /// **'Description or total period'**
+  String get healthEntryLabel;
+
+  /// Health entry business date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get healthEntryDate;
+
+  /// Save health entry action.
+  ///
+  /// In en, this message translates to:
+  /// **'Record entry'**
+  String get saveHealthEntry;
+
+  /// Dashboard health estimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Health estimate: {amount}'**
+  String healthDashboardEstimate(String amount);
+
+  /// Dashboard healthy tracking state.
+  ///
+  /// In en, this message translates to:
+  /// **'No alert under the current delay and threshold.'**
+  String get healthDashboardOnTrack;
 }
 
 class _AppLocalizationsDelegate

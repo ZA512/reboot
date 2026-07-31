@@ -931,4 +931,207 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get confirmReserveExpense => 'J’ai compris, enregistrer';
+
+  @override
+  String get refundsTitle => 'Remboursements';
+
+  @override
+  String get refundsIntro =>
+      'Rattachez chaque remboursement à son achat d’origine. L’étalement n’est jamais réécrit et un remboursement tardif améliore la trajectoire sans augmenter le budget de la semaine en cours.';
+
+  @override
+  String get noRefundableExpense =>
+      'Aucun achat actif ne peut encore être remboursé.';
+
+  @override
+  String get refundMutationError =>
+      'Le remboursement n’a pas pu être enregistré. Aucun changement partiel n’a été sauvegardé.';
+
+  @override
+  String refundRestoredOriginalCycle(String amount) {
+    return '$amount a été restauré sur la semaine de l’achat.';
+  }
+
+  @override
+  String refundImprovesTrajectory(String amount) {
+    return 'Votre trajectoire s’améliore de $amount. Le budget de cette semaine reste inchangé.';
+  }
+
+  @override
+  String get reverseRefundTitle => 'Annuler ce remboursement erroné ?';
+
+  @override
+  String get reverseRefundBody =>
+      'Son effet sera neutralisé, mais les deux saisies resteront dans l’historique d’audit local.';
+
+  @override
+  String get reverseRefund => 'Annuler le remboursement';
+
+  @override
+  String refundExpenseSummary(String amount, String date) {
+    return '$amount payé le $date';
+  }
+
+  @override
+  String get fullyRefunded => 'Remboursé en totalité';
+
+  @override
+  String get recordRefund => 'Saisir un remboursement';
+
+  @override
+  String refundableRemaining(String amount) {
+    return 'Encore remboursable : $amount';
+  }
+
+  @override
+  String refundHistoryLine(String amount, String date) {
+    return '$amount reçu le $date';
+  }
+
+  @override
+  String get reversedRefund => 'Saisie erronée annulée';
+
+  @override
+  String recordRefundFor(String label) {
+    return 'Remboursement de $label';
+  }
+
+  @override
+  String get refundAmount => 'Montant reçu';
+
+  @override
+  String invalidRefundAmount(String maximum) {
+    return 'Saisissez un montant supérieur à zéro et inférieur ou égal à $maximum.';
+  }
+
+  @override
+  String get refundDate => 'Date de réception';
+
+  @override
+  String refundsRestoredThisCycle(String amount) {
+    return 'Remboursements restaurés cette semaine : $amount';
+  }
+
+  @override
+  String get refundsRestoredThisCycleHelp =>
+      'Seuls les remboursements d’achats affectés à cette même semaine restaurent son restant.';
+
+  @override
+  String get refundsDashboardHelp =>
+      'Rattachez le remboursement d’un produit à son achat d’origine.';
+
+  @override
+  String expenseRefunded(String amount) {
+    return 'Remboursé : $amount';
+  }
+
+  @override
+  String get trendRefundCredits => 'Remboursements';
+
+  @override
+  String get healthTitle => 'Suivi Santé';
+
+  @override
+  String get healthSettings => 'Réglages Santé';
+
+  @override
+  String get healthMutationError =>
+      'Le suivi Santé n’a pas pu être mis à jour. Aucun changement partiel n’a été enregistré.';
+
+  @override
+  String get healthTrackingDisabled => 'Le suivi Santé est en pause';
+
+  @override
+  String get healthTrackingOptional => 'Suivi Santé facultatif';
+
+  @override
+  String get healthIntro =>
+      'Saisissez les dépenses de santé et les remboursements, un par un ou sous forme de totaux occasionnels. Aucun rapprochement dossier par dossier n’est imposé.';
+
+  @override
+  String get healthDisabledWarning =>
+      'Sans ce suivi, les frais de santé peuvent dériver sans alerte. Vous pouvez à la place réduire prudemment votre budget semaine.';
+
+  @override
+  String get enableHealthTracking => 'Activer le suivi Santé';
+
+  @override
+  String get healthEstimatedRest => 'Reste Santé estimé à couvrir';
+
+  @override
+  String healthEstimateSettings(int weeks, String threshold) {
+    return 'Dépenses de plus de $weeks semaines · alerte au-dessus de $threshold';
+  }
+
+  @override
+  String get healthAttentionTitle => 'Cette estimation mérite votre attention';
+
+  @override
+  String get healthAttentionBody =>
+      'Vous pouvez la couvrir avec une réserve, la semaine en cours ou un étalement jusqu’à 12 semaines — ou attendre. REBOOT ne modifie jamais votre budget automatiquement.';
+
+  @override
+  String get addHealthExpense => 'Dépense de santé';
+
+  @override
+  String get addHealthReimbursement => 'Remboursement reçu';
+
+  @override
+  String get addHealthRegularization => 'Montant déjà compensé';
+
+  @override
+  String get healthRegularizationHelp =>
+      'N’indiquez un montant déjà compensé qu’après l’avoir réellement couvert par une réserve ou une réduction des dépenses. Une estimation négative n’augmente jamais le budget semaine.';
+
+  @override
+  String get healthHistory => 'Historique Santé';
+
+  @override
+  String get noHealthEntry => 'Aucune saisie Santé depuis le début du suivi.';
+
+  @override
+  String get reversedHealthEntry => 'Saisie erronée annulée';
+
+  @override
+  String get reverseHealthEntryTitle => 'Annuler cette saisie erronée ?';
+
+  @override
+  String get reverseHealthEntryBody =>
+      'Son effet sera neutralisé, mais les deux saisies resteront dans l’historique d’audit local.';
+
+  @override
+  String get reverseHealthEntry => 'Annuler la saisie';
+
+  @override
+  String get healthDelayWeeks => 'Délai de remboursement en semaines';
+
+  @override
+  String get invalidHealthDelay => 'Choisissez entre 1 et 52 semaines.';
+
+  @override
+  String get healthAlertThreshold => 'Seuil d’alerte';
+
+  @override
+  String get saveHealthSettings => 'Enregistrer les réglages';
+
+  @override
+  String get healthEntryAmount => 'Montant';
+
+  @override
+  String get healthEntryLabel => 'Description ou période du total';
+
+  @override
+  String get healthEntryDate => 'Date';
+
+  @override
+  String get saveHealthEntry => 'Enregistrer la saisie';
+
+  @override
+  String healthDashboardEstimate(String amount) {
+    return 'Estimation Santé : $amount';
+  }
+
+  @override
+  String get healthDashboardOnTrack =>
+      'Aucune alerte selon le délai et le seuil actuels.';
 }

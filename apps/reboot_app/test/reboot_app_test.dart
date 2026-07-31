@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reboot_app/health/health_screen.dart';
 import 'package:reboot_app/infrastructure/device_context_providers.dart';
 import 'package:reboot_app/infrastructure/profile_providers.dart';
+import 'package:reboot_app/l10n/app_localizations.dart';
+import 'package:reboot_app/refunds/refunds_screen.dart';
 import 'package:reboot_app/src/reboot_app.dart';
 import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
@@ -411,6 +414,13 @@ void main() {
     expect(find.text('Réparation'), findsOneWidget);
     expect(journal.entries, hasLength(6));
 
+    await tester.scrollUntilVisible(
+      find.byIcon(Icons.delete_outline),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -120));
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.delete_outline));
     await tester.pumpAndSettle();
     expect(
@@ -464,6 +474,11 @@ void main() {
         .first
         .remaining;
 
+    await tester.scrollUntilVisible(
+      find.text('Créer votre première réserve'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.text('Créer votre première réserve'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('create-reserve')));
@@ -547,12 +562,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Une correction mérite d’être envisagée'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Une correction mérite d’être envisagée'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    expect(find.text('Une correction mérite d’être envisagée'), findsOneWidget);
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -180));
     await tester.pumpAndSettle();
     await tester.tap(
@@ -577,6 +592,105 @@ void main() {
       find.byKey(const ValueKey('observed-trend-balance')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('records a same-week refund from its original purchase', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final journal = _MemoryJournal();
+    final service = await _readyService(journal);
+    await service.recordExpense(
+      RecordExpenseCommand(
+        amount: Money.fromMinorUnits(10000, Currency.eur),
+        label: 'Chaussures',
+        purchaseDate: LocalDate(2026, 4, 5),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: RefundsScreen(service: service, today: LocalDate(2026, 4, 6)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Saisir un remboursement'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField), '40');
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Saisir un remboursement').last,
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      service.expenses.activeExpenses.single.refundedAmount.minorUnits,
+      4000,
+    );
+    expect(
+      service
+          .buildRollingBudget(LocalDate(2026, 4, 6))
+          .cycles
+          .first
+          .remaining
+          .minorUnits,
+      35500,
+    );
+    expect(find.textContaining('restauré sur la semaine'), findsOneWidget);
+  });
+
+  testWidgets('enables optional health tracking and records an expense', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final service = await _readyService(_MemoryJournal());
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: HealthScreen(service: service, today: LocalDate(2026, 4, 6)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Activer le suivi Santé'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Enregistrer les réglages'),
+    );
+    await tester.pumpAndSettle();
+    expect(service.health.tracking!.enabled, isTrue);
+    expect(service.health.tracking!.delayWeeks, 4);
+    expect(service.health.tracking!.alertThreshold.minorUnits, 5000);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Dépense de santé'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).at(0), '75');
+    await tester.enterText(find.byType(TextFormField).at(1), 'Pharmacie');
+    await tester.tap(
+      find.widgetWithText(FilledButton, 'Enregistrer la saisie'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(service.health.tracking!.activeEntries, hasLength(1));
+    expect(
+      service.health.tracking!.activeEntries.single.amount.minorUnits,
+      7500,
+    );
+    expect(find.text('Pharmacie'), findsOneWidget);
   });
 
   testWidgets('does not expose a device time-zone failure', (tester) async {

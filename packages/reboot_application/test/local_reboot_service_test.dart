@@ -597,6 +597,151 @@ void main() {
       expect(harness.journal.entries, hasLength(entryCount));
     });
   });
+
+  group('LocalRebootService refunds', () {
+    test(
+      'classifies same-cycle and later refunds without changing plans',
+      () async {
+        final harness = await _Harness.initialized();
+        final recorded = await harness.service.recordExpense(
+          RecordExpenseCommand(
+            amount: _eur(15000),
+            label: 'Achat retourné',
+            purchaseDate: LocalDate(2026, 4, 5),
+            allocationCycleCount: 3,
+          ),
+        );
+        final sameCycle = await harness.service.recordExpenseRefund(
+          RecordExpenseRefundCommand(
+            expenseId: recorded.expenseId,
+            amount: _eur(5000),
+            receivedDate: LocalDate(2026, 4, 6),
+          ),
+        );
+        final later = await harness.service.recordExpenseRefund(
+          RecordExpenseRefundCommand(
+            expenseId: recorded.expenseId,
+            amount: _eur(4000),
+            receivedDate: LocalDate(2026, 4, 12),
+          ),
+        );
+
+        expect(sameCycle.restoresOriginalCycle, isTrue);
+        expect(later.restoresOriginalCycle, isFalse);
+        expect(later.expense.allocations, hasLength(3));
+        expect(later.expense.refundedAmount.minorUnits, 9000);
+
+        final restored = await LocalRebootService.restore(
+          journal: harness.journal,
+          clock: const _FixedClock(),
+          identities: _SequentialIdentities(100),
+        );
+        expect(
+          restored
+              .expenses
+              .expenses[recorded.expenseId]!
+              .refundedAmount
+              .minorUnits,
+          9000,
+        );
+      },
+    );
+
+    test('rejects over-refunding without appending an event', () async {
+      final harness = await _Harness.initialized();
+      final recorded = await harness.service.recordExpense(
+        _expense('Achat', 5000),
+      );
+      final entryCount = harness.journal.entries.length;
+
+      await expectLater(
+        harness.service.recordExpenseRefund(
+          RecordExpenseRefundCommand(
+            expenseId: recorded.expenseId,
+            amount: _eur(5001),
+            receivedDate: LocalDate(2026, 4, 6),
+          ),
+        ),
+        throwsA(isA<ProjectionConflictException>()),
+      );
+      expect(harness.journal.entries, hasLength(entryCount));
+    });
+  });
+
+  group('LocalRebootService health tracking', () {
+    test(
+      'configures, estimates, and restores aggregate health flows',
+      () async {
+        final harness = await _Harness.initialized();
+        await harness.service.configureHealthTracking(
+          ConfigureHealthTrackingCommand(
+            enabled: true,
+            delayWeeks: 4,
+            alertThreshold: _eur(5000),
+            businessDate: LocalDate(2026, 4, 1),
+          ),
+        );
+        await harness.service.recordHealthEntry(
+          RecordHealthEntryCommand(
+            kind: HealthEntryKind.expense,
+            amount: _eur(10000),
+            label: 'Dépenses avril',
+            businessDate: LocalDate(2026, 4, 1),
+          ),
+        );
+        await harness.service.recordHealthEntry(
+          RecordHealthEntryCommand(
+            kind: HealthEntryKind.reimbursement,
+            amount: _eur(3000),
+            label: 'Remboursements avril',
+            businessDate: LocalDate(2026, 4, 20),
+          ),
+        );
+
+        final tracking = harness.service.health.tracking!;
+        expect(tracking.estimatedRest(LocalDate(2026, 4, 29)).minorUnits, 7000);
+        expect(tracking.requiresAttention(LocalDate(2026, 4, 29)), isTrue);
+
+        final restored = await LocalRebootService.restore(
+          journal: harness.journal,
+          clock: const _FixedClock(),
+          identities: _SequentialIdentities(100),
+        );
+        expect(
+          restored.health.tracking!
+              .estimatedRest(LocalDate(2026, 4, 29))
+              .minorUnits,
+          7000,
+        );
+      },
+    );
+
+    test('prevents health entries while tracking is disabled', () async {
+      final harness = await _Harness.initialized();
+      await harness.service.configureHealthTracking(
+        ConfigureHealthTrackingCommand(
+          enabled: false,
+          delayWeeks: 4,
+          alertThreshold: _eur(5000),
+          businessDate: LocalDate(2026, 4, 1),
+        ),
+      );
+      final entryCount = harness.journal.entries.length;
+
+      await expectLater(
+        harness.service.recordHealthEntry(
+          RecordHealthEntryCommand(
+            kind: HealthEntryKind.expense,
+            amount: _eur(1000),
+            label: 'Médecin',
+            businessDate: LocalDate(2026, 4, 2),
+          ),
+        ),
+        throwsA(isA<IncompleteConfigurationException>()),
+      );
+      expect(harness.journal.entries, hasLength(entryCount));
+    });
+  });
 }
 
 InitializeHouseholdCommand _initialize(FirstCycleStartChoice choice) {

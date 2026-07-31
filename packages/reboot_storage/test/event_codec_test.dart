@@ -130,6 +130,13 @@ List<EventPayload> _allPayloads() {
       cycleStarts: [LocalDate(2026, 4, 4), LocalDate(2026, 4, 11)],
     ),
     const ExpenseDeletedPayload(),
+    ExpenseRefundedPayload(
+      amount: _eur(2000),
+      receiptCycleStart: LocalDate(2026, 4, 11),
+    ),
+    ExpenseRefundReversedPayload(
+      refundEventId: EventId('018f2b8a-7d3c-7a1b-8c4d-1234567890ab'),
+    ),
     ReserveCreatedPayload(
       name: 'Imprévus',
       kind: ReserveKind.real,
@@ -139,6 +146,20 @@ List<EventPayload> _allPayloads() {
     ReserveExpenseRecordedPayload(amount: _eur(8000), label: 'Vétérinaire'),
     ReserveMovementReversedPayload(
       movementEventId: EventId('018f2b8a-7d3c-7a1b-8c4d-1234567890ab'),
+    ),
+    HealthTrackingConfiguredPayload(
+      enabled: true,
+      delayWeeks: 4,
+      alertThreshold: _eur(5000),
+    ),
+    HealthExpenseRecordedPayload(amount: _eur(9000), label: 'Médecin'),
+    HealthReimbursementRecordedPayload(
+      amount: _eur(6000),
+      label: 'Remboursements',
+    ),
+    HealthRegularizationRecordedPayload(amount: _eur(3000), label: 'Compensé'),
+    HealthEntryReversedPayload(
+      entryEventId: EventId('018f2b8a-7d3c-7a1b-8c4d-1234567890ab'),
     ),
   ];
 }

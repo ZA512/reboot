@@ -8,6 +8,7 @@ final class ProjectedCycleFinances {
     required this.cycle,
     required this.budget,
     required this.allocatedExpenses,
+    required this.refundCredits,
     required this.remaining,
   });
 
@@ -19,6 +20,9 @@ final class ProjectedCycleFinances {
 
   /// Sum of active virtual expense allocations targeting this cycle.
   final Money allocatedExpenses;
+
+  /// Refunds received inside their original purchase cycle.
+  final Money refundCredits;
 
   /// Signed budget minus allocations; may be negative.
   final Money remaining;
@@ -59,6 +63,7 @@ final class Rolling52Projection {
     final horizonStart = cycles.first.start;
     final horizonEnd = cycles.last.endExclusive;
     final allocationsByCycleStart = <LocalDate, Money>{};
+    final refundsByCycleStart = <LocalDate, Money>{};
     for (final expense in expenseLedger.activeExpenses) {
       final allocations = expense.allocations;
       if (allocations == null) {
@@ -83,6 +88,19 @@ final class Rolling52Projection {
           ifAbsent: () => allocation.amount,
         );
       }
+      for (final refund in expense.activeRefunds) {
+        final restoresOriginalCycle =
+            refund.receiptCycleStart == expense.cycleAssignment.cycleStart;
+        if (!restoresOriginalCycle ||
+            !cycleStarts.contains(refund.receiptCycleStart)) {
+          continue;
+        }
+        refundsByCycleStart.update(
+          refund.receiptCycleStart,
+          (existing) => existing + refund.amount,
+          ifAbsent: () => refund.amount,
+        );
+      }
     }
 
     return Rolling52Projection._([
@@ -92,6 +110,8 @@ final class Rolling52Projection {
           budget: _requiredBudget(cycle, budgetsByCycleStart),
           allocatedExpenses:
               allocationsByCycleStart[cycle.start] ?? Money.zero(Currency.eur),
+          refundCredits:
+              refundsByCycleStart[cycle.start] ?? Money.zero(Currency.eur),
         ),
     ]);
   }
@@ -130,12 +150,14 @@ final class Rolling52Projection {
     required WeeklyCycle cycle,
     required Money budget,
     required Money allocatedExpenses,
+    required Money refundCredits,
   }) {
     return ProjectedCycleFinances(
       cycle: cycle,
       budget: budget,
       allocatedExpenses: allocatedExpenses,
-      remaining: budget - allocatedExpenses,
+      refundCredits: refundCredits,
+      remaining: budget - allocatedExpenses + refundCredits,
     );
   }
 }

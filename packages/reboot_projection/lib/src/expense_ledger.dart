@@ -2,6 +2,48 @@ import 'package:reboot_domain/reboot_domain.dart';
 
 import 'projection_errors.dart';
 
+/// One immutable refund received for an expense and any later correction.
+final class ProjectedExpenseRefund {
+  const ProjectedExpenseRefund._({
+    required this.eventId,
+    required this.amount,
+    required this.receivedDate,
+    required this.receiptCycleStart,
+    required this.recordedAtUtc,
+    this.reversalEventId,
+  });
+
+  factory ProjectedExpenseRefund._fromEvent(EventRecord event) {
+    final payload = event.payload as ExpenseRefundedPayload;
+    return ProjectedExpenseRefund._(
+      eventId: event.id,
+      amount: payload.amount,
+      receivedDate: event.businessDate,
+      receiptCycleStart: payload.receiptCycleStart,
+      recordedAtUtc: event.recordedAtUtc,
+    );
+  }
+
+  final EventId eventId;
+  final Money amount;
+  final LocalDate receivedDate;
+  final LocalDate receiptCycleStart;
+  final DateTime recordedAtUtc;
+  final EventId? reversalEventId;
+
+  bool get isReversed => reversalEventId != null;
+
+  ProjectedExpenseRefund _reversedBy(EventRecord event) =>
+      ProjectedExpenseRefund._(
+        eventId: eventId,
+        amount: amount,
+        receivedDate: receivedDate,
+        receiptCycleStart: receiptCycleStart,
+        recordedAtUtc: recordedAtUtc,
+        reversalEventId: event.id,
+      );
+}
+
 /// Observable expense reconstructed solely from immutable journal events.
 final class ProjectedExpense {
   const ProjectedExpense._({
@@ -12,6 +54,7 @@ final class ProjectedExpense {
     required this.cycleAssignment,
     required this.recordedAtUtc,
     required this.recordingEventId,
+    required this.refunds,
     this.allocations,
     this.allocationEventId,
     this.deletedAtUtc,
@@ -28,6 +71,7 @@ final class ProjectedExpense {
       cycleAssignment: payload.cycleAssignment,
       recordedAtUtc: event.recordedAtUtc,
       recordingEventId: event.id,
+      refunds: const [],
     );
   }
 
@@ -51,6 +95,22 @@ final class ProjectedExpense {
 
   /// Event that created this projection.
   final EventId recordingEventId;
+
+  /// Complete refund history, including corrected entries.
+  final List<ProjectedExpenseRefund> refunds;
+
+  /// Non-reversed refund entries.
+  Iterable<ProjectedExpenseRefund> get activeRefunds =>
+      refunds.where((refund) => !refund.isReversed);
+
+  /// Total received and still active.
+  Money get refundedAmount => activeRefunds.fold(
+    Money.zero(Currency.eur),
+    (sum, refund) => sum + refund.amount,
+  );
+
+  /// Amount still eligible for later refunds.
+  Money get refundableAmount => amount - refundedAmount;
 
   /// Immutable virtual allocation plan, once its event is applied.
   final List<ExpenseAllocation>? allocations;
@@ -94,6 +154,7 @@ final class ProjectedExpense {
       cycleAssignment: cycleAssignment,
       recordedAtUtc: recordedAtUtc,
       recordingEventId: recordingEventId,
+      refunds: refunds,
       allocations: payload.allocations,
       allocationEventId: event.id,
     );
@@ -112,6 +173,68 @@ final class ProjectedExpense {
       allocationEventId: allocationEventId,
       deletedAtUtc: event.recordedAtUtc,
       deletionEventId: event.id,
+      refunds: refunds,
+    );
+  }
+
+  ProjectedExpense _refundedBy(EventRecord event) {
+    if (isDeleted) {
+      throw ProjectionConflictException(
+        'Deleted expense $id cannot receive a refund.',
+      );
+    }
+    final refund = ProjectedExpenseRefund._fromEvent(event);
+    if (refundedAmount.minorUnits + refund.amount.minorUnits >
+        amount.minorUnits) {
+      throw ProjectionConflictException(
+        'Expense $id refunds exceed its original amount.',
+      );
+    }
+    return ProjectedExpense._(
+      id: id,
+      amount: amount,
+      label: label,
+      purchaseDate: purchaseDate,
+      cycleAssignment: cycleAssignment,
+      recordedAtUtc: recordedAtUtc,
+      recordingEventId: recordingEventId,
+      allocations: allocations,
+      allocationEventId: allocationEventId,
+      deletedAtUtc: deletedAtUtc,
+      deletionEventId: deletionEventId,
+      refunds: [...refunds, refund],
+    );
+  }
+
+  ProjectedExpense _reverseRefund(EventRecord event, EventId refundEventId) {
+    final index = refunds.indexWhere(
+      (refund) => refund.eventId == refundEventId,
+    );
+    if (index < 0) {
+      throw ProjectionConflictException(
+        'Expense $id does not contain refund $refundEventId.',
+      );
+    }
+    if (refunds[index].isReversed) {
+      throw ProjectionConflictException(
+        'Refund $refundEventId received multiple reversals.',
+      );
+    }
+    final next = List<ProjectedExpenseRefund>.of(refunds);
+    next[index] = next[index]._reversedBy(event);
+    return ProjectedExpense._(
+      id: id,
+      amount: amount,
+      label: label,
+      purchaseDate: purchaseDate,
+      cycleAssignment: cycleAssignment,
+      recordedAtUtc: recordedAtUtc,
+      recordingEventId: recordingEventId,
+      allocations: allocations,
+      allocationEventId: allocationEventId,
+      deletedAtUtc: deletedAtUtc,
+      deletionEventId: deletionEventId,
+      refunds: next,
     );
   }
 
@@ -125,6 +248,7 @@ final class ProjectedExpense {
         cycleAssignment == other.cycleAssignment &&
         recordedAtUtc == other.recordedAtUtc &&
         recordingEventId == other.recordingEventId &&
+        _refundListsEqual(refunds, other.refunds) &&
         _allocationListsEqual(allocations, other.allocations) &&
         allocationEventId == other.allocationEventId &&
         deletedAtUtc == other.deletedAtUtc &&
@@ -141,6 +265,7 @@ final class ProjectedExpense {
       cycleAssignment,
       recordedAtUtc,
       recordingEventId,
+      Object.hashAll(refunds),
       Object.hashAll(allocations ?? const <ExpenseAllocation>[]),
       allocationEventId,
       deletedAtUtc,
@@ -239,6 +364,27 @@ final class ExpenseLedger {
           nextExpenses[entry.event.target.id] = existing._deletedBy(
             entry.event,
           );
+        case ExpenseRefundedPayload():
+          final existing = nextExpenses[entry.event.target.id];
+          if (existing == null) {
+            throw ProjectionConflictException(
+              'Expense ${entry.event.target.id} was refunded before recording.',
+            );
+          }
+          nextExpenses[entry.event.target.id] = existing._refundedBy(
+            entry.event,
+          );
+        case ExpenseRefundReversedPayload(:final refundEventId):
+          final existing = nextExpenses[entry.event.target.id];
+          if (existing == null) {
+            throw ProjectionConflictException(
+              'Expense ${entry.event.target.id} had a refund reversed before recording.',
+            );
+          }
+          nextExpenses[entry.event.target.id] = existing._reverseRefund(
+            entry.event,
+            refundEventId,
+          );
         default:
           throw UnsupportedEventException(entry.event.eventType);
       }
@@ -250,6 +396,27 @@ final class ExpenseLedger {
       lastPosition: entry.position,
     );
   }
+}
+
+bool _refundListsEqual(
+  List<ProjectedExpenseRefund> left,
+  List<ProjectedExpenseRefund> right,
+) {
+  if (identical(left, right)) return true;
+  if (left.length != right.length) return false;
+  for (var index = 0; index < left.length; index++) {
+    final a = left[index];
+    final b = right[index];
+    if (a.eventId != b.eventId ||
+        a.amount != b.amount ||
+        a.receivedDate != b.receivedDate ||
+        a.receiptCycleStart != b.receiptCycleStart ||
+        a.recordedAtUtc != b.recordedAtUtc ||
+        a.reversalEventId != b.reversalEventId) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool _allocationListsEqual(

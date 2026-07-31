@@ -66,6 +66,13 @@ final class EventPayloadJsonCodec {
         ],
       },
       ExpenseDeletedPayload() => const <String, Object?>{},
+      ExpenseRefundedPayload() => <String, Object?>{
+        'amount': _encodeMoney(payload.amount),
+        'receiptCycleStart': payload.receiptCycleStart.toString(),
+      },
+      ExpenseRefundReversedPayload() => <String, Object?>{
+        'refundEventId': payload.refundEventId.value,
+      },
       ReserveCreatedPayload() => <String, Object?>{
         'name': payload.name,
         'kind': payload.kind.name,
@@ -81,6 +88,26 @@ final class EventPayloadJsonCodec {
       },
       ReserveMovementReversedPayload() => <String, Object?>{
         'movementEventId': payload.movementEventId.value,
+      },
+      HealthTrackingConfiguredPayload() => <String, Object?>{
+        'enabled': payload.enabled,
+        'delayWeeks': payload.delayWeeks,
+        'alertThreshold': _encodeMoney(payload.alertThreshold),
+      },
+      HealthExpenseRecordedPayload() => <String, Object?>{
+        'amount': _encodeMoney(payload.amount),
+        'label': payload.label,
+      },
+      HealthReimbursementRecordedPayload() => <String, Object?>{
+        'amount': _encodeMoney(payload.amount),
+        'label': payload.label,
+      },
+      HealthRegularizationRecordedPayload() => <String, Object?>{
+        'amount': _encodeMoney(payload.amount),
+        'label': payload.label,
+      },
+      HealthEntryReversedPayload() => <String, Object?>{
+        'entryEventId': payload.entryEventId.value,
       },
       _ => throw UnsupportedStoredEventException(
         payload.eventType,
@@ -174,6 +201,18 @@ final class EventPayloadJsonCodec {
       'expense.recorded' => _decodeExpenseRecorded(map),
       'expense.allocations.planned' => _decodeExpenseAllocations(map),
       'expense.deleted' => const ExpenseDeletedPayload(),
+      'expense.refunded' => ExpenseRefundedPayload(
+        amount: _decodeMoney(_asMap(map['amount'], 'amount')),
+        receiptCycleStart: _decodeDate(
+          map['receiptCycleStart'],
+          'receiptCycleStart',
+        ),
+      ),
+      'expense.refund-reversed' => ExpenseRefundReversedPayload(
+        refundEventId: EventId(
+          _asString(map['refundEventId'], 'refundEventId'),
+        ),
+      ),
       'reserve.created' => ReserveCreatedPayload(
         name: _asString(map['name'], 'name'),
         kind: _enumByName(ReserveKind.values, _asString(map['kind'], 'kind')),
@@ -193,6 +232,28 @@ final class EventPayloadJsonCodec {
         movementEventId: EventId(
           _asString(map['movementEventId'], 'movementEventId'),
         ),
+      ),
+      'health-tracking.configured' => HealthTrackingConfiguredPayload(
+        enabled: _asBool(map['enabled'], 'enabled'),
+        delayWeeks: _asInt(map['delayWeeks'], 'delayWeeks'),
+        alertThreshold: _decodeMoney(
+          _asMap(map['alertThreshold'], 'alertThreshold'),
+        ),
+      ),
+      'health.expense-recorded' => HealthExpenseRecordedPayload(
+        amount: _decodeMoney(_asMap(map['amount'], 'amount')),
+        label: _asString(map['label'], 'label'),
+      ),
+      'health.reimbursement-recorded' => HealthReimbursementRecordedPayload(
+        amount: _decodeMoney(_asMap(map['amount'], 'amount')),
+        label: _asString(map['label'], 'label'),
+      ),
+      'health.regularization-recorded' => HealthRegularizationRecordedPayload(
+        amount: _decodeMoney(_asMap(map['amount'], 'amount')),
+        label: _asString(map['label'], 'label'),
+      ),
+      'health.entry-reversed' => HealthEntryReversedPayload(
+        entryEventId: EventId(_asString(map['entryEventId'], 'entryEventId')),
       ),
       _ => throw UnsupportedStoredEventException(eventType, schemaVersion),
     };
@@ -412,6 +473,13 @@ String _asString(Object? value, String name) {
 int _asInt(Object? value, String name) {
   if (value is! int) {
     throw FormatException('Stored $name must be an integer.');
+  }
+  return value;
+}
+
+bool _asBool(Object? value, String name) {
+  if (value is! bool) {
+    throw FormatException('Stored $name must be a boolean.');
   }
   return value;
 }

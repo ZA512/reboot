@@ -925,4 +925,208 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirmReserveExpense => 'I understand, record it';
+
+  @override
+  String get refundsTitle => 'Refunds';
+
+  @override
+  String get refundsIntro =>
+      'Attach each refund to its original purchase. The installment plan is never rewritten, and a later refund improves the trajectory without increasing the current weekly budget.';
+
+  @override
+  String get noRefundableExpense =>
+      'There is no active purchase to refund yet.';
+
+  @override
+  String get refundMutationError =>
+      'The refund could not be saved. No partial change was recorded.';
+
+  @override
+  String refundRestoredOriginalCycle(String amount) {
+    return '$amount was restored to the original purchase week.';
+  }
+
+  @override
+  String refundImprovesTrajectory(String amount) {
+    return 'Your trajectory improves by $amount. This week\'s budget stays unchanged.';
+  }
+
+  @override
+  String get reverseRefundTitle => 'Reverse this incorrect refund?';
+
+  @override
+  String get reverseRefundBody =>
+      'Its effect will be neutralized, while both entries remain in the local audit history.';
+
+  @override
+  String get reverseRefund => 'Reverse refund';
+
+  @override
+  String refundExpenseSummary(String amount, String date) {
+    return '$amount paid on $date';
+  }
+
+  @override
+  String get fullyRefunded => 'Fully refunded';
+
+  @override
+  String get recordRefund => 'Record refund';
+
+  @override
+  String refundableRemaining(String amount) {
+    return 'Still refundable: $amount';
+  }
+
+  @override
+  String refundHistoryLine(String amount, String date) {
+    return '$amount received on $date';
+  }
+
+  @override
+  String get reversedRefund => 'Incorrect entry reversed';
+
+  @override
+  String recordRefundFor(String label) {
+    return 'Refund for $label';
+  }
+
+  @override
+  String get refundAmount => 'Amount received';
+
+  @override
+  String invalidRefundAmount(String maximum) {
+    return 'Enter an amount above zero and no greater than $maximum.';
+  }
+
+  @override
+  String get refundDate => 'Date received';
+
+  @override
+  String refundsRestoredThisCycle(String amount) {
+    return 'Refunds restored this week: $amount';
+  }
+
+  @override
+  String get refundsRestoredThisCycleHelp =>
+      'Only refunds from purchases assigned to this same week restore its remaining amount.';
+
+  @override
+  String get refundsDashboardHelp =>
+      'Record a product refund against its original purchase.';
+
+  @override
+  String expenseRefunded(String amount) {
+    return 'Refunded: $amount';
+  }
+
+  @override
+  String get trendRefundCredits => 'Refund credits';
+
+  @override
+  String get healthTitle => 'Health tracking';
+
+  @override
+  String get healthSettings => 'Health settings';
+
+  @override
+  String get healthMutationError =>
+      'Health tracking could not be updated. No partial change was recorded.';
+
+  @override
+  String get healthTrackingDisabled => 'Health tracking is paused';
+
+  @override
+  String get healthTrackingOptional => 'Optional health tracking';
+
+  @override
+  String get healthIntro =>
+      'Enter both health expenses and reimbursements, individually or as occasional totals. No per-claim matching is required.';
+
+  @override
+  String get healthDisabledWarning =>
+      'Without this tracking, health costs may drift unnoticed. You can instead reduce your weekly budget by a cautious amount.';
+
+  @override
+  String get enableHealthTracking => 'Enable health tracking';
+
+  @override
+  String get healthEstimatedRest => 'Estimated health amount still to cover';
+
+  @override
+  String healthEstimateSettings(int weeks, String threshold) {
+    return 'Expenses older than $weeks weeks · alert above $threshold';
+  }
+
+  @override
+  String get healthAttentionTitle => 'This estimate deserves attention';
+
+  @override
+  String get healthAttentionBody =>
+      'You may cover it from a reserve, the current week, or a spread of up to 12 weeks—or wait. REBOOT never changes your budget automatically.';
+
+  @override
+  String get addHealthExpense => 'Health expense';
+
+  @override
+  String get addHealthReimbursement => 'Reimbursement received';
+
+  @override
+  String get addHealthRegularization => 'Already covered amount';
+
+  @override
+  String get healthRegularizationHelp =>
+      'Record an already covered amount only after you actually compensated it from a reserve or reduced spending. A negative estimate never increases the weekly budget.';
+
+  @override
+  String get healthHistory => 'Health history';
+
+  @override
+  String get noHealthEntry =>
+      'No health entry has been recorded since tracking began.';
+
+  @override
+  String get reversedHealthEntry => 'Incorrect entry reversed';
+
+  @override
+  String get reverseHealthEntryTitle => 'Reverse this incorrect entry?';
+
+  @override
+  String get reverseHealthEntryBody =>
+      'Its effect will be neutralized, while both entries remain in the local audit history.';
+
+  @override
+  String get reverseHealthEntry => 'Reverse entry';
+
+  @override
+  String get healthDelayWeeks => 'Reimbursement delay in weeks';
+
+  @override
+  String get invalidHealthDelay => 'Choose between 1 and 52 weeks.';
+
+  @override
+  String get healthAlertThreshold => 'Alert threshold';
+
+  @override
+  String get saveHealthSettings => 'Save settings';
+
+  @override
+  String get healthEntryAmount => 'Amount';
+
+  @override
+  String get healthEntryLabel => 'Description or total period';
+
+  @override
+  String get healthEntryDate => 'Date';
+
+  @override
+  String get saveHealthEntry => 'Record entry';
+
+  @override
+  String healthDashboardEstimate(String amount) {
+    return 'Health estimate: $amount';
+  }
+
+  @override
+  String get healthDashboardOnTrack =>
+      'No alert under the current delay and threshold.';
 }

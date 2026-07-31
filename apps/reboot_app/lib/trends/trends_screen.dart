@@ -206,6 +206,16 @@ final class _TrendDetails extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (window.totalTrajectoryCredits.isPositive)
+                        Expanded(
+                          child: _WindowMetric(
+                            label: l10n.trendRefundCredits,
+                            value: _formatMoney(
+                              context,
+                              window.totalTrajectoryCredits,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ],
@@ -278,7 +288,8 @@ final class _CycleTile extends StatelessWidget {
         '${l10n.trendHistoricalBudget}: '
         '${_formatMoney(context, observation.budget)} · '
         '${l10n.trendAllocated}: '
-        '${_formatMoney(context, observation.allocatedExpenses)}',
+        '${_formatMoney(context, observation.allocatedExpenses)}'
+        '${observation.trajectoryCredits.isPositive ? ' · ${l10n.trendRefundCredits}: ${_formatMoney(context, observation.trajectoryCredits)}' : ''}',
       ),
       trailing: Text(
         _formatSignedMoney(context, balance),

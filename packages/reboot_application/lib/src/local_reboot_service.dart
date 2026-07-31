@@ -259,6 +259,45 @@ final class ExpenseRecordingResult {
   final ProjectedExpense expense;
 }
 
+/// Records a partial or total refund against its original expense.
+final class RecordExpenseRefundCommand {
+  const RecordExpenseRefundCommand({
+    required this.expenseId,
+    required this.amount,
+    required this.receivedDate,
+  });
+
+  final EntityId expenseId;
+  final Money amount;
+  final LocalDate receivedDate;
+}
+
+/// Accepted refund with its immediate weekly-impact classification.
+final class ExpenseRefundResult {
+  const ExpenseRefundResult({
+    required this.expense,
+    required this.refund,
+    required this.restoresOriginalCycle,
+  });
+
+  final ProjectedExpense expense;
+  final ProjectedExpenseRefund refund;
+  final bool restoresOriginalCycle;
+}
+
+/// Corrects an erroneous refund entry without deleting journal history.
+final class ReverseExpenseRefundCommand {
+  const ReverseExpenseRefundCommand({
+    required this.expenseId,
+    required this.refundEventId,
+    required this.businessDate,
+  });
+
+  final EntityId expenseId;
+  final EventId refundEventId;
+  final LocalDate businessDate;
+}
+
 /// Creates one named real or virtual reserve.
 final class CreateReserveCommand {
   const CreateReserveCommand({
@@ -330,6 +369,47 @@ final class ReverseReserveMovementCommand {
   final LocalDate businessDate;
 }
 
+/// Enables, disables, or updates aggregate health tracking.
+final class ConfigureHealthTrackingCommand {
+  const ConfigureHealthTrackingCommand({
+    required this.enabled,
+    required this.delayWeeks,
+    required this.alertThreshold,
+    required this.businessDate,
+  });
+
+  final bool enabled;
+  final int delayWeeks;
+  final Money alertThreshold;
+  final LocalDate businessDate;
+}
+
+/// Records an aggregate or individual health flow or regularization.
+final class RecordHealthEntryCommand {
+  const RecordHealthEntryCommand({
+    required this.kind,
+    required this.amount,
+    required this.label,
+    required this.businessDate,
+  });
+
+  final HealthEntryKind kind;
+  final Money amount;
+  final String label;
+  final LocalDate businessDate;
+}
+
+/// Corrects one erroneous health entry.
+final class ReverseHealthEntryCommand {
+  const ReverseHealthEntryCommand({
+    required this.entryEventId,
+    required this.businessDate,
+  });
+
+  final EventId entryEventId;
+  final LocalDate businessDate;
+}
+
 /// Local-first command boundary owning one journal and its live projections.
 ///
 /// All mutations are serialized to prevent two rapid UI actions from deriving
@@ -343,6 +423,7 @@ final class LocalRebootService {
     this._configuration,
     this._expenses,
     this._reserves,
+    this._health,
   );
 
   /// Restores all observable state from the append-only journal.
@@ -359,6 +440,7 @@ final class LocalRebootService {
       ConfigurationLedger.replay(entries),
       ExpenseLedger.replay(entries),
       ReserveLedger.replay(entries),
+      HealthLedger.replay(entries),
     );
   }
 
@@ -368,6 +450,7 @@ final class LocalRebootService {
   ConfigurationLedger _configuration;
   ExpenseLedger _expenses;
   ReserveLedger _reserves;
+  HealthLedger _health;
   Future<void> _commandTail = Future<void>.value();
   bool _closed = false;
 
@@ -379,6 +462,9 @@ final class LocalRebootService {
 
   /// Current named reserves and their event-derived balances.
   ReserveLedger get reserves => _reserves;
+
+  /// Optional aggregate health tracking projection.
+  HealthLedger get health => _health;
 
   /// Establishes the household exactly once.
   Future<HouseholdInitializationResult> initializeHousehold(
@@ -682,6 +768,7 @@ final class LocalRebootService {
               )
               .recommendedWeeklyBudget,
           allocatedExpenses: _allocatedExpensesFor(cycle.start),
+          trajectoryCredits: _refundCreditsFor(cycle.start),
         ),
     ]);
   }
@@ -693,6 +780,18 @@ final class LocalRebootService {
           in expense.allocations ?? const <ExpenseAllocation>[]) {
         if (allocation.cycleStart == cycleStart) {
           total = total + allocation.amount;
+        }
+      }
+    }
+    return total;
+  }
+
+  Money _refundCreditsFor(LocalDate cycleStart) {
+    var total = Money.zero(Currency.eur);
+    for (final expense in _expenses.activeExpenses) {
+      for (final refund in expense.activeRefunds) {
+        if (refund.receiptCycleStart == cycleStart) {
+          total = total + refund.amount;
         }
       }
     }
@@ -775,6 +874,82 @@ final class LocalRebootService {
       );
       await _appendValidated([event]);
       return _expenses.expenses[expenseId]!;
+    });
+  }
+
+  /// Records a refund without changing an existing installment plan.
+  Future<ExpenseRefundResult> recordExpenseRefund(
+    RecordExpenseRefundCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final household = _configuration.household;
+      if (household == null) {
+        throw const IncompleteConfigurationException(
+          'The household must be initialized before recording refunds.',
+        );
+      }
+      final existing = _expenses.expenses[command.expenseId];
+      if (existing == null || existing.isDeleted) {
+        throw ArgumentError.value(
+          command.expenseId,
+          'expenseId',
+          'A refund requires an active original expense.',
+        );
+      }
+      if (command.receivedDate.isBefore(existing.purchaseDate)) {
+        throw ArgumentError.value(
+          command.receivedDate,
+          'receivedDate',
+          'A refund cannot precede its original expense.',
+        );
+      }
+      final receiptCycle = household.cycleContaining(command.receivedDate);
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.receivedDate,
+        target: EntityReference(
+          kind: EntityKind.expense,
+          id: command.expenseId,
+        ),
+        payload: ExpenseRefundedPayload(
+          amount: command.amount,
+          receiptCycleStart: receiptCycle.start,
+        ),
+      );
+      await _appendValidated([event]);
+      final expense = _expenses.expenses[command.expenseId]!;
+      final refund = expense.refunds.last;
+      return ExpenseRefundResult(
+        expense: expense,
+        refund: refund,
+        restoresOriginalCycle:
+            refund.receiptCycleStart == expense.cycleAssignment.cycleStart,
+      );
+    });
+  }
+
+  /// Neutralizes one erroneous refund while retaining both events.
+  Future<ProjectedExpense> reverseExpenseRefund(
+    ReverseExpenseRefundCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(
+          kind: EntityKind.expense,
+          id: command.expenseId,
+        ),
+        payload: ExpenseRefundReversedPayload(
+          refundEventId: command.refundEventId,
+        ),
+      );
+      await _appendValidated([event]);
+      return _expenses.expenses[command.expenseId]!;
     });
   }
 
@@ -876,6 +1051,102 @@ final class LocalRebootService {
     });
   }
 
+  /// Persists an explicit aggregate health-tracking configuration.
+  Future<ProjectedHealthTracking> configureHealthTracking(
+    ConfigureHealthTrackingCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      if (_configuration.household == null) {
+        throw const IncompleteConfigurationException(
+          'The household must exist before configuring health tracking.',
+        );
+      }
+      final trackerId = _health.tracking?.id ?? _identities.nextEntityId();
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(kind: EntityKind.healthTracking, id: trackerId),
+        payload: HealthTrackingConfiguredPayload(
+          enabled: command.enabled,
+          delayWeeks: command.delayWeeks,
+          alertThreshold: command.alertThreshold,
+        ),
+      );
+      await _appendValidated([event]);
+      return _health.tracking!;
+    });
+  }
+
+  /// Records one health expense, reimbursement, or handled amount.
+  Future<ProjectedHealthTracking> recordHealthEntry(
+    RecordHealthEntryCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final tracker = _health.tracking;
+      if (tracker == null || !tracker.enabled) {
+        throw const IncompleteConfigurationException(
+          'Health tracking must be enabled before recording entries.',
+        );
+      }
+      final payload = switch (command.kind) {
+        HealthEntryKind.expense => HealthExpenseRecordedPayload(
+          amount: command.amount,
+          label: command.label.trim(),
+        ),
+        HealthEntryKind.reimbursement => HealthReimbursementRecordedPayload(
+          amount: command.amount,
+          label: command.label.trim(),
+        ),
+        HealthEntryKind.regularization => HealthRegularizationRecordedPayload(
+          amount: command.amount,
+          label: command.label.trim(),
+        ),
+      };
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(
+          kind: EntityKind.healthTracking,
+          id: tracker.id,
+        ),
+        payload: payload,
+      );
+      await _appendValidated([event]);
+      return _health.tracking!;
+    });
+  }
+
+  /// Neutralizes one erroneous health entry while retaining its audit trail.
+  Future<ProjectedHealthTracking> reverseHealthEntry(
+    ReverseHealthEntryCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final tracker = _health.tracking;
+      if (tracker == null) {
+        throw const IncompleteConfigurationException(
+          'Health tracking must exist before correcting entries.',
+        );
+      }
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(
+          kind: EntityKind.healthTracking,
+          id: tracker.id,
+        ),
+        payload: HealthEntryReversedPayload(entryEventId: command.entryEventId),
+      );
+      await _appendValidated([event]);
+      return _health.tracking!;
+    });
+  }
+
   /// Closes the owned journal after all earlier commands have completed.
   Future<void> close() {
     return _runExclusive(() async {
@@ -891,6 +1162,7 @@ final class LocalRebootService {
     var nextConfiguration = _configuration;
     var nextExpenses = _expenses;
     var nextReserves = _reserves;
+    var nextHealth = _health;
     var nextPosition = _configuration.lastPosition?.value ?? 0;
     for (final event in events) {
       nextPosition++;
@@ -901,6 +1173,7 @@ final class LocalRebootService {
       nextConfiguration = nextConfiguration.apply(provisional);
       nextExpenses = nextExpenses.apply(provisional);
       nextReserves = nextReserves.apply(provisional);
+      nextHealth = nextHealth.apply(provisional);
     }
 
     final appended = await _journal.appendAll(events);
@@ -910,14 +1183,17 @@ final class LocalRebootService {
     var committedConfiguration = _configuration;
     var committedExpenses = _expenses;
     var committedReserves = _reserves;
+    var committedHealth = _health;
     for (final entry in appended) {
       committedConfiguration = committedConfiguration.apply(entry);
       committedExpenses = committedExpenses.apply(entry);
       committedReserves = committedReserves.apply(entry);
+      committedHealth = committedHealth.apply(entry);
     }
     _configuration = committedConfiguration;
     _expenses = committedExpenses;
     _reserves = committedReserves;
+    _health = committedHealth;
   }
 
   Future<T> _runExclusive<T>(Future<T> Function() action) {

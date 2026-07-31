@@ -9,8 +9,12 @@ import 'package:reboot_projection/reboot_projection.dart';
 
 import '../expenses/quick_expense_controller.dart';
 import '../expenses/quick_expense_screen.dart';
+import '../health/health_controller.dart';
+import '../health/health_screen.dart';
 import '../infrastructure/device_context_providers.dart';
 import '../l10n/app_localizations.dart';
+import '../refunds/refund_controller.dart';
+import '../refunds/refunds_screen.dart';
 import '../reserves/reserve_controller.dart';
 import '../reserves/reserves_screen.dart';
 import '../trends/trends_screen.dart';
@@ -27,6 +31,8 @@ final class WeeklyDashboardScreen extends ConsumerWidget {
     final deviceContext = ref.watch(onboardingDeviceContextProvider);
     final mutation = ref.watch(quickExpenseControllerProvider);
     ref.watch(reserveControllerProvider);
+    ref.watch(refundControllerProvider);
+    ref.watch(healthControllerProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
@@ -215,6 +221,45 @@ final class _DashboardBody extends ConsumerWidget {
               ),
             ],
           ),
+          if (current.refundCredits.isPositive) ...[
+            const SizedBox(height: 8),
+            Card(
+              color: colors.primaryContainer,
+              child: ListTile(
+                leading: const Icon(Icons.replay_circle_filled),
+                title: Text(
+                  l10n.refundsRestoredThisCycle(
+                    _formatMoney(context, current.refundCredits),
+                  ),
+                ),
+                subtitle: Text(l10n.refundsRestoredThisCycleHelp),
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.replay_outlined),
+              title: Text(l10n.refundsTitle),
+              subtitle: Text(l10n.refundsDashboardHelp),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => RefundsScreen(service: service, today: today),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _HealthSummaryCard(
+            tracking: service.health.tracking,
+            today: today,
+            onOpen: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => HealthScreen(service: service, today: today),
+              ),
+            ),
+          ),
           const SizedBox(height: 12),
           Card(
             child: ListTile(
@@ -370,6 +415,53 @@ final class _TrendSummaryCard extends StatelessWidget {
   }
 }
 
+final class _HealthSummaryCard extends StatelessWidget {
+  const _HealthSummaryCard({
+    required this.tracking,
+    required this.today,
+    required this.onOpen,
+  });
+
+  final ProjectedHealthTracking? tracking;
+  final LocalDate today;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final enabled = tracking?.enabled ?? false;
+    final alert = enabled && tracking!.requiresAttention(today);
+    final colors = Theme.of(context).colorScheme;
+    return Card(
+      color: alert ? colors.errorContainer : null,
+      child: ListTile(
+        leading: Icon(
+          alert
+              ? Icons.warning_amber_rounded
+              : Icons.health_and_safety_outlined,
+          color: alert ? colors.error : null,
+        ),
+        title: Text(
+          enabled
+              ? l10n.healthDashboardEstimate(
+                  _formatSignedMoney(context, tracking!.estimatedRest(today)),
+                )
+              : l10n.healthTrackingOptional,
+        ),
+        subtitle: Text(
+          enabled
+              ? (alert
+                    ? l10n.healthAttentionTitle
+                    : l10n.healthDashboardOnTrack)
+              : l10n.healthDisabledWarning,
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onOpen,
+      ),
+    );
+  }
+}
+
 final class _Metric extends StatelessWidget {
   const _Metric({required this.label, required this.amount});
 
@@ -419,13 +511,8 @@ final class _ExpenseTile extends StatelessWidget {
       leading: const CircleAvatar(child: Icon(Icons.receipt_long_outlined)),
       title: Text(expense.label),
       subtitle: Text(
-        splitCount > 1
-            ? l10n.splitExpenseDetail(
-                _formatMoney(context, expense.amount),
-                splitCount,
-                _formatDate(context, expense.purchaseDate),
-              )
-            : _formatDate(context, expense.purchaseDate),
+        '${splitCount > 1 ? l10n.splitExpenseDetail(_formatMoney(context, expense.amount), splitCount, _formatDate(context, expense.purchaseDate)) : _formatDate(context, expense.purchaseDate)}'
+        '${expense.refundedAmount.isPositive ? '\n${l10n.expenseRefunded(_formatMoney(context, expense.refundedAmount))}' : ''}',
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
