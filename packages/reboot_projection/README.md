@@ -9,4 +9,5 @@ Implemented foundations:
 
 - deterministic expense replay ordered by local journal position;
 - UUID-based idempotence;
-- explicit expense tombstones that preserve audit history.
+- explicit expense tombstones that preserve audit history;
+- exact overlapping allocations and a gap-free rolling 52-cycle projection.

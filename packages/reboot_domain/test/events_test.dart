@@ -73,6 +73,86 @@ void main() {
     });
   });
 
+  group('ExpenseAllocationsPlannedPayload', () {
+    test('splits 28 EUR exactly across three ordered cycles', () {
+      final payload = ExpenseAllocationsPlannedPayload.evenly(
+        expenseAmount: Money.fromMinorUnits(2800, Currency.eur),
+        cycleStarts: [
+          LocalDate(2026, 3, 28),
+          LocalDate(2026, 4, 4),
+          LocalDate(2026, 4, 11),
+        ],
+      );
+
+      expect(payload.eventType, 'expense.allocations.planned');
+      expect(payload.allocations.map((allocation) => allocation.amount), [
+        Money.fromMinorUnits(933, Currency.eur),
+        Money.fromMinorUnits(933, Currency.eur),
+        Money.fromMinorUnits(934, Currency.eur),
+      ]);
+      expect(payload.total, Money.fromMinorUnits(2800, Currency.eur));
+    });
+
+    test('preserves a one-cent source with zero-valued early parts', () {
+      final payload = ExpenseAllocationsPlannedPayload.evenly(
+        expenseAmount: Money.fromMinorUnits(1, Currency.eur),
+        cycleStarts: [
+          LocalDate(2026, 3, 28),
+          LocalDate(2026, 4, 4),
+          LocalDate(2026, 4, 11),
+        ],
+      );
+
+      expect(
+        payload.allocations.map((allocation) => allocation.amount.minorUnits),
+        [0, 0, 1],
+      );
+      expect(payload.total, Money.fromMinorUnits(1, Currency.eur));
+    });
+
+    test('rejects duplicate, unordered, empty, or overlong plans', () {
+      ExpenseAllocation allocation(LocalDate date) {
+        return ExpenseAllocation(
+          cycleStart: date,
+          amount: Money.fromMinorUnits(100, Currency.eur),
+        );
+      }
+
+      expect(
+        () => ExpenseAllocationsPlannedPayload(allocations: const []),
+        throwsRangeError,
+      );
+      expect(
+        () => ExpenseAllocationsPlannedPayload(
+          allocations: [
+            allocation(LocalDate(2026, 4, 4)),
+            allocation(LocalDate(2026, 4, 4)),
+          ],
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExpenseAllocationsPlannedPayload(
+          allocations: [
+            allocation(LocalDate(2026, 4, 4)),
+            allocation(LocalDate(2026, 3, 28)),
+          ],
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExpenseAllocationsPlannedPayload.evenly(
+          expenseAmount: Money.fromMinorUnits(1300, Currency.eur),
+          cycleStarts: [
+            for (var week = 0; week < 13; week++)
+              LocalDate(2026, 3, 28).addDays(week * 7),
+          ],
+        ),
+        throwsRangeError,
+      );
+    });
+  });
+
   group('EventRecord', () {
     test('keeps business metadata outside its immutable payload', () {
       final event = _recordedEvent();

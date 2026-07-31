@@ -29,6 +29,21 @@ void main() {
       expect(tombstone.amount, Money.fromMinorUnits(4250, Currency.eur));
     });
 
+    test('attaches one exact immutable allocation plan', () {
+      final ledger = ExpenseLedger.replay([
+        _recordedEntry(),
+        _allocationEntry(),
+      ]);
+
+      final expense = ledger.activeExpenses.single;
+      expect(expense.allocations, hasLength(3));
+      expect(
+        expense.allocations!.map((allocation) => allocation.amount.minorUnits),
+        [1416, 1416, 1418],
+      );
+      expect(expense.allocationEventId, _allocationEventId);
+    });
+
     test('reapplying an event UUID is strictly idempotent', () {
       final first = ExpenseLedger.empty().apply(_recordedEntry());
       final repeated = first.apply(_recordedEntry());
@@ -77,6 +92,37 @@ void main() {
       );
     });
 
+    test('rejects allocation before recording or with a wrong total', () {
+      expect(
+        () => ExpenseLedger.empty().apply(_allocationEntry()),
+        throwsA(isA<ProjectionConflictException>()),
+      );
+
+      final wrongAllocation = LocalJournalEntry(
+        position: LocalJournalPosition(2),
+        event: EventRecord(
+          id: _allocationEventId,
+          recordedAtUtc: DateTime.utc(2026, 4, 1, 10, 0, 1),
+          businessDate: LocalDate(2026, 4, 1),
+          target: _expenseReference,
+          payload: ExpenseAllocationsPlannedPayload(
+            allocations: [
+              ExpenseAllocation(
+                cycleStart: LocalDate(2026, 3, 28),
+                amount: Money.fromMinorUnits(4000, Currency.eur),
+              ),
+            ],
+          ),
+        ),
+      );
+      final recorded = ExpenseLedger.empty().apply(_recordedEntry());
+
+      expect(
+        () => recorded.apply(wrongAllocation),
+        throwsA(isA<ProjectionConflictException>()),
+      );
+    });
+
     test('rejects two recording facts for one expense identity', () {
       final secondRecording = LocalJournalEntry(
         position: LocalJournalPosition(2),
@@ -105,6 +151,9 @@ final EventId _recordingEventId = EventId(
 final EventId _deletionEventId = EventId(
   '01903333-3333-7333-8333-333333333333',
 );
+final EventId _allocationEventId = EventId(
+  '01904444-4444-7444-8444-444444444444',
+);
 final EntityReference _expenseReference = EntityReference(
   kind: EntityKind.expense,
   id: _expenseId,
@@ -127,6 +176,26 @@ LocalJournalEntry _deletedEntry() {
   return LocalJournalEntry(
     position: LocalJournalPosition(2),
     event: _deletedEvent(),
+  );
+}
+
+LocalJournalEntry _allocationEntry() {
+  return LocalJournalEntry(
+    position: LocalJournalPosition(2),
+    event: EventRecord(
+      id: _allocationEventId,
+      recordedAtUtc: DateTime.utc(2026, 4, 1, 10, 0, 1),
+      businessDate: LocalDate(2026, 4, 1),
+      target: _expenseReference,
+      payload: ExpenseAllocationsPlannedPayload.evenly(
+        expenseAmount: Money.fromMinorUnits(4250, Currency.eur),
+        cycleStarts: [
+          LocalDate(2026, 3, 28),
+          LocalDate(2026, 4, 4),
+          LocalDate(2026, 4, 11),
+        ],
+      ),
+    ),
   );
 }
 

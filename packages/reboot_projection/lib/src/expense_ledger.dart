@@ -10,6 +10,8 @@ final class ProjectedExpense {
     required this.cycleAssignment,
     required this.recordedAtUtc,
     required this.recordingEventId,
+    this.allocations,
+    this.allocationEventId,
     this.deletedAtUtc,
     this.deletionEventId,
   });
@@ -48,6 +50,12 @@ final class ProjectedExpense {
   /// Event that created this projection.
   final EventId recordingEventId;
 
+  /// Immutable virtual allocation plan, once its event is applied.
+  final List<ExpenseAllocation>? allocations;
+
+  /// Event that fixed [allocations], if any.
+  final EventId? allocationEventId;
+
   /// Recording instant of the tombstone, if deleted.
   final DateTime? deletedAtUtc;
 
@@ -56,6 +64,38 @@ final class ProjectedExpense {
 
   /// Whether a tombstone removed this expense from active totals.
   bool get isDeleted => deletionEventId != null;
+
+  ProjectedExpense _allocatedBy(EventRecord event) {
+    final payload = event.payload as ExpenseAllocationsPlannedPayload;
+    if (allocations != null) {
+      throw ProjectionConflictException(
+        'Expense $id received multiple allocation plans.',
+      );
+    }
+    if (isDeleted) {
+      throw ProjectionConflictException(
+        'Deleted expense $id cannot receive an allocation plan.',
+      );
+    }
+    if (payload.total != amount) {
+      throw ProjectionConflictException(
+        'Expense $id allocations total ${payload.total} '
+        'does not equal real amount $amount.',
+      );
+    }
+
+    return ProjectedExpense._(
+      id: id,
+      amount: amount,
+      label: label,
+      purchaseDate: purchaseDate,
+      cycleAssignment: cycleAssignment,
+      recordedAtUtc: recordedAtUtc,
+      recordingEventId: recordingEventId,
+      allocations: payload.allocations,
+      allocationEventId: event.id,
+    );
+  }
 
   ProjectedExpense _deletedBy(EventRecord event) {
     return ProjectedExpense._(
@@ -66,6 +106,8 @@ final class ProjectedExpense {
       cycleAssignment: cycleAssignment,
       recordedAtUtc: recordedAtUtc,
       recordingEventId: recordingEventId,
+      allocations: allocations,
+      allocationEventId: allocationEventId,
       deletedAtUtc: event.recordedAtUtc,
       deletionEventId: event.id,
     );
@@ -81,6 +123,8 @@ final class ProjectedExpense {
         cycleAssignment == other.cycleAssignment &&
         recordedAtUtc == other.recordedAtUtc &&
         recordingEventId == other.recordingEventId &&
+        _allocationListsEqual(allocations, other.allocations) &&
+        allocationEventId == other.allocationEventId &&
         deletedAtUtc == other.deletedAtUtc &&
         deletionEventId == other.deletionEventId;
   }
@@ -95,6 +139,8 @@ final class ProjectedExpense {
       cycleAssignment,
       recordedAtUtc,
       recordingEventId,
+      Object.hashAll(allocations ?? const <ExpenseAllocation>[]),
+      allocationEventId,
       deletedAtUtc,
       deletionEventId,
     );
@@ -165,6 +211,16 @@ final class ExpenseLedger {
         nextExpenses[entry.event.target.id] = ProjectedExpense._recorded(
           entry.event,
         );
+      case ExpenseAllocationsPlannedPayload():
+        final existing = nextExpenses[entry.event.target.id];
+        if (existing == null) {
+          throw ProjectionConflictException(
+            'Expense ${entry.event.target.id} was allocated before recording.',
+          );
+        }
+        nextExpenses[entry.event.target.id] = existing._allocatedBy(
+          entry.event,
+        );
       case ExpenseDeletedPayload():
         final existing = nextExpenses[entry.event.target.id];
         if (existing == null) {
@@ -188,6 +244,24 @@ final class ExpenseLedger {
       lastPosition: entry.position,
     );
   }
+}
+
+bool _allocationListsEqual(
+  List<ExpenseAllocation>? left,
+  List<ExpenseAllocation>? right,
+) {
+  if (identical(left, right)) {
+    return true;
+  }
+  if (left == null || right == null || left.length != right.length) {
+    return false;
+  }
+  for (var index = 0; index < left.length; index++) {
+    if (left[index] != right[index]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 /// Indicates that local journal entries were not replayed monotonically.

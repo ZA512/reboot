@@ -43,7 +43,8 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Type monétaire et tests de référence
 - [x] Moteur de cycles civils et tests de changements d’heure
 - [x] Premiers événements métier locaux et rejeu pur
-- [ ] Projection financière glissante sur 52 cycles
+- [x] Allocations et projection hebdomadaire glissante sur 52 cycles
+- [ ] Annualisation des revenus, charges, réserves et objectifs
 
 ## Licence
 

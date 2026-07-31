@@ -181,6 +181,115 @@ final class ExpenseRecordedPayload implements EventPayload {
   final ExpenseCycleAssignment cycleAssignment;
 }
 
+/// One virtual amount applied to a materialized weekly cycle.
+final class ExpenseAllocation {
+  /// Creates a non-negative EUR allocation.
+  ExpenseAllocation({required this.cycleStart, required this.amount}) {
+    if (amount.isNegative || amount.currency != Currency.eur) {
+      throw ArgumentError.value(
+        amount,
+        'amount',
+        'An expense allocation must be a non-negative EUR value.',
+      );
+    }
+  }
+
+  /// Start date identifying the target materialized cycle.
+  final LocalDate cycleStart;
+
+  /// Virtual amount reducing that cycle's remaining budget.
+  final Money amount;
+
+  @override
+  bool operator ==(Object other) {
+    return other is ExpenseAllocation &&
+        cycleStart == other.cycleStart &&
+        amount == other.amount;
+  }
+
+  @override
+  int get hashCode => Object.hash(cycleStart, amount);
+}
+
+/// Version 1 payload fixing an expense's immutable 1-to-12-cycle plan.
+final class ExpenseAllocationsPlannedPayload implements EventPayload {
+  /// Creates and validates an already calculated allocation plan.
+  ExpenseAllocationsPlannedPayload({
+    required List<ExpenseAllocation> allocations,
+  }) : allocations = List<ExpenseAllocation>.unmodifiable(allocations) {
+    if (allocations.isEmpty || allocations.length > 12) {
+      throw RangeError.range(allocations.length, 1, 12, 'allocations.length');
+    }
+
+    for (var index = 1; index < allocations.length; index++) {
+      if (!allocations[index - 1].cycleStart.isBefore(
+        allocations[index].cycleStart,
+      )) {
+        throw ArgumentError.value(
+          allocations,
+          'allocations',
+          'Allocation cycle starts must be unique and strictly increasing.',
+        );
+      }
+    }
+    if (!total.isPositive) {
+      throw ArgumentError.value(
+        total,
+        'allocations',
+        'The complete allocation plan must have a positive total.',
+      );
+    }
+  }
+
+  /// Splits [expenseAmount] exactly across the ordered [cycleStarts].
+  factory ExpenseAllocationsPlannedPayload.evenly({
+    required Money expenseAmount,
+    required List<LocalDate> cycleStarts,
+  }) {
+    if (!expenseAmount.isPositive || expenseAmount.currency != Currency.eur) {
+      throw ArgumentError.value(
+        expenseAmount,
+        'expenseAmount',
+        'An expense plan requires a positive EUR source amount.',
+      );
+    }
+    if (cycleStarts.isEmpty || cycleStarts.length > 12) {
+      throw RangeError.range(cycleStarts.length, 1, 12, 'cycleStarts.length');
+    }
+
+    final parts = expenseAmount.splitEvenly(cycleStarts.length);
+    return ExpenseAllocationsPlannedPayload(
+      allocations: [
+        for (var index = 0; index < cycleStarts.length; index++)
+          ExpenseAllocation(
+            cycleStart: cycleStarts[index],
+            amount: parts[index],
+          ),
+      ],
+    );
+  }
+
+  @override
+  String get eventType => 'expense.allocations.planned';
+
+  @override
+  int get schemaVersion => 1;
+
+  @override
+  EntityKind get targetKind => EntityKind.expense;
+
+  /// Complete ordered allocation plan.
+  final List<ExpenseAllocation> allocations;
+
+  /// Exact total of all virtual allocations.
+  Money get total {
+    return allocations.fold(
+      Money.zero(Currency.eur),
+      (sum, allocation) => sum + allocation.amount,
+    );
+  }
+}
+
 /// Version 1 tombstone payload for deleting an erroneous expense.
 final class ExpenseDeletedPayload implements EventPayload {
   /// Creates an expense tombstone payload.
