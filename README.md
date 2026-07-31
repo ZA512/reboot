@@ -42,7 +42,8 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Création du workspace Flutter/Dart
 - [x] Type monétaire et tests de référence
 - [x] Moteur de cycles civils et tests de changements d’heure
-- [ ] Premiers événements métier locaux
+- [x] Premiers événements métier locaux et rejeu pur
+- [ ] Projection financière glissante sur 52 cycles
 
 ## Licence
 

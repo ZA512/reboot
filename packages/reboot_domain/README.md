@@ -11,4 +11,5 @@ Implemented foundations:
 - explicit supported ISO 4217 currencies;
 - checked arithmetic and exact installment allocation;
 - local civil dates and auditable weekly-cycle policies;
-- explicit short or long transitions when the anchor weekday changes.
+- explicit short or long transitions when the anchor weekday changes;
+- immutable, versioned expense events and separate local journal positions.

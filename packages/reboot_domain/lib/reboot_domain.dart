@@ -2,5 +2,6 @@
 library;
 
 export 'src/cycles.dart';
+export 'src/events.dart';
 export 'src/local_date.dart';
 export 'src/money.dart';
