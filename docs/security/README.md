@@ -1,6 +1,14 @@
 # Sécurité du projet
 
-Le PRD constitue la référence normative. Ce dossier accueillera le modèle de menaces, les choix cryptographiques, les procédures de revue et les preuves de tests de sécurité.
+Le PRD constitue la référence normative. Ce dossier accueille le modèle de
+menaces, les choix cryptographiques, les procédures de revue et les preuves de
+tests de sécurité.
+
+## Documents
+
+- [Modèle de menaces initial](threat-model.md)
+- [ADR-0005 — SQLite chiffrée, Drift et migrations](../adr/0005-encrypted-sqlite-and-migrations.md)
+- [ADR-0006 — Cycle de vie des clés, révocation et récupération](../adr/0006-key-lifecycle-revocation-and-recovery.md)
 
 ## Invariants initiaux
 

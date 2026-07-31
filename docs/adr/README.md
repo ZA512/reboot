@@ -40,9 +40,8 @@ Statuts autorisés :
 
 ## Prochaines décisions à traiter
 
-1. primitives cryptographiques, stockage des clés et révocation ;
-2. gestion d’état et injection de dépendances ;
-3. modèle de synchronisation et résolution des conflits.
+1. gestion d’état et injection de dépendances ;
+2. modèle de synchronisation et résolution des conflits.
 
 ## ADR acceptés
 
@@ -51,8 +50,10 @@ Statuts autorisés :
 - [ADR-0003 — Représentation monétaire et arrondis](0003-money-and-rounding.md)
 - [ADR-0004 — Workspace Flutter/Dart et outillage monorepo](0004-flutter-dart-workspace.md)
 - [ADR-0005 — SQLite chiffrée, Drift et migrations](0005-encrypted-sqlite-and-migrations.md)
+- [ADR-0006 — Cycle de vie des clés, révocation et récupération](0006-key-lifecycle-revocation-and-recovery.md)
 
 Les trois premiers ADR ont été acceptés explicitement le 2026-07-30.
 L’ADR-0004 a été accepté le 2026-07-31 dans le cadre de la délégation des
 décisions techniques au responsable de l’implémentation.
 L’ADR-0005 a été décidé par le responsable de l’implémentation le 2026-07-31.
+L’ADR-0006 a été décidé par le responsable de l’implémentation le 2026-07-31.
