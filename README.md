@@ -8,7 +8,7 @@ Le projet est actuellement en **Phase 1 — Application locale**.
 
 ## Documentation
 
-- [PRD REBOOT 2.0](docs/PRD.md)
+- [PRD REBOOT 2.1](docs/PRD.md)
 - [Méthode REBOOT](docs/reboot-method.md)
 - [Décisions d’architecture](docs/adr/README.md)
 - [Principes de sécurité](docs/security/README.md)
@@ -17,7 +17,11 @@ Le projet est actuellement en **Phase 1 — Application locale**.
 
 ## Architecture cible
 
-Le client sera développé en Flutter/Dart pour Android et iOS. La logique financière restera indépendante de l’interface et manipulera exclusivement des montants entiers en centimes.
+Le client est développé en Flutter/Dart pour Android natif et Web/PWA. L’accès
+iPhone initial passe par une PWA installable depuis Safari ; une application
+iOS native est hors du premier périmètre. La logique financière reste
+indépendante de l’interface et manipule exclusivement des montants entiers en
+centimes.
 
 L’organisation détaillée du dépôt et l’ordre d’implémentation sont définis dans
 le PRD. Le workspace sépare le domaine, les projections, l’orchestration
@@ -34,10 +38,10 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 
 - [x] Dépôt public initialisé
 - [x] PRD Budget52 original archivé sans modification
-- [x] PRD REBOOT 2.0 publié comme source de vérité
+- [x] PRD REBOOT 2.1 publié comme source de vérité
 - [x] Garde-fous Git et sécurité posés
 - [x] Analyse initiale des contradictions et questions ouvertes
-- [x] Six ADR de fondation acceptés
+- [x] Huit ADR d’architecture acceptés
 - [x] Méthode REBOOT formalisée
 - [x] Création du workspace Flutter/Dart
 - [x] Type monétaire et tests de référence
@@ -59,6 +63,10 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Raccourcis de saisie, qualification facultative et répartition des dépenses
 - [x] Modification future des revenus et charges sans réécriture de la semaine en cours
 - [x] Révision future de la trajectoire, des objectifs et du coussin annuel
+- [x] Changement futur du jour REBOOT avec cycle de transition explicite
+- [x] Stratégie de distribution Android et Web/PWA acceptée
+- [ ] Prototype de stockage Web chiffré et garde des clés
+- [ ] PWA installable et utilisable hors ligne sur iPhone
 
 ## Licence
 

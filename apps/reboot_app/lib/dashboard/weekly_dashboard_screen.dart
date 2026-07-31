@@ -7,6 +7,8 @@ import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 import 'package:reboot_projection/reboot_projection.dart';
 
+import '../cycle_settings/cycle_settings_controller.dart';
+import '../cycle_settings/cycle_settings_screen.dart';
 import '../expenses/quick_expense_controller.dart';
 import '../expenses/quick_expense_screen.dart';
 import '../financial_setup/cash_flow_management_screen.dart';
@@ -35,6 +37,7 @@ final class WeeklyDashboardScreen extends ConsumerWidget {
     ref.watch(reserveControllerProvider);
     ref.watch(refundControllerProvider);
     ref.watch(healthControllerProvider);
+    ref.watch(cycleSettingsControllerProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
@@ -268,6 +271,22 @@ final class _DashboardBody extends ConsumerWidget {
                     service: service,
                     today: today,
                   ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              key: const ValueKey('open-cycle-settings'),
+              leading: const Icon(Icons.event_repeat),
+              title: Text(l10n.cycleSettingsDashboardTitle),
+              subtitle: Text(l10n.cycleSettingsDashboardHelp),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      CycleSettingsScreen(service: service, today: today),
                 ),
               ),
             ),

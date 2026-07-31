@@ -1,5 +1,8 @@
 # ADR-0005 — SQLite chiffrée, Drift et migrations
 
+> Note : depuis l’ADR-0008, cette pile de stockage native s’applique à Android.
+> Le stockage Web/PWA requiert un adaptateur et une décision de sécurité dédiés.
+
 - Statut : Accepted
 - Date : 2026-07-31
 - Accepté le : 2026-07-31

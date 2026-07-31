@@ -2219,6 +2219,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Review the amounts protected before the weekly budget is calculated.'**
   String get trajectoryDashboardHelp;
+
+  /// Dashboard navigation title for weekly cycle settings.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT day'**
+  String get cycleSettingsDashboardTitle;
+
+  /// Dashboard navigation help for weekly cycle settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the start day without rewriting previous weeks.'**
+  String get cycleSettingsDashboardHelp;
+
+  /// Weekly cycle settings screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly rhythm'**
+  String get cycleSettingsTitle;
+
+  /// Explains how to choose and change the REBOOT day.
+  ///
+  /// In en, this message translates to:
+  /// **'Your REBOOT day should normally match the day of your main grocery shop. A change affects future weeks only.'**
+  String get cycleSettingsIntro;
+
+  /// Label for the latest accepted weekly anchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Current REBOOT day'**
+  String get currentRebootDay;
+
+  /// Label for the new weekly anchor selector.
+  ///
+  /// In en, this message translates to:
+  /// **'New REBOOT day'**
+  String get newRebootDay;
+
+  /// Explains non-retroactive weekly anchor changes.
+  ///
+  /// In en, this message translates to:
+  /// **'The week already in progress keeps its accepted budget. REBOOT creates one visible exceptional transition, then starts complete weeks on the new day.'**
+  String get rebootDayChangeHelp;
+
+  /// Preview of the first normal week using the new anchor.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete {weekday} weeks start on {date}'**
+  String rebootDayChangePreview(String weekday, String date);
+
+  /// Exact exceptional cycle created by an anchor change.
+  ///
+  /// In en, this message translates to:
+  /// **'Transition from {start} to {end}: {dayCount} days.'**
+  String rebootTransitionPreview(String start, String end, int dayCount);
+
+  /// Explains how transition cycles affect trends.
+  ///
+  /// In en, this message translates to:
+  /// **'This exceptional period remains in history but is excluded from normal trend averages.'**
+  String get rebootTransitionTrendHelp;
+
+  /// Confirms a future weekly anchor change.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule this change'**
+  String get scheduleRebootDayChange;
+
+  /// Generic weekly anchor mutation failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The new REBOOT day could not be scheduled. No partial change was saved.'**
+  String get rebootDayChangeError;
+
+  /// Pending weekly anchor summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday} is already scheduled from {date}'**
+  String rebootDayAlreadyScheduled(String weekday, String date);
+
+  /// Explains why a second pending anchor change is disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'For safety in this first version, let this change take effect before scheduling another one.'**
+  String get rebootDayScheduledLocked;
 }
 
 class _AppLocalizationsDelegate

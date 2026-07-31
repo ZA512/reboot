@@ -2,10 +2,12 @@
 
 ## Regain Expenses, Back On Our Track
 
-- Version : 2.0
-- Date : 2026-07-31
+- Version : 2.1
+- Date : 2026-08-01
 - Statut : spécification produit de référence
-- Cibles initiales : Android et iOS
+- Cibles initiales : Android natif et Web/PWA
+- Accès iPhone initial : PWA installable depuis Safari
+- Version iPhone native : hors périmètre initial
 - Langues initiales : anglais et français
 - Devise du premier MVP : EUR
 
@@ -398,13 +400,15 @@ La synchronisation distante :
 
 ## 19. Contraintes d’architecture
 
-- Flutter et Dart pour Android et iOS ;
+- Flutter et Dart pour Android et Web/PWA ;
 - domaine indépendant de Flutter ;
 - moteur de projection pur ;
 - aucune formule financière dans les widgets ;
 - journal local append-only dès la première mutation ;
-- projections SQLite reconstruisibles ;
-- base locale chiffrée ;
+- projections locales reconstruisibles depuis le journal ;
+- SQLite chiffrée sur Android ;
+- adaptateur Web chiffré à valider avant stockage de données réelles ;
+- service worker PWA explicitement maintenu et versionné ;
 - dépendances verrouillées et lockfiles versionnés ;
 - aucun flottant binaire pour l’argent ;
 - aucun serveur métier administré par l’éditeur requis.
@@ -416,7 +420,9 @@ Les décisions acceptées sont :
 - [ADR-0003 — Représentation monétaire et arrondis](adr/0003-money-and-rounding.md) ;
 - [ADR-0004 — Workspace Flutter/Dart et outillage monorepo](adr/0004-flutter-dart-workspace.md) ;
 - [ADR-0005 — SQLite chiffrée, Drift et migrations](adr/0005-encrypted-sqlite-and-migrations.md) ;
-- [ADR-0006 — Cycle de vie des clés, révocation et récupération](adr/0006-key-lifecycle-revocation-and-recovery.md).
+- [ADR-0006 — Cycle de vie des clés, révocation et récupération](adr/0006-key-lifecycle-revocation-and-recovery.md) ;
+- [ADR-0007 — État Flutter et racine de composition](adr/0007-riverpod-state-and-composition.md) ;
+- [ADR-0008 — Distribution Android et Web/PWA](adr/0008-android-and-web-pwa-distribution.md).
 
 ## 20. Écrans du premier produit
 
@@ -429,7 +435,8 @@ Les décisions acceptées sont :
 - engagements futurs ;
 - tendances ;
 - méthode et hypothèses ;
-- paramètres de cycle, confidentialité et synchronisation.
+- paramètres de cycle, confidentialité et synchronisation ;
+- installation de la PWA et état du stockage local sur le Web.
 
 ## 21. Jalons de livraison
 
@@ -451,12 +458,13 @@ Les décisions acceptées sont :
 
 ### Application locale
 
-1. onboarding ;
-2. écran principal ;
-3. saisie rapide ;
-4. hypothèses et alertes ;
-5. réserves et rattrapages ;
-6. export local.
+1. livrer onboarding, écran principal et saisie rapide sur Android ;
+2. livrer hypothèses, alertes, réserves et rattrapages sur Android ;
+3. prototyper stockage Web chiffré et garde des clés ;
+4. rendre la composition compatible Web ;
+5. ajouter installation PWA et fonctionnement hors ligne ;
+6. valider Safari sur iPhone réel ;
+7. livrer l’export local.
 
 ### Partage chiffré
 
@@ -492,13 +500,19 @@ Le premier produit doit permettre de :
 - rejouer le journal pour reconstruire les projections ;
 - conserver le budget suivant après un surplus ou dépassement ;
 - distinguer un montant frais d’un montant partagé potentiellement ancien ;
-- utiliser le produit sans import ni connexion bancaire.
+- utiliser le produit sans import ni connexion bancaire ;
+- utiliser la PWA dans Safari sans installation ;
+- installer la PWA sur l’écran d’accueil d’un iPhone ;
+- redémarrer la PWA hors ligne après un premier chargement réussi ;
+- conserver localement une dépense hors ligne et réduire immédiatement le restant.
 
 ## 23. Décisions encore ouvertes
 
 Les décisions suivantes doivent être prises avant le code concerné :
 
-- gestion d’état et injection de dépendances ;
+- chiffrement, garde des clés et récupération du stockage Web ;
+- versions minimales des navigateurs après prototype ;
+- hébergeur PWA et chaîne de déploiement sécurisée ;
 - fournisseur Drive, OAuth et permissions ;
 - modèle de conflits multi-appareils ;
 - formats d’export et de portabilité.
@@ -517,3 +531,80 @@ REBOOT réussit si un foyer peut :
 8. comprendre pourquoi chaque recommandation existe ;
 9. restaurer et auditer ses données ;
 10. conserver la maîtrise de ses choix et de ses clés.
+
+## 25. Distribution Web et PWA iPhone
+
+### 25.1. Décision produit
+
+La version iPhone native n’est pas incluse dans le périmètre initial. Sur
+iPhone, REBOOT est une PWA installable depuis Safari et reste utilisable dans
+le navigateur sans installation. Android natif demeure la plateforme de
+développement prioritaire. Le même produit Web vise aussi les navigateurs
+mobiles et de bureau compatibles.
+
+Ce choix évite une dépendance initiale à un Mac, TestFlight, l’App Store et au
+programme développeur Apple. Une application iOS native pourra être
+reconsidérée si l’usage ou des limites bloquantes de la PWA le justifient.
+
+### 25.2. Hébergement et données
+
+La PWA est une application statique servie en HTTPS. L’hébergeur distribue le
+code, les ressources, le manifeste et le service worker ; il ne reçoit ni ne
+conserve les données financières du foyer.
+
+Les données métier restent dans le stockage local chiffré de l’appareil et,
+après activation, dans le stockage distant chiffré choisi par l’utilisateur.
+Le stockage du navigateur ne constitue jamais l’unique sauvegarde fiable d’un
+foyer partagé.
+
+### 25.3. Stockage et hors ligne
+
+Le domaine utilise le port commun `LocalEventJournal`. Android l’implémente
+avec SQLite chiffrée. Le Web utilise un adaptateur persistant propre au
+navigateur, choisi après prototype entre SQLite WebAssembly avec stockage
+OPFS/IndexedDB et IndexedDB direct.
+
+Après un premier chargement réussi, le shell et les données locales nécessaires
+permettent de consulter le restant et de saisir une dépense hors ligne. La
+dépense réduit immédiatement le restant et reste en attente de synchronisation
+sans être annulée en cas d’échec réseau.
+
+### 25.4. Installation et transparence
+
+Un assistant non bloquant explique sur iPhone : ouvrir le menu de partage,
+choisir « Sur l’écran d’accueil », confirmer puis ouvrir REBOOT depuis son
+icône. Cette aide reste accessible depuis les paramètres. L’interface parle de
+PWA ou d’application Web installée, jamais d’application native.
+
+Le manifeste définit un identifiant stable, le nom, les icônes, les couleurs,
+la portée, l’URL de démarrage et le mode `standalone`. Le service worker gère le
+shell versionné, le démarrage hors ligne et une mise à jour contrôlée qui
+n’interrompt pas une saisie.
+
+### 25.5. Synchronisation et limites
+
+La synchronisation distante chiffrée est déclenchée au lancement, au retour au
+premier plan, après une écriture et à la demande. Elle affiche sa fraîcheur et
+ne suppose jamais une exécution fiable en arrière-plan sur iPhone.
+
+REBOOT explique que le navigateur ou le système peut supprimer le stockage
+local, fermer l’application ou limiter les notifications et les tâches de fond.
+Woob n’est pas embarqué dans la PWA ; les imports manuels et un futur compagnon
+Android ou ordinateur restent possibles.
+
+Le partage multi-appareils PWA n’est livré qu’avec une sauvegarde distante
+chiffrée et récupérable. Le chiffrement Web, la garde des clés, les en-têtes de
+sécurité et la résistance aux suppressions doivent être validés avant toute
+donnée financière réelle.
+
+### 25.6. Compatibilité et performances
+
+La matrice minimale couvre Safari iPhone, Chrome Android, Chrome et Edge de
+bureau, ainsi que Firefox de bureau. Les versions exactes sont fixées après un
+prototype et des essais sur appareils réels.
+
+Sur un jeu de référence de 10 ans comprenant 200 000 transactions et 100 000
+autres événements, la cible à chaud est de 300 ms pour le tableau de bord,
+100 ms pour le retour visuel d’une saisie, 500 ms pour la projection sur
+52 cycles et 800 ms pour une recherche courante. Les historiques utilisent
+pagination, index, agrégats matérialisés et listes virtualisées.

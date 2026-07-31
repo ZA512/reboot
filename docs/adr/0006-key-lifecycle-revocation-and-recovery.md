@@ -1,5 +1,9 @@
 # ADR-0006 — Cycle de vie des clés, révocation et récupération
 
+> Note : l’ADR-0008 retire l’application iOS native du périmètre initial. Les
+> invariants de partage restent applicables à la PWA, mais sa garde locale des
+> clés doit faire l’objet d’une décision dédiée.
+
 - Statut : Accepted
 - Date : 2026-07-31
 - Accepté le : 2026-07-31

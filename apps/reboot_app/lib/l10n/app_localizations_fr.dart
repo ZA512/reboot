@@ -1315,4 +1315,58 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get trajectoryDashboardHelp =>
       'Consultez les montants protégés avant le calcul du budget semaine.';
+
+  @override
+  String get cycleSettingsDashboardTitle => 'Jour REBOOT';
+
+  @override
+  String get cycleSettingsDashboardHelp =>
+      'Changez le jour de départ sans réécrire les semaines passées.';
+
+  @override
+  String get cycleSettingsTitle => 'Rythme hebdomadaire';
+
+  @override
+  String get cycleSettingsIntro =>
+      'Votre jour REBOOT devrait normalement correspondre au jour des courses principales. Un changement affecte uniquement les semaines futures.';
+
+  @override
+  String get currentRebootDay => 'Jour REBOOT actuel';
+
+  @override
+  String get newRebootDay => 'Nouveau jour REBOOT';
+
+  @override
+  String get rebootDayChangeHelp =>
+      'La semaine déjà commencée conserve son budget accepté. REBOOT crée une période de transition exceptionnelle visible, puis débute des semaines complètes au nouveau jour.';
+
+  @override
+  String rebootDayChangePreview(String weekday, String date) {
+    return 'Les semaines complètes du $weekday débutent le $date';
+  }
+
+  @override
+  String rebootTransitionPreview(String start, String end, int dayCount) {
+    return 'Transition du $start au $end : $dayCount jours.';
+  }
+
+  @override
+  String get rebootTransitionTrendHelp =>
+      'Cette période exceptionnelle reste dans l’historique mais est exclue des moyennes de tendance normales.';
+
+  @override
+  String get scheduleRebootDayChange => 'Planifier ce changement';
+
+  @override
+  String get rebootDayChangeError =>
+      'Le nouveau jour REBOOT n’a pas pu être planifié. Aucun changement partiel n’a été enregistré.';
+
+  @override
+  String rebootDayAlreadyScheduled(String weekday, String date) {
+    return 'Le $weekday est déjà planifié à partir du $date';
+  }
+
+  @override
+  String get rebootDayScheduledLocked =>
+      'Par sécurité dans cette première version, laissez ce changement prendre effet avant d’en planifier un autre.';
 }

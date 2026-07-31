@@ -31,7 +31,7 @@ Exemples de chemins :
 - Windows : `C:\Users\<utilisateur>\develop\flutter` ;
 - macOS et Linux : `~/develop/flutter`.
 
-## Plateformes mobiles
+## Plateformes produit
 
 ### Android
 
@@ -42,14 +42,24 @@ command-line tools et accepter les licences avec :
 flutter doctor --android-licenses
 ```
 
-REBOOT ne cible pas Windows, macOS, Linux ou le web comme plateformes produit.
-Le poste Windows sert au développement Dart, Flutter et Android.
+Android est la cible d’implémentation prioritaire. Le poste Windows sert au
+développement Dart, Flutter, Android et Web.
 
-### iOS
+### Web/PWA et iPhone
 
-Une construction iOS exige macOS, Xcode et CocoaPods ou Swift Package Manager
-selon les plugins utilisés. Les vérifications iOS seront exécutées sur un
-runner macOS et sur un appareil réel avant distribution.
+L’accès iPhone initial passe par une PWA. Ne pas activer la cible Web en
+important directement les adaptateurs Android : la racine de composition, le
+stockage local chiffré et la garde des clés doivent d’abord disposer
+d’implémentations Web validées conformément à l’ADR-0008.
+
+Le prototype utilise Chrome pour le développement local, puis Safari sur un
+iPhone réel pour valider installation, redémarrage, mise à jour et hors-ligne.
+Une inspection WebKit approfondie pourra nécessiter ponctuellement un Mac, mais
+ni la construction ni la publication de la PWA ne dépendent du programme
+développeur Apple.
+
+La version iOS native est hors du périmètre initial. Le squelette généré reste
+dans le dépôt afin de ne pas rendre une future reprise destructive.
 
 ## Commandes du dépôt
 
@@ -88,7 +98,8 @@ flutter build apk --debug
 - versionner le lockfile racine ;
 - ne pas utiliser de préversion sans justification documentée ;
 - examiner le changelog, la maintenance, la licence et les avis de sécurité ;
-- tester Android et iOS après toute mise à niveau native ;
+- tester Android après toute mise à niveau native et le Web après toute mise à
+  niveau affectant Flutter Web, Wasm ou le service worker ;
 - ne jamais fusionner automatiquement une mise à niveau majeure.
 
 Les versions mentionnées dans un ADR décrivent l’état étudié au moment de la

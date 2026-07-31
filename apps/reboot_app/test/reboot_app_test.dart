@@ -734,6 +734,70 @@ void main() {
     );
   });
 
+  testWidgets('schedules a new REBOOT day through one visible transition', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    await tester.binding.setSurfaceSize(const Size(800, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final service = await _readyService(_MemoryJournal());
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 4, 5),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('open-cycle-settings')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const ValueKey('open-cycle-settings')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Rythme hebdomadaire'), findsOneWidget);
+    expect(find.text('Samedi'), findsWidgets);
+    await tester.tap(find.byKey(const ValueKey('new-reboot-day')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lundi').last);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Transition du'), findsOneWidget);
+    expect(find.textContaining('2 jours'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('save-reboot-day')));
+    await tester.pumpAndSettle();
+
+    final household = service.configuration.household!;
+    expect(household.cyclePolicies, hasLength(2));
+    expect(household.latestCyclePolicy.anchorWeekday, Weekday.monday);
+    expect(household.latestCyclePolicy.effectiveFrom, LocalDate(2026, 4, 11));
+    expect(
+      household.latestCyclePolicy.firstNormalCycleStart,
+      LocalDate(2026, 4, 13),
+    );
+    final transition = household.cycleContaining(LocalDate(2026, 4, 12));
+    expect(transition.kind, WeeklyCycleKind.transition);
+    expect(transition.start, LocalDate(2026, 4, 11));
+    expect(transition.endExclusive, LocalDate(2026, 4, 13));
+    expect(find.text('Rythme hebdomadaire'), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('open-cycle-settings')));
+    await tester.pumpAndSettle();
+    expect(find.text('Samedi'), findsOneWidget);
+    expect(find.textContaining('Lundi est déjà planifié'), findsOneWidget);
+    expect(find.byKey(const ValueKey('new-reboot-day')), findsNothing);
+  });
+
   testWidgets('uses a real reserve without reducing the weekly budget', (
     tester,
   ) async {

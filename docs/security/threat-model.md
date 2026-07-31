@@ -1,8 +1,8 @@
 # Modèle de menaces initial
 
-- Version : 1
-- Date : 2026-07-31
-- Portée : application mobile locale et futur partage chiffré
+- Version : 2
+- Date : 2026-08-01
+- Portée : application Android locale, future PWA et futur partage chiffré
 
 ## Objectif
 
@@ -24,10 +24,14 @@ ne remplace pas les tests, les revues de code ni les ADR cryptographiques.
 
 - **Domaine pur** : traite des données déjà validées, sans accès direct au
   stockage, au réseau ou aux secrets.
-- **Stockage local** : fichier chiffré dans l’espace privé de l’application,
-  ouvert uniquement après récupération de la clé locale.
-- **Stockage sécurisé du système** : Android Keystore et iOS Keychain protègent
-  les petits secrets propres à l’installation.
+- **Stockage local Android** : fichier chiffré dans l’espace privé de
+  l’application, ouvert uniquement après récupération de la clé locale.
+- **Stockage sécurisé Android** : Android Keystore protège les petits secrets
+  propres à l’installation.
+- **Origine Web/PWA** : code, service worker, caches, stockage persistant et
+  primitives cryptographiques du navigateur forment une frontière distincte.
+  Elle n’est pas assimilée à Android Keystore et doit être validée avant
+  utilisation de données financières réelles.
 - **Fournisseur distant** : considéré comme non fiable pour la confidentialité
   et l’intégrité des objets ; il fournit seulement stockage et transport.
 - **Autre appareil du foyer** : autorisé tant que son certificat est actif,
@@ -48,6 +52,10 @@ ne remplace pas les tests, les revues de code ni les ADR cryptographiques.
 - utilisateur distant envoyant un objet malformé, surdimensionné ou signé avec
   une identité non autorisée ;
 - erreur de migration, corruption locale ou suppression distante.
+- injection XSS lisant des données déchiffrées dans la PWA ;
+- service worker, ressource statique ou dépendance Web compromis ;
+- effacement, éviction ou repli silencieux vers un stockage Web non persistant ;
+- ancienne version PWA continuant à écrire un format devenu incompatible.
 
 ## Propriétés exigées
 
@@ -65,6 +73,11 @@ ne remplace pas les tests, les revues de code ni les ADR cryptographiques.
 - une erreur de stockage sécurisé ne provoque ni effacement silencieux ni
   recréation d’une base vide ;
 - aucune clé, donnée financière ou jeton OAuth n’apparaît dans les journaux.
+- aucune donnée métier, clé ou jeton OAuth n’est placé en clair dans un cache
+  Web ou confié au service worker ;
+- une perte du stockage PWA est détectée et conduit à une récupération
+  explicite, jamais à un faux profil vide présenté comme le profil existant ;
+- une politique de sécurité de contenu restrictive limite les sources de code.
 
 ## Limites assumées
 
@@ -80,6 +93,9 @@ REBOOT ne peut pas garantir :
   informations affichées ;
 - la révocation sûre d’un kit de récupération volé sans création d’une nouvelle
   racine de confiance et migration du foyer.
+- la conservation illimitée du stockage local d’un navigateur ;
+- la confidentialité d’une PWA lorsqu’un script exécuté dans son origine est
+  compromis et accède aux données déjà déchiffrées.
 
 Ces limites doivent être expliquées sans présenter le chiffrement comme une
 garantie absolue.
@@ -100,6 +116,10 @@ garantie absolue.
 | Fuite par diagnostic | redaction stricte et télémétrie sans données métier |
 | Dépendance compromise | versions verrouillées, revue des mises à jour et inventaire |
 | Migration interrompue | transaction, schémas versionnés et tests de reprise |
+| XSS dans la PWA | CSP restrictive, aucun HTML dynamique non assaini, revue des dépendances |
+| Cache applicatif compromis | HTTPS, ressources versionnées, service worker minimal et mise à jour contrôlée |
+| Stockage PWA supprimé | détection, avertissement, export et récupération distante chiffrée |
+| Repli vers stockage non persistant | test au démarrage et échec fermé pour les données réelles |
 
 ## Validation continue
 
@@ -110,8 +130,8 @@ Le modèle doit être revu :
 - avant les imports bancaires ;
 - après toute modification du format d’enveloppe ou de la hiérarchie de clés ;
 - après un incident, une vulnérabilité de dépendance ou un changement majeur
-  Android/iOS ;
-- avant une publication en magasin.
+  Android ou Web ;
+- avant une publication Android ou PWA.
 
 Les constats entraînent un ADR, un test ou une limitation documentée. Ils ne
 restent pas uniquement dans une discussion.

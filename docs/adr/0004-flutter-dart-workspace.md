@@ -1,5 +1,8 @@
 # ADR-0004 — Workspace Flutter/Dart et outillage monorepo
 
+> Note : l’ADR-0008 remplace la cible iOS initiale par Web/PWA. Le découpage du
+> workspace et les autres décisions de cet ADR restent applicables.
+
 - Statut : Accepted
 - Date : 2026-07-31
 - Accepté le : 2026-07-31

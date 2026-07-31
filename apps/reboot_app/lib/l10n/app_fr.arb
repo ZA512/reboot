@@ -352,5 +352,19 @@
   "overdraftTargetSummary": "Date cible : {date}",
   "noAnnualDeductions": "Aucun coussin, projet ou marge de sécurité supplémentaire n’est actuellement retiré.",
   "trajectoryDashboardTitle": "Trajectoire et objectifs",
-  "trajectoryDashboardHelp": "Consultez les montants protégés avant le calcul du budget semaine."
+  "trajectoryDashboardHelp": "Consultez les montants protégés avant le calcul du budget semaine.",
+  "cycleSettingsDashboardTitle": "Jour REBOOT",
+  "cycleSettingsDashboardHelp": "Changez le jour de départ sans réécrire les semaines passées.",
+  "cycleSettingsTitle": "Rythme hebdomadaire",
+  "cycleSettingsIntro": "Votre jour REBOOT devrait normalement correspondre au jour des courses principales. Un changement affecte uniquement les semaines futures.",
+  "currentRebootDay": "Jour REBOOT actuel",
+  "newRebootDay": "Nouveau jour REBOOT",
+  "rebootDayChangeHelp": "La semaine déjà commencée conserve son budget accepté. REBOOT crée une période de transition exceptionnelle visible, puis débute des semaines complètes au nouveau jour.",
+  "rebootDayChangePreview": "Les semaines complètes du {weekday} débutent le {date}",
+  "rebootTransitionPreview": "Transition du {start} au {end} : {dayCount} jours.",
+  "rebootTransitionTrendHelp": "Cette période exceptionnelle reste dans l’historique mais est exclue des moyennes de tendance normales.",
+  "scheduleRebootDayChange": "Planifier ce changement",
+  "rebootDayChangeError": "Le nouveau jour REBOOT n’a pas pu être planifié. Aucun changement partiel n’a été enregistré.",
+  "rebootDayAlreadyScheduled": "Le {weekday} est déjà planifié à partir du {date}",
+  "rebootDayScheduledLocked": "Par sécurité dans cette première version, laissez ce changement prendre effet avant d’en planifier un autre."
 }

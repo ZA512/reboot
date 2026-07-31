@@ -1310,4 +1310,58 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get trajectoryDashboardHelp =>
       'Review the amounts protected before the weekly budget is calculated.';
+
+  @override
+  String get cycleSettingsDashboardTitle => 'REBOOT day';
+
+  @override
+  String get cycleSettingsDashboardHelp =>
+      'Change the start day without rewriting previous weeks.';
+
+  @override
+  String get cycleSettingsTitle => 'Weekly rhythm';
+
+  @override
+  String get cycleSettingsIntro =>
+      'Your REBOOT day should normally match the day of your main grocery shop. A change affects future weeks only.';
+
+  @override
+  String get currentRebootDay => 'Current REBOOT day';
+
+  @override
+  String get newRebootDay => 'New REBOOT day';
+
+  @override
+  String get rebootDayChangeHelp =>
+      'The week already in progress keeps its accepted budget. REBOOT creates one visible exceptional transition, then starts complete weeks on the new day.';
+
+  @override
+  String rebootDayChangePreview(String weekday, String date) {
+    return 'Complete $weekday weeks start on $date';
+  }
+
+  @override
+  String rebootTransitionPreview(String start, String end, int dayCount) {
+    return 'Transition from $start to $end: $dayCount days.';
+  }
+
+  @override
+  String get rebootTransitionTrendHelp =>
+      'This exceptional period remains in history but is excluded from normal trend averages.';
+
+  @override
+  String get scheduleRebootDayChange => 'Schedule this change';
+
+  @override
+  String get rebootDayChangeError =>
+      'The new REBOOT day could not be scheduled. No partial change was saved.';
+
+  @override
+  String rebootDayAlreadyScheduled(String weekday, String date) {
+    return '$weekday is already scheduled from $date';
+  }
+
+  @override
+  String get rebootDayScheduledLocked =>
+      'For safety in this first version, let this change take effect before scheduling another one.';
 }

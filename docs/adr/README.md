@@ -40,8 +40,10 @@ Statuts autorisés :
 
 ## Prochaines décisions à traiter
 
-1. modèle de synchronisation et résolution des conflits ;
-2. format d’export chiffré et portabilité.
+1. stockage Web chiffré, garde des clés et récupération locale ;
+2. modèle de synchronisation et résolution des conflits ;
+3. hébergement PWA, en-têtes de sécurité et chaîne de déploiement ;
+4. format d’export chiffré et portabilité.
 
 ## ADR acceptés
 
@@ -52,6 +54,7 @@ Statuts autorisés :
 - [ADR-0005 — SQLite chiffrée, Drift et migrations](0005-encrypted-sqlite-and-migrations.md)
 - [ADR-0006 — Cycle de vie des clés, révocation et récupération](0006-key-lifecycle-revocation-and-recovery.md)
 - [ADR-0007 — État Flutter et racine de composition](0007-riverpod-state-and-composition.md)
+- [ADR-0008 — Distribution Android et Web/PWA](0008-android-and-web-pwa-distribution.md)
 
 Les trois premiers ADR ont été acceptés explicitement le 2026-07-30.
 L’ADR-0004 a été accepté le 2026-07-31 dans le cadre de la délégation des
@@ -59,3 +62,5 @@ décisions techniques au responsable de l’implémentation.
 L’ADR-0005 a été décidé par le responsable de l’implémentation le 2026-07-31.
 L’ADR-0006 a été décidé par le responsable de l’implémentation le 2026-07-31.
 L’ADR-0007 a été décidé par le responsable de l’implémentation le 2026-07-31.
+L’ADR-0008 a été accepté le 2026-08-01 à la demande du porteur du projet ; ses
+choix techniques ont été précisés par le responsable de l’implémentation.
