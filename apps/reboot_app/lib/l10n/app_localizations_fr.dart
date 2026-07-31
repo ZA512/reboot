@@ -1369,4 +1369,112 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get rebootDayScheduledLocked =>
       'Par sécurité dans cette première version, laissez ce changement prendre effet avant d’en planifier un autre.';
+
+  @override
+  String get receivedBonusesDashboardTitle => 'Primes déjà reçues';
+
+  @override
+  String get receivedBonusesDashboardEmpty =>
+      'Ajoutez uniquement l’argent qui existe encore et qui est destiné au quotidien.';
+
+  @override
+  String receivedBonusesDashboardCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count primes reçues sont en cours de lissage',
+      one: '1 prime reçue est en cours de lissage',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivedBonusesDashboardDue(int count, int due) {
+    String _temp0 = intl.Intl.pluralLogic(
+      due,
+      locale: localeName,
+      other: '$due primes sur $count doivent être confirmées',
+      one: '1 prime sur $count doit être confirmée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get receivedBonusesTitle => 'Primes déjà reçues';
+
+  @override
+  String get receivedBonusesIntro =>
+      'Une prime ne compte jamais parce qu’elle est simplement attendue. Saisissez uniquement la part déjà reçue, encore disponible et volontairement destinée au quotidien.';
+
+  @override
+  String receivedBonusRule(String date) {
+    return 'Un nouveau montant s’applique à partir du $date. REBOOT le répartit exactement jusqu’au prochain versement, puis attend votre confirmation.';
+  }
+
+  @override
+  String get noReceivedBonus =>
+      'Aucune prime reçue ne soutient actuellement votre budget semaine.';
+
+  @override
+  String get receivedBonusMutationError =>
+      'La prime n’a pas pu être enregistrée. Aucun changement partiel n’a été sauvegardé.';
+
+  @override
+  String get addReceivedBonus => 'Ajouter une prime reçue';
+
+  @override
+  String get receivedBonusConfirmationRequired =>
+      'La date de versement attendue est arrivée. Confirmez ce qui a réellement été reçu et la part destinée au quotidien.';
+
+  @override
+  String receivedBonusUntil(String date) {
+    return 'Répartie jusqu’au versement attendu le $date';
+  }
+
+  @override
+  String receivedBonusChangesOn(String date) {
+    return 'Un nouveau montant confirmé s’applique à partir du $date';
+  }
+
+  @override
+  String receivedBonusEndsOn(String date) {
+    return 'Cette prime cesse d’affecter le budget à partir du $date';
+  }
+
+  @override
+  String get stopReceivedBonus => 'Arrêter';
+
+  @override
+  String get confirmReceivedBonus => 'Confirmer';
+
+  @override
+  String get adjustReceivedBonus => 'Ajuster';
+
+  @override
+  String get deleteReceivedBonusTitle => 'Arrêter d’utiliser cette prime ?';
+
+  @override
+  String deleteReceivedBonusBody(String date) {
+    return 'Elle cessera d’augmenter le budget semaine à partir du $date. Les semaines précédentes restent inchangées.';
+  }
+
+  @override
+  String get confirmReceivedBonusTitle => 'Confirmer le montant disponible';
+
+  @override
+  String get receivedBonusDialogHelp =>
+      'Ne saisissez ni la prime brute d’origine ni une estimation future. Indiquez uniquement le montant qui existe aujourd’hui et que vous choisissez d’injecter dans le quotidien.';
+
+  @override
+  String get receivedBonusName => 'Nom';
+
+  @override
+  String get receivedBonusRemainingAmount =>
+      'Montant encore disponible pour le quotidien';
+
+  @override
+  String get receivedBonusNextPayment => 'Date du prochain versement attendu';
+
+  @override
+  String get saveReceivedBonus => 'Enregistrer ce montant';
 }

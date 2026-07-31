@@ -79,9 +79,7 @@ final class CashFlowManagementScreen extends ConsumerWidget {
               CashFlowDirection.outflow,
         )
         .toList(growable: false);
-    final currentBudget = service
-        .buildAnnualBudget(currentCycle)
-        .recommendedWeeklyBudget;
+    final currentBudget = service.weeklyBudgetForCycleStarting(currentCycle);
     final futureProjection = service.buildAnnualBudget(effectiveCycle);
 
     return Scaffold(
@@ -121,7 +119,9 @@ final class CashFlowManagementScreen extends ConsumerWidget {
                           child: _BudgetValue(
                             key: const ValueKey('future-weekly-budget'),
                             label: l10n.futureWeeklyBudget,
-                            amount: futureProjection.recommendedWeeklyBudget,
+                            amount: service.weeklyBudgetForCycleStarting(
+                              effectiveCycle,
+                            ),
                           ),
                         ),
                       ],

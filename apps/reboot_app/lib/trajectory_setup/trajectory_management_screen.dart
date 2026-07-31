@@ -35,7 +35,6 @@ final class TrajectoryManagementScreen extends ConsumerWidget {
     final future = service.configuration.commitmentsForCycleStarting(
       effectiveCycle,
     )!;
-    final currentBudget = service.buildAnnualBudget(currentCycle);
     final futureBudget = service.buildAnnualBudget(effectiveCycle);
     final hasPendingChange = current.eventId != future.eventId;
 
@@ -72,7 +71,9 @@ final class TrajectoryManagementScreen extends ConsumerWidget {
                         Expanded(
                           child: _BudgetValue(
                             label: l10n.currentWeeklyBudget,
-                            amount: currentBudget.recommendedWeeklyBudget,
+                            amount: service.weeklyBudgetForCycleStarting(
+                              currentCycle,
+                            ),
                           ),
                         ),
                         const Icon(Icons.arrow_forward),
@@ -80,7 +81,9 @@ final class TrajectoryManagementScreen extends ConsumerWidget {
                           child: _BudgetValue(
                             key: const ValueKey('future-trajectory-budget'),
                             label: l10n.futureWeeklyBudget,
-                            amount: futureBudget.recommendedWeeklyBudget,
+                            amount: service.weeklyBudgetForCycleStarting(
+                              effectiveCycle,
+                            ),
                           ),
                         ),
                       ],

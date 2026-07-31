@@ -98,6 +98,25 @@ List<EventPayload> _allPayloads() {
       effectiveFromCycleStart: LocalDate(2026, 4, 11),
     ),
     CashFlowDeletedPayload(effectiveFromCycleStart: LocalDate(2026, 4, 18)),
+    ReceivedBonusCreatedPayload(
+      pool: ReceivedBonusPool(
+        title: 'Prime annuelle',
+        remainingForDailyLife: _eur(500000),
+        nextPaymentDate: LocalDate(2027, 1, 15),
+      ),
+      effectiveFromCycleStart: LocalDate(2026, 4, 4),
+    ),
+    ReceivedBonusReplacedPayload(
+      pool: ReceivedBonusPool(
+        title: 'Prime annuelle',
+        remainingForDailyLife: _eur(450000),
+        nextPaymentDate: LocalDate(2027, 7, 15),
+      ),
+      effectiveFromCycleStart: LocalDate(2027, 1, 16),
+    ),
+    ReceivedBonusDeletedPayload(
+      effectiveFromCycleStart: LocalDate(2027, 7, 17),
+    ),
     AnnualCommitmentsSetPayload(
       effectiveFromCycleStart: LocalDate(2026, 4, 4),
       reserveContributions: _eur(120000),

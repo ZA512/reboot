@@ -7,6 +7,8 @@ import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 import 'package:reboot_projection/reboot_projection.dart';
 
+import '../bonuses/received_bonus_controller.dart';
+import '../bonuses/received_bonus_screen.dart';
 import '../cycle_settings/cycle_settings_controller.dart';
 import '../cycle_settings/cycle_settings_screen.dart';
 import '../expenses/quick_expense_controller.dart';
@@ -38,6 +40,7 @@ final class WeeklyDashboardScreen extends ConsumerWidget {
     ref.watch(refundControllerProvider);
     ref.watch(healthControllerProvider);
     ref.watch(cycleSettingsControllerProvider);
+    ref.watch(receivedBonusControllerProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
@@ -278,6 +281,22 @@ final class _DashboardBody extends ConsumerWidget {
           const SizedBox(height: 12),
           Card(
             child: ListTile(
+              key: const ValueKey('open-received-bonuses'),
+              leading: const Icon(Icons.card_giftcard),
+              title: Text(l10n.receivedBonusesDashboardTitle),
+              subtitle: Text(_receivedBonusSummary(l10n, service, today)),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      ReceivedBonusScreen(service: service, today: today),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
               key: const ValueKey('open-cycle-settings'),
               leading: const Icon(Icons.event_repeat),
               title: Text(l10n.cycleSettingsDashboardTitle),
@@ -414,6 +433,34 @@ final class _DashboardBody extends ConsumerWidget {
       ).showSnackBar(SnackBar(content: Text(l10n.deleteExpenseError)));
     }
   }
+}
+
+String _receivedBonusSummary(
+  AppLocalizations l10n,
+  LocalRebootService service,
+  LocalDate today,
+) {
+  final household = service.configuration.household!;
+  final currentCycle = today.isBefore(household.firstCycleStart)
+      ? household.firstCycleStart
+      : household.cycleContaining(today).start;
+  final nextCycle = service.nextConfigurationCycleStart(today);
+  final active = service.configuration.receivedBonuses.values
+      .where((bonus) {
+        return bonus.revisionForCycleStarting(currentCycle)?.pool != null ||
+            bonus.revisionForCycleStarting(nextCycle)?.pool != null;
+      })
+      .toList(growable: false);
+  if (active.isEmpty) return l10n.receivedBonusesDashboardEmpty;
+  final due = active.where((bonus) {
+    final displayed =
+        bonus.revisionForCycleStarting(nextCycle)?.pool ??
+        bonus.revisionForCycleStarting(currentCycle)?.pool;
+    return displayed != null && !displayed.nextPaymentDate.isAfter(today);
+  }).length;
+  return due == 0
+      ? l10n.receivedBonusesDashboardCount(active.length)
+      : l10n.receivedBonusesDashboardDue(active.length, due);
 }
 
 final class _TrendSummaryCard extends StatelessWidget {

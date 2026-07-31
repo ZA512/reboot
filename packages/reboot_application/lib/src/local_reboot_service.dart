@@ -136,6 +136,47 @@ final class DeleteCashFlowCommand {
   final LocalDate businessDate;
 }
 
+/// Creates one allocation from money that has already been received.
+final class CreateReceivedBonusCommand {
+  const CreateReceivedBonusCommand({
+    required this.pool,
+    required this.effectiveFromCycleStart,
+    required this.businessDate,
+  });
+
+  final ReceivedBonusPool pool;
+  final LocalDate effectiveFromCycleStart;
+  final LocalDate businessDate;
+}
+
+/// Confirms a new remaining amount for an existing bonus source.
+final class ReplaceReceivedBonusCommand {
+  const ReplaceReceivedBonusCommand({
+    required this.receivedBonusId,
+    required this.pool,
+    required this.effectiveFromCycleStart,
+    required this.businessDate,
+  });
+
+  final EntityId receivedBonusId;
+  final ReceivedBonusPool pool;
+  final LocalDate effectiveFromCycleStart;
+  final LocalDate businessDate;
+}
+
+/// Stops using one received bonus in future weekly budgets.
+final class DeleteReceivedBonusCommand {
+  const DeleteReceivedBonusCommand({
+    required this.receivedBonusId,
+    required this.effectiveFromCycleStart,
+    required this.businessDate,
+  });
+
+  final EntityId receivedBonusId;
+  final LocalDate effectiveFromCycleStart;
+  final LocalDate businessDate;
+}
+
 /// Replaces the complete annual reserve, project, and safety commitments.
 final class SetAnnualCommitmentsCommand {
   /// Creates the command.
@@ -598,6 +639,78 @@ final class LocalRebootService {
     });
   }
 
+  /// Starts allocating one amount that already exists until its renewal date.
+  Future<ProjectedReceivedBonus> createReceivedBonus(
+    CreateReceivedBonusCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final receivedBonusId = _identities.nextEntityId();
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(
+          kind: EntityKind.receivedBonus,
+          id: receivedBonusId,
+        ),
+        payload: ReceivedBonusCreatedPayload(
+          pool: command.pool,
+          effectiveFromCycleStart: command.effectiveFromCycleStart,
+        ),
+      );
+      await _appendValidated([event]);
+      return _configuration.receivedBonuses[receivedBonusId]!;
+    });
+  }
+
+  /// Confirms the newly received and explicitly assigned remaining amount.
+  Future<ProjectedReceivedBonus> replaceReceivedBonus(
+    ReplaceReceivedBonusCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(
+          kind: EntityKind.receivedBonus,
+          id: command.receivedBonusId,
+        ),
+        payload: ReceivedBonusReplacedPayload(
+          pool: command.pool,
+          effectiveFromCycleStart: command.effectiveFromCycleStart,
+        ),
+      );
+      await _appendValidated([event]);
+      return _configuration.receivedBonuses[command.receivedBonusId]!;
+    });
+  }
+
+  /// Stops allocating an existing bonus source from a future cycle.
+  Future<ProjectedReceivedBonus> deleteReceivedBonus(
+    DeleteReceivedBonusCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(
+          kind: EntityKind.receivedBonus,
+          id: command.receivedBonusId,
+        ),
+        payload: ReceivedBonusDeletedPayload(
+          effectiveFromCycleStart: command.effectiveFromCycleStart,
+        ),
+      );
+      await _appendValidated([event]);
+      return _configuration.receivedBonuses[command.receivedBonusId]!;
+    });
+  }
+
   /// Sets the complete annual commitment snapshot from a future cycle.
   Future<AnnualCommitmentsRevision> setAnnualCommitments(
     SetAnnualCommitmentsCommand command,
@@ -722,6 +835,21 @@ final class LocalRebootService {
     return _configuration.buildAnnualBudget(cycles);
   }
 
+  /// Complete accepted budget for one cycle, including received bonus money.
+  Money weeklyBudgetForCycleStarting(LocalDate cycleStart) {
+    _requireOpen();
+    final household = _configuration.household;
+    if (household == null) {
+      throw const IncompleteConfigurationException(
+        'The household must be initialized before projecting a budget.',
+      );
+    }
+    final base = _configuration
+        .buildAnnualBudget(household.cyclesFromDate(cycleStart, count: 52))
+        .recommendedWeeklyBudget;
+    return base + _configuration.receivedBonusForCycleStarting(cycleStart);
+  }
+
   /// Projects the live weekly balances from the cycle containing [asOfDate].
   ///
   /// Before the first configured cycle, the horizon starts on that first
@@ -739,12 +867,11 @@ final class LocalRebootService {
         ? household.firstCycleStart
         : household.cycleContaining(asOfDate).start;
     final cycles = household.cyclesFromDate(projectionStart, count: 52);
-    final annualBudget = _configuration.buildAnnualBudget(cycles);
     return Rolling52Projection.build(
       cycles: cycles,
       budgetsByCycleStart: {
         for (final cycle in cycles)
-          cycle.start: annualBudget.recommendedWeeklyBudget,
+          cycle.start: weeklyBudgetForCycleStarting(cycle.start),
       },
       expenseLedger: _expenses,
     );
@@ -785,11 +912,7 @@ final class LocalRebootService {
       for (final cycle in completed)
         TrendCycleObservation(
           cycle: cycle,
-          budget: _configuration
-              .buildAnnualBudget(
-                household.cyclesFromDate(cycle.start, count: 52),
-              )
-              .recommendedWeeklyBudget,
+          budget: weeklyBudgetForCycleStarting(cycle.start),
           allocatedExpenses: _allocatedExpensesFor(cycle.start),
           trajectoryCredits: _refundCreditsFor(cycle.start),
         ),

@@ -26,6 +26,17 @@ final class EventPayloadJsonCodec {
       CashFlowDeletedPayload() => <String, Object?>{
         'effectiveFromCycleStart': payload.effectiveFromCycleStart.toString(),
       },
+      ReceivedBonusCreatedPayload() => <String, Object?>{
+        'pool': _encodeReceivedBonus(payload.pool),
+        'effectiveFromCycleStart': payload.effectiveFromCycleStart.toString(),
+      },
+      ReceivedBonusReplacedPayload() => <String, Object?>{
+        'pool': _encodeReceivedBonus(payload.pool),
+        'effectiveFromCycleStart': payload.effectiveFromCycleStart.toString(),
+      },
+      ReceivedBonusDeletedPayload() => <String, Object?>{
+        'effectiveFromCycleStart': payload.effectiveFromCycleStart.toString(),
+      },
       AnnualCommitmentsSetPayload() => <String, Object?>{
         'effectiveFromCycleStart': payload.effectiveFromCycleStart.toString(),
         'reserveContributions': _encodeMoney(payload.reserveContributions),
@@ -160,6 +171,26 @@ final class EventPayloadJsonCodec {
         ),
       ),
       'cash-flow.deleted' => CashFlowDeletedPayload(
+        effectiveFromCycleStart: _decodeDate(
+          map['effectiveFromCycleStart'],
+          'effectiveFromCycleStart',
+        ),
+      ),
+      'received-bonus.created' => ReceivedBonusCreatedPayload(
+        pool: _decodeReceivedBonus(_asMap(map['pool'], 'pool')),
+        effectiveFromCycleStart: _decodeDate(
+          map['effectiveFromCycleStart'],
+          'effectiveFromCycleStart',
+        ),
+      ),
+      'received-bonus.replaced' => ReceivedBonusReplacedPayload(
+        pool: _decodeReceivedBonus(_asMap(map['pool'], 'pool')),
+        effectiveFromCycleStart: _decodeDate(
+          map['effectiveFromCycleStart'],
+          'effectiveFromCycleStart',
+        ),
+      ),
+      'received-bonus.deleted' => ReceivedBonusDeletedPayload(
         effectiveFromCycleStart: _decodeDate(
           map['effectiveFromCycleStart'],
           'effectiveFromCycleStart',
@@ -316,6 +347,24 @@ Map<String, Object?> _encodeCashFlow(CashFlowDefinition definition) {
     },
     'lastConfirmedOn': definition.lastConfirmedOn?.toString(),
   };
+}
+
+Map<String, Object?> _encodeReceivedBonus(ReceivedBonusPool pool) {
+  return <String, Object?>{
+    'title': pool.title,
+    'remainingForDailyLife': _encodeMoney(pool.remainingForDailyLife),
+    'nextPaymentDate': pool.nextPaymentDate.toString(),
+  };
+}
+
+ReceivedBonusPool _decodeReceivedBonus(Map<String, Object?> map) {
+  return ReceivedBonusPool(
+    title: _asString(map['title'], 'title'),
+    remainingForDailyLife: _decodeMoney(
+      _asMap(map['remainingForDailyLife'], 'remainingForDailyLife'),
+    ),
+    nextPaymentDate: _decodeDate(map['nextPaymentDate'], 'nextPaymentDate'),
+  );
 }
 
 CashFlowDefinition _decodeCashFlow(Map<String, Object?> map) {

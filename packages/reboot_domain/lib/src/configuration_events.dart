@@ -141,6 +141,69 @@ final class CashFlowDeletedPayload implements EventPayload {
   final LocalDate effectiveFromCycleStart;
 }
 
+/// Creates one pool from money already received and still available.
+final class ReceivedBonusCreatedPayload implements EventPayload {
+  const ReceivedBonusCreatedPayload({
+    required this.pool,
+    required this.effectiveFromCycleStart,
+  });
+
+  @override
+  String get eventType => 'received-bonus.created';
+
+  @override
+  int get schemaVersion => 1;
+
+  @override
+  EntityKind get targetKind => EntityKind.receivedBonus;
+
+  /// Amount that exists now and the date on which it must be reconfirmed.
+  final ReceivedBonusPool pool;
+
+  /// First weekly cycle receiving a share of this pool.
+  final LocalDate effectiveFromCycleStart;
+}
+
+/// Replaces a bonus pool after a new receipt or an explicit correction.
+final class ReceivedBonusReplacedPayload implements EventPayload {
+  const ReceivedBonusReplacedPayload({
+    required this.pool,
+    required this.effectiveFromCycleStart,
+  });
+
+  @override
+  String get eventType => 'received-bonus.replaced';
+
+  @override
+  int get schemaVersion => 1;
+
+  @override
+  EntityKind get targetKind => EntityKind.receivedBonus;
+
+  /// Newly confirmed amount; future expected money remains excluded.
+  final ReceivedBonusPool pool;
+
+  /// First cycle using the newly confirmed amount.
+  final LocalDate effectiveFromCycleStart;
+}
+
+/// Stops allocating one bonus pool from a future weekly boundary.
+final class ReceivedBonusDeletedPayload implements EventPayload {
+  const ReceivedBonusDeletedPayload({required this.effectiveFromCycleStart});
+
+  @override
+  String get eventType => 'received-bonus.deleted';
+
+  @override
+  int get schemaVersion => 1;
+
+  @override
+  EntityKind get targetKind => EntityKind.receivedBonus;
+
+  /// First cycle from which no amount is allocated.
+  final LocalDate effectiveFromCycleStart;
+}
+
 /// Version 1 payload accepting annual amounts protected from daily spending.
 final class AnnualCommitmentsSetPayload implements EventPayload {
   /// Creates a complete annual commitment snapshot.

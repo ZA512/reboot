@@ -1364,4 +1364,112 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get rebootDayScheduledLocked =>
       'For safety in this first version, let this change take effect before scheduling another one.';
+
+  @override
+  String get receivedBonusesDashboardTitle => 'Bonuses already received';
+
+  @override
+  String get receivedBonusesDashboardEmpty =>
+      'Add only money that still exists and is assigned to everyday spending.';
+
+  @override
+  String receivedBonusesDashboardCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count received bonuses are being spread',
+      one: '1 received bonus is being spread',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String receivedBonusesDashboardDue(int count, int due) {
+    String _temp0 = intl.Intl.pluralLogic(
+      due,
+      locale: localeName,
+      other: '$due of $count bonuses need confirmation',
+      one: '1 of $count bonuses needs confirmation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get receivedBonusesTitle => 'Bonuses already received';
+
+  @override
+  String get receivedBonusesIntro =>
+      'A bonus never counts merely because it is expected. Enter only the part already received, still available, and deliberately assigned to everyday spending.';
+
+  @override
+  String receivedBonusRule(String date) {
+    return 'A new amount applies from $date. REBOOT spreads it exactly until the next payment date, then waits for your confirmation.';
+  }
+
+  @override
+  String get noReceivedBonus =>
+      'No received bonus currently supports your weekly budget.';
+
+  @override
+  String get receivedBonusMutationError =>
+      'The bonus could not be saved. No partial change was recorded.';
+
+  @override
+  String get addReceivedBonus => 'Add a received bonus';
+
+  @override
+  String get receivedBonusConfirmationRequired =>
+      'The expected payment date has arrived. Confirm what was actually received and what part will support everyday spending.';
+
+  @override
+  String receivedBonusUntil(String date) {
+    return 'Spread until the expected payment on $date';
+  }
+
+  @override
+  String receivedBonusChangesOn(String date) {
+    return 'A newly confirmed amount applies from $date';
+  }
+
+  @override
+  String receivedBonusEndsOn(String date) {
+    return 'This bonus stops affecting the budget from $date';
+  }
+
+  @override
+  String get stopReceivedBonus => 'Stop';
+
+  @override
+  String get confirmReceivedBonus => 'Confirm';
+
+  @override
+  String get adjustReceivedBonus => 'Adjust';
+
+  @override
+  String get deleteReceivedBonusTitle => 'Stop using this bonus?';
+
+  @override
+  String deleteReceivedBonusBody(String date) {
+    return 'It will stop increasing the weekly budget from $date. Previous weeks remain unchanged.';
+  }
+
+  @override
+  String get confirmReceivedBonusTitle => 'Confirm the available amount';
+
+  @override
+  String get receivedBonusDialogHelp =>
+      'Do not enter the original gross bonus or a future estimate. Enter only the amount that exists now and that you choose to inject into everyday spending.';
+
+  @override
+  String get receivedBonusName => 'Name';
+
+  @override
+  String get receivedBonusRemainingAmount =>
+      'Amount still available for everyday spending';
+
+  @override
+  String get receivedBonusNextPayment => 'Next expected payment date';
+
+  @override
+  String get saveReceivedBonus => 'Save this amount';
 }

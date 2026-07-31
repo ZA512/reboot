@@ -11,6 +11,8 @@ boundary used by the mobile application:
 - initialize the solo or shared household and its first REBOOT cycle;
 - create, replace, and delete fixed or variable cash-flow assumptions;
 - set annual reserve, project, and safety commitments;
+- create, confirm, and stop already-received bonus pools without forecasting a
+  future payment;
 - schedule a new REBOOT day or time zone without rewriting history;
 - calculate the explainable 52-cycle weekly recommendation;
 - record and atomically allocate an expense over 1 to 12 cycles;

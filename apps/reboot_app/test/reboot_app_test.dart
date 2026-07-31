@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:reboot_app/bonuses/received_bonus_screen.dart';
 import 'package:reboot_app/health/health_screen.dart';
 import 'package:reboot_app/infrastructure/device_context_providers.dart';
 import 'package:reboot_app/infrastructure/profile_providers.dart';
@@ -1052,6 +1053,60 @@ void main() {
       7500,
     );
     expect(find.text('Pharmacie'), findsOneWidget);
+  });
+
+  testWidgets('adds a received bonus without rewriting the current week', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final service = await _readyService(_MemoryJournal());
+    final currentCycle = LocalDate(2026, 4, 4);
+    final nextCycle = LocalDate(2026, 4, 11);
+    final currentBudgetBefore = service.weeklyBudgetForCycleStarting(
+      currentCycle,
+    );
+    final nextBudgetBefore = service.weeklyBudgetForCycleStarting(nextCycle);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ReceivedBonusScreen(
+            service: service,
+            today: LocalDate(2026, 4, 5),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('create-received-bonus')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('received-bonus-title')),
+      'Prime annuelle',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('received-bonus-amount')),
+      '52',
+    );
+    await tester.tap(find.byKey(const ValueKey('save-received-bonus')));
+    await tester.pumpAndSettle();
+
+    expect(service.configuration.receivedBonuses, hasLength(1));
+    expect(find.text('Prime annuelle'), findsOneWidget);
+    expect(
+      service.weeklyBudgetForCycleStarting(currentCycle),
+      currentBudgetBefore,
+    );
+    expect(
+      service.weeklyBudgetForCycleStarting(nextCycle).minorUnits,
+      nextBudgetBefore.minorUnits + 100,
+    );
   });
 
   testWidgets('does not expose a device time-zone failure', (tester) async {

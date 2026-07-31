@@ -514,6 +514,81 @@ void main() {
     });
 
     test(
+      'allocates only a received bonus until its confirmation date',
+      () async {
+        final harness = await _Harness.initialized();
+        final created = await harness.service.createReceivedBonus(
+          CreateReceivedBonusCommand(
+            pool: ReceivedBonusPool(
+              title: 'Prime annuelle',
+              remainingForDailyLife: _eur(2800),
+              nextPaymentDate: LocalDate(2026, 4, 25),
+            ),
+            effectiveFromCycleStart: LocalDate(2026, 4, 4),
+            businessDate: LocalDate(2026, 4, 1),
+          ),
+        );
+
+        final initial = harness.service.buildRollingBudget(
+          LocalDate(2026, 4, 4),
+        );
+        expect(initial.cycles.take(4).map((cycle) => cycle.budget.minorUnits), [
+          933,
+          933,
+          934,
+          0,
+        ]);
+        expect(created.latestRevision.pool!.remainingForDailyLife, _eur(2800));
+
+        final replaced = await harness.service.replaceReceivedBonus(
+          ReplaceReceivedBonusCommand(
+            receivedBonusId: created.id,
+            pool: ReceivedBonusPool(
+              title: 'Prime annuelle',
+              remainingForDailyLife: _eur(1000),
+              nextPaymentDate: LocalDate(2026, 5, 16),
+            ),
+            effectiveFromCycleStart: LocalDate(2026, 5, 2),
+            businessDate: LocalDate(2026, 4, 25),
+          ),
+        );
+        expect(replaced.revisions, hasLength(2));
+        expect(
+          harness.service.weeklyBudgetForCycleStarting(LocalDate(2026, 5, 2)),
+          _eur(500),
+        );
+        expect(
+          harness.service.weeklyBudgetForCycleStarting(LocalDate(2026, 5, 9)),
+          _eur(500),
+        );
+        expect(
+          harness.service.weeklyBudgetForCycleStarting(LocalDate(2026, 5, 16)),
+          _eur(0),
+        );
+
+        final deleted = await harness.service.deleteReceivedBonus(
+          DeleteReceivedBonusCommand(
+            receivedBonusId: created.id,
+            effectiveFromCycleStart: LocalDate(2026, 5, 16),
+            businessDate: LocalDate(2026, 5, 12),
+          ),
+        );
+        expect(deleted.latestRevision.isDeletion, isTrue);
+
+        final restored = await LocalRebootService.restore(
+          journal: harness.journal,
+          clock: const _FixedClock(),
+          identities: _SequentialIdentities(100),
+        );
+        expect(restored.configuration.receivedBonuses, hasLength(1));
+        expect(
+          restored.configuration.receivedBonuses.values.single.revisions,
+          hasLength(3),
+        );
+      },
+    );
+
+    test(
       'keeps configuration changes out of the cycle already started',
       () async {
         final harness = await _Harness.initialized();

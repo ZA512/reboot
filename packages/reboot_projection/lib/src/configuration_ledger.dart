@@ -288,6 +288,137 @@ final class ProjectedCashFlow {
   }
 }
 
+/// One accepted already-received bonus snapshot or future tombstone.
+final class ReceivedBonusRevision {
+  const ReceivedBonusRevision({
+    required this.effectiveFromCycleStart,
+    required this.eventId,
+    required this.recordedAtUtc,
+    required this.pool,
+  });
+
+  /// First weekly cycle affected by this snapshot.
+  final LocalDate effectiveFromCycleStart;
+
+  /// Immutable source event.
+  final EventId eventId;
+
+  /// UTC instant at which the user confirmed the amount.
+  final DateTime recordedAtUtc;
+
+  /// Complete pool, or `null` when this revision stops the allocation.
+  final ReceivedBonusPool? pool;
+
+  bool get isDeletion => pool == null;
+}
+
+/// Replayable history of one recurring bonus source.
+final class ProjectedReceivedBonus {
+  ProjectedReceivedBonus._({
+    required this.id,
+    required List<ReceivedBonusRevision> revisions,
+  }) : revisions = List<ReceivedBonusRevision>.unmodifiable(revisions);
+
+  factory ProjectedReceivedBonus._created(EventRecord event) {
+    final payload = event.payload as ReceivedBonusCreatedPayload;
+    return ProjectedReceivedBonus._(
+      id: event.target.id,
+      revisions: [
+        ReceivedBonusRevision(
+          effectiveFromCycleStart: payload.effectiveFromCycleStart,
+          eventId: event.id,
+          recordedAtUtc: event.recordedAtUtc,
+          pool: payload.pool,
+        ),
+      ],
+    );
+  }
+
+  final EntityId id;
+  final List<ReceivedBonusRevision> revisions;
+
+  ReceivedBonusRevision get latestRevision => revisions.last;
+
+  /// Complete snapshot effective for [cycleStart], including a tombstone.
+  ReceivedBonusRevision? revisionForCycleStarting(LocalDate cycleStart) {
+    ReceivedBonusRevision? effective;
+    for (final revision in revisions) {
+      if (!revision.effectiveFromCycleStart.isAfter(cycleStart)) {
+        effective = revision;
+      }
+    }
+    return effective;
+  }
+
+  ProjectedReceivedBonus _replacedBy(EventRecord event) {
+    if (latestRevision.isDeletion) {
+      throw ProjectionConflictException(
+        'Deleted received bonus $id cannot be replaced.',
+      );
+    }
+    final payload = event.payload as ReceivedBonusReplacedPayload;
+    _validateNextEffectiveDate(
+      payload.effectiveFromCycleStart,
+      event.businessDate,
+    );
+    return ProjectedReceivedBonus._(
+      id: id,
+      revisions: [
+        ...revisions,
+        ReceivedBonusRevision(
+          effectiveFromCycleStart: payload.effectiveFromCycleStart,
+          eventId: event.id,
+          recordedAtUtc: event.recordedAtUtc,
+          pool: payload.pool,
+        ),
+      ],
+    );
+  }
+
+  ProjectedReceivedBonus _deletedBy(EventRecord event) {
+    if (latestRevision.isDeletion) {
+      throw ProjectionConflictException(
+        'Received bonus $id received multiple tombstones.',
+      );
+    }
+    final payload = event.payload as ReceivedBonusDeletedPayload;
+    _validateNextEffectiveDate(
+      payload.effectiveFromCycleStart,
+      event.businessDate,
+    );
+    return ProjectedReceivedBonus._(
+      id: id,
+      revisions: [
+        ...revisions,
+        ReceivedBonusRevision(
+          effectiveFromCycleStart: payload.effectiveFromCycleStart,
+          eventId: event.id,
+          recordedAtUtc: event.recordedAtUtc,
+          pool: null,
+        ),
+      ],
+    );
+  }
+
+  void _validateNextEffectiveDate(
+    LocalDate effectiveFromCycleStart,
+    LocalDate businessDate,
+  ) {
+    if (effectiveFromCycleStart.isBefore(businessDate)) {
+      throw ProjectionConflictException(
+        'A received-bonus change cannot take effect retroactively.',
+      );
+    }
+    if (effectiveFromCycleStart.isBefore(
+      latestRevision.effectiveFromCycleStart,
+    )) {
+      throw ProjectionConflictException(
+        'Received-bonus effective dates cannot move backwards.',
+      );
+    }
+  }
+}
+
 /// One complete annual reserve, project, and safety snapshot.
 final class AnnualCommitmentsRevision {
   const AnnualCommitmentsRevision({
@@ -341,11 +472,15 @@ final class ConfigurationLedger {
   ConfigurationLedger._({
     required this.household,
     required Map<EntityId, ProjectedCashFlow> cashFlows,
+    required Map<EntityId, ProjectedReceivedBonus> receivedBonuses,
     required this.annualBudgetPlanId,
     required List<AnnualCommitmentsRevision> annualCommitments,
     required Set<EventId> appliedEventIds,
     required this.lastPosition,
   }) : cashFlows = Map<EntityId, ProjectedCashFlow>.unmodifiable(cashFlows),
+       receivedBonuses = Map<EntityId, ProjectedReceivedBonus>.unmodifiable(
+         receivedBonuses,
+       ),
        annualCommitments = List<AnnualCommitmentsRevision>.unmodifiable(
          annualCommitments,
        ),
@@ -356,6 +491,7 @@ final class ConfigurationLedger {
     return ConfigurationLedger._(
       household: null,
       cashFlows: const {},
+      receivedBonuses: const {},
       annualBudgetPlanId: null,
       annualCommitments: const [],
       appliedEventIds: const {},
@@ -377,6 +513,9 @@ final class ConfigurationLedger {
   /// All cash-flow histories, including future-effective tombstones.
   final Map<EntityId, ProjectedCashFlow> cashFlows;
 
+  /// Already-received bonus sources with all confirmed snapshots.
+  final Map<EntityId, ProjectedReceivedBonus> receivedBonuses;
+
   /// Stable aggregate identity used for annual commitments.
   final EntityId? annualBudgetPlanId;
 
@@ -395,6 +534,32 @@ final class ConfigurationLedger {
           .map((projected) => projected.definitionForCycleStarting(cycleStart))
           .nonNulls,
     );
+  }
+
+  /// Exact already-existing bonus amount assigned to one weekly cycle.
+  Money receivedBonusForCycleStarting(LocalDate cycleStart) {
+    final configuredHousehold = household;
+    if (configuredHousehold == null) {
+      throw const IncompleteConfigurationException(
+        'The household has not been configured.',
+      );
+    }
+    var total = Money.zero(configuredHousehold.currency);
+    for (final projected in receivedBonuses.values) {
+      final revision = projected.revisionForCycleStarting(cycleStart);
+      final pool = revision?.pool;
+      if (revision == null || pool == null) continue;
+      final allocation = ReceivedBonusAllocator.allocate(
+        pool: pool,
+        cyclesCoveringPaymentDate: _cyclesCoveringPaymentDate(
+          configuredHousehold,
+          revision.effectiveFromCycleStart,
+          pool.nextPaymentDate,
+        ),
+      );
+      total += allocation.amountFor(cycleStart);
+    }
+    return total;
   }
 
   /// Returns the latest annual commitments active for [cycleStart].
@@ -455,6 +620,9 @@ final class ConfigurationLedger {
 
     var nextHousehold = household;
     final nextCashFlows = Map<EntityId, ProjectedCashFlow>.of(cashFlows);
+    final nextReceivedBonuses = Map<EntityId, ProjectedReceivedBonus>.of(
+      receivedBonuses,
+    );
     var nextPlanId = annualBudgetPlanId;
     final nextCommitments = List<AnnualCommitmentsRevision>.of(
       annualCommitments,
@@ -536,6 +704,65 @@ final class ConfigurationLedger {
               );
             }
             nextCashFlows[entry.event.target.id] = existing._deletedBy(
+              entry.event,
+            );
+          default:
+            throw UnsupportedEventException(entry.event.eventType);
+        }
+      case EntityKind.receivedBonus:
+        final configuredHousehold = nextHousehold;
+        if (configuredHousehold == null) {
+          throw const ProjectionConflictException(
+            'A received bonus was configured before the household existed.',
+          );
+        }
+        switch (entry.event.payload) {
+          case ReceivedBonusCreatedPayload():
+            final payload = entry.event.payload as ReceivedBonusCreatedPayload;
+            _validateReceivedBonus(
+              configuredHousehold,
+              payload.pool,
+              payload.effectiveFromCycleStart,
+              entry.event.businessDate,
+            );
+            if (nextReceivedBonuses.containsKey(entry.event.target.id)) {
+              throw ProjectionConflictException(
+                'Received bonus ${entry.event.target.id} was created more than once.',
+              );
+            }
+            nextReceivedBonuses[entry.event.target.id] =
+                ProjectedReceivedBonus._created(entry.event);
+          case ReceivedBonusReplacedPayload():
+            final payload = entry.event.payload as ReceivedBonusReplacedPayload;
+            _validateReceivedBonus(
+              configuredHousehold,
+              payload.pool,
+              payload.effectiveFromCycleStart,
+              entry.event.businessDate,
+            );
+            final existing = nextReceivedBonuses[entry.event.target.id];
+            if (existing == null) {
+              throw ProjectionConflictException(
+                'Received bonus ${entry.event.target.id} was replaced before creation.',
+              );
+            }
+            nextReceivedBonuses[entry.event.target.id] = existing._replacedBy(
+              entry.event,
+            );
+          case ReceivedBonusDeletedPayload():
+            final payload = entry.event.payload as ReceivedBonusDeletedPayload;
+            _requireConfiguredCycleStart(
+              configuredHousehold,
+              payload.effectiveFromCycleStart,
+              'Received bonus deletion',
+            );
+            final existing = nextReceivedBonuses[entry.event.target.id];
+            if (existing == null) {
+              throw ProjectionConflictException(
+                'Received bonus ${entry.event.target.id} was deleted before creation.',
+              );
+            }
+            nextReceivedBonuses[entry.event.target.id] = existing._deletedBy(
               entry.event,
             );
           default:
@@ -650,10 +877,52 @@ final class ConfigurationLedger {
     return ConfigurationLedger._(
       household: nextHousehold,
       cashFlows: nextCashFlows,
+      receivedBonuses: nextReceivedBonuses,
       annualBudgetPlanId: nextPlanId,
       annualCommitments: nextCommitments,
       appliedEventIds: {..._appliedEventIds, entry.event.id},
       lastPosition: entry.position,
+    );
+  }
+}
+
+List<WeeklyCycle> _cyclesCoveringPaymentDate(
+  ProjectedHousehold household,
+  LocalDate firstCycleStart,
+  LocalDate paymentDate,
+) {
+  final cycles = <WeeklyCycle>[household.cycleContaining(firstCycleStart)];
+  while (cycles.last.endExclusive.isBefore(paymentDate)) {
+    cycles.add(household.cycleContaining(cycles.last.endExclusive));
+  }
+  return List<WeeklyCycle>.unmodifiable(cycles);
+}
+
+void _validateReceivedBonus(
+  ProjectedHousehold household,
+  ReceivedBonusPool pool,
+  LocalDate effectiveFromCycleStart,
+  LocalDate businessDate,
+) {
+  _requireConfiguredCycleStart(
+    household,
+    effectiveFromCycleStart,
+    'Received bonus',
+  );
+  if (pool.remainingForDailyLife.currency != household.currency) {
+    throw CurrencyMismatchException(
+      household.currency,
+      pool.remainingForDailyLife.currency,
+    );
+  }
+  if (effectiveFromCycleStart.isBefore(businessDate)) {
+    throw const ProjectionConflictException(
+      'A received bonus cannot take effect retroactively.',
+    );
+  }
+  if (!pool.nextPaymentDate.isAfter(effectiveFromCycleStart)) {
+    throw const ProjectionConflictException(
+      'A received bonus must cover at least one future REBOOT cycle.',
     );
   }
 }

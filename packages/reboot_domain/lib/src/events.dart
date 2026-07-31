@@ -78,6 +78,9 @@ enum EntityKind {
 
   /// Optional aggregate household health tracking.
   healthTracking,
+
+  /// One already-received bonus amount assigned to ordinary daily life.
+  receivedBonus,
 }
 
 /// Typed target of an immutable event.

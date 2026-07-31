@@ -75,6 +75,33 @@ void main() {
     });
   });
 
+  group('received-bonus configuration events', () {
+    test('stores only money already received and its renewal date', () {
+      final pool = ReceivedBonusPool(
+        title: 'Prime annuelle',
+        remainingForDailyLife: _eur(500000),
+        nextPaymentDate: LocalDate(2027, 1, 15),
+      );
+      final created = ReceivedBonusCreatedPayload(
+        pool: pool,
+        effectiveFromCycleStart: _cycleStart,
+      );
+      final replaced = ReceivedBonusReplacedPayload(
+        pool: pool,
+        effectiveFromCycleStart: _cycleStart.addDays(7),
+      );
+      final deleted = ReceivedBonusDeletedPayload(
+        effectiveFromCycleStart: _cycleStart.addDays(14),
+      );
+
+      expect(created.eventType, 'received-bonus.created');
+      expect(replaced.eventType, 'received-bonus.replaced');
+      expect(deleted.eventType, 'received-bonus.deleted');
+      expect(created.targetKind, EntityKind.receivedBonus);
+      expect(created.pool, same(pool));
+    });
+  });
+
   group('AnnualCommitmentsSetPayload', () {
     test('keeps reserves, projects, and safety separate', () {
       final payload = AnnualCommitmentsSetPayload(

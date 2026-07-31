@@ -2303,6 +2303,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'For safety in this first version, let this change take effect before scheduling another one.'**
   String get rebootDayScheduledLocked;
+
+  /// Dashboard navigation title for received bonus pools.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonuses already received'**
+  String get receivedBonusesDashboardTitle;
+
+  /// Empty received bonus dashboard summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Add only money that still exists and is assigned to everyday spending.'**
+  String get receivedBonusesDashboardEmpty;
+
+  /// Active received bonus count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 received bonus is being spread} other{{count} received bonuses are being spread}}'**
+  String receivedBonusesDashboardCount(int count);
+
+  /// Received bonuses requiring confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'{due, plural, =1{1 of {count} bonuses needs confirmation} other{{due} of {count} bonuses need confirmation}}'**
+  String receivedBonusesDashboardDue(int count, int due);
+
+  /// Received bonus management screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonuses already received'**
+  String get receivedBonusesTitle;
+
+  /// Core already-received bonus rule.
+  ///
+  /// In en, this message translates to:
+  /// **'A bonus never counts merely because it is expected. Enter only the part already received, still available, and deliberately assigned to everyday spending.'**
+  String get receivedBonusesIntro;
+
+  /// Bonus effective date and confirmation rule.
+  ///
+  /// In en, this message translates to:
+  /// **'A new amount applies from {date}. REBOOT spreads it exactly until the next payment date, then waits for your confirmation.'**
+  String receivedBonusRule(String date);
+
+  /// Empty received bonus list.
+  ///
+  /// In en, this message translates to:
+  /// **'No received bonus currently supports your weekly budget.'**
+  String get noReceivedBonus;
+
+  /// Generic received bonus mutation failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The bonus could not be saved. No partial change was recorded.'**
+  String get receivedBonusMutationError;
+
+  /// Creates a received bonus pool.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a received bonus'**
+  String get addReceivedBonus;
+
+  /// Mandatory received bonus renewal warning.
+  ///
+  /// In en, this message translates to:
+  /// **'The expected payment date has arrived. Confirm what was actually received and what part will support everyday spending.'**
+  String get receivedBonusConfirmationRequired;
+
+  /// Received bonus allocation end.
+  ///
+  /// In en, this message translates to:
+  /// **'Spread until the expected payment on {date}'**
+  String receivedBonusUntil(String date);
+
+  /// Pending bonus replacement status.
+  ///
+  /// In en, this message translates to:
+  /// **'A newly confirmed amount applies from {date}'**
+  String receivedBonusChangesOn(String date);
+
+  /// Pending bonus deletion status.
+  ///
+  /// In en, this message translates to:
+  /// **'This bonus stops affecting the budget from {date}'**
+  String receivedBonusEndsOn(String date);
+
+  /// Stops a received bonus allocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get stopReceivedBonus;
+
+  /// Confirms a newly received bonus amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirmReceivedBonus;
+
+  /// Adjusts an existing received bonus amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust'**
+  String get adjustReceivedBonus;
+
+  /// Received bonus deletion confirmation title.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop using this bonus?'**
+  String get deleteReceivedBonusTitle;
+
+  /// Received bonus deletion confirmation body.
+  ///
+  /// In en, this message translates to:
+  /// **'It will stop increasing the weekly budget from {date}. Previous weeks remain unchanged.'**
+  String deleteReceivedBonusBody(String date);
+
+  /// Received bonus renewal dialog title.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the available amount'**
+  String get confirmReceivedBonusTitle;
+
+  /// Warning shown in the received bonus form.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not enter the original gross bonus or a future estimate. Enter only the amount that exists now and that you choose to inject into everyday spending.'**
+  String get receivedBonusDialogHelp;
+
+  /// Received bonus source name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get receivedBonusName;
+
+  /// Existing received bonus amount field.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount still available for everyday spending'**
+  String get receivedBonusRemainingAmount;
+
+  /// Mandatory received bonus renewal date.
+  ///
+  /// In en, this message translates to:
+  /// **'Next expected payment date'**
+  String get receivedBonusNextPayment;
+
+  /// Persists a received bonus snapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Save this amount'**
+  String get saveReceivedBonus;
 }
 
 class _AppLocalizationsDelegate
