@@ -10,4 +10,8 @@ Implemented foundations:
 - deterministic expense replay ordered by local journal position;
 - UUID-based idempotence;
 - explicit expense tombstones that preserve audit history;
-- exact overlapping allocations and a gap-free rolling 52-cycle projection.
+- exact overlapping allocations and a gap-free rolling 52-cycle projection;
+- exact-date annualization of fixed and variable incomes and outflows;
+- prudent 90% income and 110% outflow estimates with deterministic rounding;
+- whole-euro weekly recommendations with the retained annual margin exposed;
+- exact allocation of already-received bonus pools until their renewal date.

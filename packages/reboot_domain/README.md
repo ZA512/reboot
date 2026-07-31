@@ -12,4 +12,6 @@ Implemented foundations:
 - checked arithmetic and exact installment allocation;
 - local civil dates and auditable weekly-cycle policies;
 - explicit short or long transitions when the anchor weekday changes;
+- fixed and variable cash flows with civil recurrence schedules;
+- already-received bonus pools that cannot include future expected money;
 - immutable, versioned expense events and separate local journal positions.

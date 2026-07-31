@@ -44,7 +44,8 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Moteur de cycles civils et tests de changements d’heure
 - [x] Premiers événements métier locaux et rejeu pur
 - [x] Allocations et projection hebdomadaire glissante sur 52 cycles
-- [ ] Annualisation des revenus, charges, réserves et objectifs
+- [x] Annualisation des revenus, charges, réserves et objectifs
+- [ ] Configuration locale du foyer et de sa trajectoire
 
 ## Licence
 
