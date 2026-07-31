@@ -145,6 +145,50 @@ void main() {
   });
 
   group('LocalRebootService configuration', () {
+    test('creates initial cash flows in one journal batch', () async {
+      final harness = await _Harness.initialized();
+
+      final ids = await harness.service.createCashFlows(
+        CreateCashFlowsCommand(
+          definitions: [
+            _monthlyFlow(
+              title: 'Salaire 1',
+              direction: CashFlowDirection.income,
+              minorUnits: 300000,
+            ),
+            _monthlyFlow(
+              title: 'Logement',
+              direction: CashFlowDirection.outflow,
+              minorUnits: 100000,
+            ),
+          ],
+          effectiveFromCycleStart: LocalDate(2026, 4, 4),
+          businessDate: LocalDate(2026, 4, 1),
+        ),
+      );
+
+      expect(ids, hasLength(2));
+      expect(ids.toSet(), hasLength(2));
+      expect(harness.service.configuration.cashFlows, hasLength(2));
+      expect(harness.journal.entries, hasLength(3));
+      expect(harness.journal.appendCallCount, 2);
+      expect(
+        harness.journal.entries.skip(1).map((entry) => entry.event.eventType),
+        everyElement('cash-flow.created'),
+      );
+    });
+
+    test('refuses an empty initial cash-flow batch', () async {
+      expect(
+        () => CreateCashFlowsCommand(
+          definitions: const [],
+          effectiveFromCycleStart: LocalDate(2026, 4, 4),
+          businessDate: LocalDate(2026, 4, 1),
+        ),
+        throwsArgumentError,
+      );
+    });
+
     test(
       'builds the annual recommendation from accepted assumptions',
       () async {
@@ -367,12 +411,14 @@ final class _SequentialIdentities implements RebootIdentityGenerator {
 final class _MemoryJournal implements LocalEventJournal {
   final List<LocalJournalEntry> entries = [];
   bool _closed = false;
+  int appendCallCount = 0;
 
   @override
   Future<List<LocalJournalEntry>> appendAll(List<EventRecord> events) async {
     if (_closed) {
       throw StateError('closed');
     }
+    appendCallCount += 1;
     await Future<void>.delayed(Duration.zero);
     final appended = <LocalJournalEntry>[];
     for (final event in events) {

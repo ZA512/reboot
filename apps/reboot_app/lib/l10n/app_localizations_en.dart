@@ -145,4 +145,207 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readyShared => 'Your shared REBOOT profile is ready.';
+
+  @override
+  String get financialSetupTitle => 'List all money coming in and going out';
+
+  @override
+  String get financialSetupIntro =>
+      'REBOOT annualizes these assumptions before calculating your weekly budget. Monthly is selected by default, but frequency and fixed or variable behavior are independent.';
+
+  @override
+  String get financialSetupTip =>
+      'You may enter one total for all income or charges. Adding detail takes longer now, but will make future changes easier to detect.';
+
+  @override
+  String get incomeSectionTitle => 'Money coming in';
+
+  @override
+  String get incomeSectionBody =>
+      'Salaries, benefits, pensions and every other predictable receipt.';
+
+  @override
+  String get outflowSectionTitle => 'Charges and smoothed expenses';
+
+  @override
+  String get outflowSectionBody =>
+      'Include monthly, annual and non-monthly charges, plus unavoidable variable spending you prefer to smooth.';
+
+  @override
+  String get suggestionsLabel => 'Add a suggested line or a custom one:';
+
+  @override
+  String get deleteDraft => 'Delete this draft line';
+
+  @override
+  String get confirmFinancialSetup => 'Confirm income and charges';
+
+  @override
+  String get financialSetupSaving => 'Saving assumptions…';
+
+  @override
+  String get financialSetupMinimum =>
+      'Add at least one income and one charge before continuing.';
+
+  @override
+  String get financialSetupError =>
+      'Income and charges could not be saved. Nothing was partially recorded. Try again.';
+
+  @override
+  String get addIncomeTitle => 'Add money coming in';
+
+  @override
+  String get addOutflowTitle => 'Add a charge';
+
+  @override
+  String get cashFlowTitleLabel => 'Name';
+
+  @override
+  String get requiredField => 'This field is required.';
+
+  @override
+  String get amountBehaviorLabel => 'Is the amount fixed or variable?';
+
+  @override
+  String get fixedAmount => 'Fixed';
+
+  @override
+  String get variableAmount => 'Variable';
+
+  @override
+  String get amountPerOccurrenceLabel => 'Amount at each payment';
+
+  @override
+  String get fixedAmountHelp => 'Enter the amount expected each time.';
+
+  @override
+  String get averageAmountLabel => 'Observed average at each payment';
+
+  @override
+  String get averageAmountHelp =>
+      'Use your available history; REBOOT applies the strategy below.';
+
+  @override
+  String get invalidPositiveAmount =>
+      'Enter an amount greater than zero, with no more than two decimals.';
+
+  @override
+  String get estimateStrategyLabel => 'Estimation strategy';
+
+  @override
+  String get strategyPrudent => 'Prudent';
+
+  @override
+  String get strategyBalanced => 'Balanced';
+
+  @override
+  String get strategyCustom => 'Custom';
+
+  @override
+  String get prudentIncomeHelp => 'REBOOT keeps 90% of the observed average.';
+
+  @override
+  String get prudentOutflowHelp =>
+      'REBOOT budgets 110% of the observed average.';
+
+  @override
+  String get balancedHelp => 'REBOOT uses 100% of the observed average.';
+
+  @override
+  String get customStrategyHelp =>
+      'Choose the amount REBOOT should use at each occurrence.';
+
+  @override
+  String get customAmountLabel => 'Amount used by REBOOT';
+
+  @override
+  String get frequencyLabel => 'Frequency';
+
+  @override
+  String get frequencyWeekly => 'Weekly';
+
+  @override
+  String get frequencyEveryFourWeeks => 'Every four weeks';
+
+  @override
+  String get frequencyMonthly => 'Monthly';
+
+  @override
+  String get frequencyQuarterly => 'Quarterly';
+
+  @override
+  String get frequencySemiAnnual => 'Every six months';
+
+  @override
+  String get frequencyAnnual => 'Annual';
+
+  @override
+  String get referenceDateLabel => 'Reference occurrence date';
+
+  @override
+  String get referenceDateHelp =>
+      'Choose a past or upcoming date when this payment occurs. REBOOT preserves its weekday or intended day of month.';
+
+  @override
+  String get irregularFrequencyTip =>
+      'For an unusual rhythm, calculate the total you expect over one year and enter it as one annual amount.';
+
+  @override
+  String get addThisCashFlow => 'Add this line';
+
+  @override
+  String cashFlowSummary(String amount, String frequency, String behavior) {
+    return '$amount · $frequency · $behavior';
+  }
+
+  @override
+  String get suggestionSalary1 => 'Salary 1';
+
+  @override
+  String get suggestionSalary2 => 'Salary 2';
+
+  @override
+  String get suggestionBenefit1 => 'Benefit or allowance 1';
+
+  @override
+  String get suggestionBenefit2 => 'Benefit or allowance 2';
+
+  @override
+  String get suggestionPension => 'Pension';
+
+  @override
+  String get suggestionOtherIncome => 'Other income';
+
+  @override
+  String get suggestionHousing => 'Housing';
+
+  @override
+  String get suggestionElectricity => 'Electricity';
+
+  @override
+  String get suggestionHeating => 'Gas or heating';
+
+  @override
+  String get suggestionWater => 'Water';
+
+  @override
+  String get suggestionInsurance => 'Insurance';
+
+  @override
+  String get suggestionTelecom => 'Telecommunications';
+
+  @override
+  String get suggestionLoans => 'Loans';
+
+  @override
+  String get suggestionTransport => 'Transport';
+
+  @override
+  String get suggestionChildcare => 'Childcare or school';
+
+  @override
+  String get suggestionTaxes => 'Taxes';
+
+  @override
+  String get suggestionOtherOutflow => 'Other charge';
 }

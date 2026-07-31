@@ -343,6 +343,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your shared REBOOT profile is ready.'**
   String get readyShared;
+
+  /// Initial financial assumptions screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'List all money coming in and going out'**
+  String get financialSetupTitle;
+
+  /// Explains the initial cash-flow setup.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT annualizes these assumptions before calculating your weekly budget. Monthly is selected by default, but frequency and fixed or variable behavior are independent.'**
+  String get financialSetupIntro;
+
+  /// Progressive-detail onboarding advice.
+  ///
+  /// In en, this message translates to:
+  /// **'You may enter one total for all income or charges. Adding detail takes longer now, but will make future changes easier to detect.'**
+  String get financialSetupTip;
+
+  /// Income assumptions section.
+  ///
+  /// In en, this message translates to:
+  /// **'Money coming in'**
+  String get incomeSectionTitle;
+
+  /// Income assumptions explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Salaries, benefits, pensions and every other predictable receipt.'**
+  String get incomeSectionBody;
+
+  /// Outflow assumptions section.
+  ///
+  /// In en, this message translates to:
+  /// **'Charges and smoothed expenses'**
+  String get outflowSectionTitle;
+
+  /// Outflow assumptions explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Include monthly, annual and non-monthly charges, plus unavoidable variable spending you prefer to smooth.'**
+  String get outflowSectionBody;
+
+  /// Label above cash-flow suggestion chips.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a suggested line or a custom one:'**
+  String get suggestionsLabel;
+
+  /// Deletes one unsaved onboarding cash flow.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this draft line'**
+  String get deleteDraft;
+
+  /// Atomically saves initial cash flows.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm income and charges'**
+  String get confirmFinancialSetup;
+
+  /// Initial cash-flow save progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving assumptions…'**
+  String get financialSetupSaving;
+
+  /// Minimum initial setup requirement.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one income and one charge before continuing.'**
+  String get financialSetupMinimum;
+
+  /// Generic initial cash-flow save error.
+  ///
+  /// In en, this message translates to:
+  /// **'Income and charges could not be saved. Nothing was partially recorded. Try again.'**
+  String get financialSetupError;
+
+  /// Income editor title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add money coming in'**
+  String get addIncomeTitle;
+
+  /// Outflow editor title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a charge'**
+  String get addOutflowTitle;
+
+  /// Editable cash-flow title field.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get cashFlowTitleLabel;
+
+  /// Required form field error.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required.'**
+  String get requiredField;
+
+  /// Amount behavior selector label.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the amount fixed or variable?'**
+  String get amountBehaviorLabel;
+
+  /// Known cash-flow amount behavior.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get fixedAmount;
+
+  /// Estimated cash-flow amount behavior.
+  ///
+  /// In en, this message translates to:
+  /// **'Variable'**
+  String get variableAmount;
+
+  /// Fixed amount per occurrence input.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount at each payment'**
+  String get amountPerOccurrenceLabel;
+
+  /// Fixed amount input help.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount expected each time.'**
+  String get fixedAmountHelp;
+
+  /// Variable historical average input.
+  ///
+  /// In en, this message translates to:
+  /// **'Observed average at each payment'**
+  String get averageAmountLabel;
+
+  /// Variable historical average input help.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your available history; REBOOT applies the strategy below.'**
+  String get averageAmountHelp;
+
+  /// Exact positive EUR parsing error.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount greater than zero, with no more than two decimals.'**
+  String get invalidPositiveAmount;
+
+  /// Variable estimate strategy field.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimation strategy'**
+  String get estimateStrategyLabel;
+
+  /// Conservative estimate strategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Prudent'**
+  String get strategyPrudent;
+
+  /// Historical-average estimate strategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced'**
+  String get strategyBalanced;
+
+  /// User-selected estimate strategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get strategyCustom;
+
+  /// Prudent income calculation.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT keeps 90% of the observed average.'**
+  String get prudentIncomeHelp;
+
+  /// Prudent outflow calculation.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT budgets 110% of the observed average.'**
+  String get prudentOutflowHelp;
+
+  /// Balanced calculation.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT uses 100% of the observed average.'**
+  String get balancedHelp;
+
+  /// Custom calculation explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the amount REBOOT should use at each occurrence.'**
+  String get customStrategyHelp;
+
+  /// Custom variable amount input.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount used by REBOOT'**
+  String get customAmountLabel;
+
+  /// Cash-flow recurrence selector.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get frequencyLabel;
+
+  /// Weekly recurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get frequencyWeekly;
+
+  /// Four-week recurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Every four weeks'**
+  String get frequencyEveryFourWeeks;
+
+  /// Monthly recurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get frequencyMonthly;
+
+  /// Quarterly recurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarterly'**
+  String get frequencyQuarterly;
+
+  /// Semiannual recurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Every six months'**
+  String get frequencySemiAnnual;
+
+  /// Annual recurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual'**
+  String get frequencyAnnual;
+
+  /// Anchor date for a recurrence schedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference occurrence date'**
+  String get referenceDateLabel;
+
+  /// Recurrence anchor explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a past or upcoming date when this payment occurs. REBOOT preserves its weekday or intended day of month.'**
+  String get referenceDateHelp;
+
+  /// Annual workaround for irregular schedules.
+  ///
+  /// In en, this message translates to:
+  /// **'For an unusual rhythm, calculate the total you expect over one year and enter it as one annual amount.'**
+  String get irregularFrequencyTip;
+
+  /// Returns a completed cash-flow draft to setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this line'**
+  String get addThisCashFlow;
+
+  /// Compact cash-flow draft summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} · {frequency} · {behavior}'**
+  String cashFlowSummary(String amount, String frequency, String behavior);
+
+  /// Suggested income title.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary 1'**
+  String get suggestionSalary1;
+
+  /// Suggested income title.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary 2'**
+  String get suggestionSalary2;
+
+  /// Suggested income title.
+  ///
+  /// In en, this message translates to:
+  /// **'Benefit or allowance 1'**
+  String get suggestionBenefit1;
+
+  /// Suggested income title.
+  ///
+  /// In en, this message translates to:
+  /// **'Benefit or allowance 2'**
+  String get suggestionBenefit2;
+
+  /// Suggested income title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pension'**
+  String get suggestionPension;
+
+  /// Suggested custom income title.
+  ///
+  /// In en, this message translates to:
+  /// **'Other income'**
+  String get suggestionOtherIncome;
+
+  /// Suggested outflow title.
+  ///
+  /// In en, this message translates to:
+  /// **'Housing'**
+  String get suggestionHousing;
+
+  /// Suggested outflow title.
+  ///
+  /// In en, this message translates to:
+  /// **'Electricity'**
+  String get suggestionElectricity;
+
+  /// Suggested outflow title.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas or heating'**
+  String get suggestionHeating;
+
+  /// Suggested outflow title.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get suggestionWater;
+
+  /// Suggested outflow title.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get suggestionInsurance;
+
+  /// Suggested outflow title.
+  ///
+  /// In en, this message translates to:
+  /// **'Telecommunications'**
+  String get suggestionTelecom;
+
+  /// Suggested outflow title.
+  ///
+  /// In en, this message translates to:
+  /// **'Loans'**
+  String get suggestionLoans;
+
+  /// Suggested outflow title.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get suggestionTransport;
+
+  /// Suggested outflow title.
+  ///
+  /// In en, this message translates to:
+  /// **'Childcare or school'**
+  String get suggestionChildcare;
+
+  /// Suggested outflow title.
+  ///
+  /// In en, this message translates to:
+  /// **'Taxes'**
+  String get suggestionTaxes;
+
+  /// Suggested custom outflow title.
+  ///
+  /// In en, this message translates to:
+  /// **'Other charge'**
+  String get suggestionOtherOutflow;
 }
 
 class _AppLocalizationsDelegate

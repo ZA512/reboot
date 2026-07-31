@@ -67,6 +67,33 @@ final class CreateCashFlowCommand {
   final LocalDate businessDate;
 }
 
+/// Atomically creates the complete set of initial financial assumptions.
+final class CreateCashFlowsCommand {
+  /// Creates one onboarding batch effective from the same weekly cycle.
+  CreateCashFlowsCommand({
+    required Iterable<CashFlowDefinition> definitions,
+    required this.effectiveFromCycleStart,
+    required this.businessDate,
+  }) : definitions = List<CashFlowDefinition>.unmodifiable(definitions) {
+    if (this.definitions.isEmpty) {
+      throw ArgumentError.value(
+        definitions,
+        'definitions',
+        'At least one cash-flow definition is required.',
+      );
+    }
+  }
+
+  /// Complete income and outflow definitions confirmed together.
+  final List<CashFlowDefinition> definitions;
+
+  /// First weekly cycle using every assumption in the batch.
+  final LocalDate effectiveFromCycleStart;
+
+  /// Civil date on which the user confirmed the batch.
+  final LocalDate businessDate;
+}
+
 /// Replaces an existing cash flow from a future weekly cycle.
 final class ReplaceCashFlowCommand {
   /// Creates the command.
@@ -295,6 +322,34 @@ final class LocalRebootService {
       );
       await _appendValidated([event]);
       return cashFlowId;
+    });
+  }
+
+  /// Creates initial income and outflow assumptions as one journal batch.
+  Future<List<EntityId>> createCashFlows(CreateCashFlowsCommand command) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final cashFlowIds = <EntityId>[];
+      final events = <EventRecord>[];
+      final recordedAtUtc = _clock.nowUtc();
+      for (final definition in command.definitions) {
+        final cashFlowId = _identities.nextEntityId();
+        cashFlowIds.add(cashFlowId);
+        events.add(
+          EventRecord(
+            id: _identities.nextEventId(),
+            recordedAtUtc: recordedAtUtc,
+            businessDate: command.businessDate,
+            target: EntityReference(kind: EntityKind.cashFlow, id: cashFlowId),
+            payload: CashFlowCreatedPayload(
+              definition: definition,
+              effectiveFromCycleStart: command.effectiveFromCycleStart,
+            ),
+          ),
+        );
+      }
+      await _appendValidated(events);
+      return List<EntityId>.unmodifiable(cashFlowIds);
     });
   }
 

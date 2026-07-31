@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 
+import '../financial_setup/financial_setup_controller.dart';
+import '../financial_setup/financial_setup_screen.dart';
 import '../infrastructure/profile_providers.dart';
 import '../l10n/app_localizations.dart';
 import '../onboarding/onboarding_controller.dart';
@@ -46,6 +48,10 @@ final class ProfileStartupGate extends ConsumerWidget {
         if (service.configuration.household == null) {
           ref.watch(onboardingControllerProvider);
           return const OnboardingScreen();
+        }
+        if (service.configuration.cashFlows.isEmpty) {
+          ref.watch(financialSetupControllerProvider);
+          return const FinancialSetupScreen();
         }
         return _ReadyScreen(service: service);
       },
