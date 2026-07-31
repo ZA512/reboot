@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reboot_application/reboot_application.dart';
+import 'package:reboot_domain/reboot_domain.dart';
 
 import '../infrastructure/profile_providers.dart';
+import '../l10n/app_localizations.dart';
+import '../onboarding/onboarding_controller.dart';
+import '../onboarding/onboarding_screen.dart';
 
 /// Root material application after platform bindings and providers exist.
 final class RebootApp extends StatelessWidget {
@@ -13,7 +17,9 @@ final class RebootApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'REBOOT',
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff315c4b)),
         useMaterial3: true,
@@ -38,7 +44,8 @@ final class ProfileStartupGate extends ConsumerWidget {
       ),
       data: (service) {
         if (service.configuration.household == null) {
-          return const _OnboardingWelcomeScreen();
+          ref.watch(onboardingControllerProvider);
+          return const OnboardingScreen();
         }
         return _ReadyScreen(service: service);
       },
@@ -51,10 +58,11 @@ final class _LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: Center(
         child: Semantics(
-          label: 'Ouverture du profil REBOOT',
+          label: l10n.profileOpening,
           child: const CircularProgressIndicator(),
         ),
       ),
@@ -69,8 +77,9 @@ final class _LockedProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('REBOOT')),
+      appBar: AppBar(title: Text(l10n.appTitle)),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
@@ -82,58 +91,18 @@ final class _LockedProfileScreen extends StatelessWidget {
                 const Icon(Icons.lock_outline, size: 48),
                 const SizedBox(height: 16),
                 Text(
-                  'Le profil local ne peut pas être ouvert.',
+                  l10n.profileLockedTitle,
                   style: Theme.of(context).textTheme.titleLarge,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Aucune donnée n’a été supprimée ni recréée. '
-                  'Déverrouillez l’appareil puis réessayez.',
-                  textAlign: TextAlign.center,
-                ),
+                Text(l10n.profileLockedBody, textAlign: TextAlign.center),
                 const SizedBox(height: 24),
                 FilledButton.icon(
                   onPressed: onRetry,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Réessayer'),
+                  label: Text(l10n.tryAgain),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-final class _OnboardingWelcomeScreen extends StatelessWidget {
-  const _OnboardingWelcomeScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('REBOOT')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Reprenez vos dépenses en main, une semaine à la fois.',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'REBOOT transforme vos revenus, charges et objectifs en '
-                  'un montant hebdomadaire simple à suivre.',
-                ),
-                const SizedBox(height: 24),
-                const Text('Votre profil local chiffré est prêt.'),
               ],
             ),
           ),
@@ -151,13 +120,14 @@ final class _ReadyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final household = service.configuration.household!;
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('REBOOT')),
+      appBar: AppBar(title: Text(l10n.appTitle)),
       body: Center(
-        child: Text(
-          'Profil ${household.householdKind.name} prêt',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        child: Text(switch (household.householdKind) {
+          HouseholdKind.solo => l10n.readySolo,
+          HouseholdKind.sharedMainAccount => l10n.readyShared,
+        }, style: Theme.of(context).textTheme.titleLarge),
       ),
     );
   }
