@@ -1828,12 +1828,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'REBOOT fonctionne actuellement hors ligne, uniquement sur cet appareil Android. Le partage et la synchronisation chiffrés ne seront ajoutés qu’après validation de leur modèle de sécurité.';
 
   @override
-  String get recoveryUnavailableTitle =>
-      'Aucune récupération disponible pour le moment';
+  String get recoveryUnavailableTitle => 'Aucune récupération automatique';
 
   @override
   String get recoveryUnavailableBody =>
-      'Si l’application est désinstallée, si ses données sont effacées ou si cet appareil et sa clé sont perdus, ce profil local ne peut pas encore être restauré. L’export et la récupération chiffrés restent à développer.';
+      'Si cet appareil est perdu, la récupération exige un fichier de sauvegarde chiffré et son code conservé séparément. Sans les deux, REBOOT ne peut pas restaurer ce profil local.';
 
   @override
   String get financialAssumptionsStatusTitle => 'Hypothèses financières';
@@ -1968,4 +1967,62 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get cashDashboardWalletMethod =>
       'Les retraits sont des transferts ; les achats en espèces réduisent le budget semaine.';
+
+  @override
+  String get encryptedBackupTitle => 'Sauvegarde de récupération chiffrée';
+
+  @override
+  String get encryptedBackupBody =>
+      'Créez un fichier de récupération protégé par une nouvelle clé aléatoire. REBOOT n’envoie jamais le fichier ni son code.';
+
+  @override
+  String get createEncryptedBackup => 'Créer une sauvegarde chiffrée';
+
+  @override
+  String get backupCreating => 'Création de la sauvegarde…';
+
+  @override
+  String get backupOperationFailed =>
+      'La sauvegarde n’a pas pu être terminée. Aucune copie non chiffrée n’a été créée.';
+
+  @override
+  String get backupRecoveryCodeTitle => 'Conservez votre code de récupération';
+
+  @override
+  String get backupRecoveryCodeBody =>
+      'Ce code est le seul moyen d’ouvrir la sauvegarde que vous venez d’enregistrer. REBOOT ne peut ni le retrouver ni le réinitialiser.';
+
+  @override
+  String get backupRecoveryCodeLabel => 'Code de récupération';
+
+  @override
+  String get backupKeepSeparateWarning =>
+      'Conservez le fichier de sauvegarde et ce code dans deux endroits sûrs différents. Toute personne possédant les deux peut lire vos données financières.';
+
+  @override
+  String get copyRecoveryCode => 'Copier le code';
+
+  @override
+  String get recoveryCodeCopied =>
+      'Code de récupération copié comme donnée sensible.';
+
+  @override
+  String get done => 'Terminé';
+
+  @override
+  String get restoreEncryptedBackup => 'Restaurer une sauvegarde chiffrée';
+
+  @override
+  String get backupRestoring => 'Restauration de la sauvegarde…';
+
+  @override
+  String get backupRestoreFailed =>
+      'L’archive, le code de récupération ou le journal est invalide. Aucune donnée n’a été importée.';
+
+  @override
+  String get restoreBackupIntro =>
+      'Saisissez le code conservé séparément, puis choisissez le fichier .reboot-backup. La restauration est disponible uniquement avant la création d’un nouveau profil.';
+
+  @override
+  String get selectBackupFile => 'Choisir le fichier de sauvegarde';
 }

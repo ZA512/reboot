@@ -117,7 +117,7 @@ garantie absolue.
 | Appareil révoqué encore connecté à Drive | nouvelle époque de clé et point de coupure signé |
 | Injection tardive par l’appareil révoqué | rejet après le point de coupure |
 | Perte du dernier appareil | kit de récupération et paquet distant chiffré |
-| Perte du stockage sécurisé local | échec fermé puis récupération explicite |
+| Perte du stockage sécurisé local | échec fermé puis restauration d’une archive locale chiffrée, si elle existe |
 | Fuite par diagnostic | redaction stricte et télémétrie sans données métier |
 | Lecture du cache du widget | cache AES-GCM, clé Android Keystore et sauvegarde Android désactivée |
 | Regard indiscret sur l’écran d’accueil | montant masqué par défaut et révélation limitée à deux secondes |

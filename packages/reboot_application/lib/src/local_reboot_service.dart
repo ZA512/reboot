@@ -490,6 +490,25 @@ final class ReverseCashWalletTransferCommand {
   final LocalDate businessDate;
 }
 
+/// Refuses a recovery snapshot that cannot safely become the local journal.
+final class JournalSnapshotImportException implements Exception {
+  const JournalSnapshotImportException(this.reason);
+
+  final JournalSnapshotImportFailureReason reason;
+}
+
+/// Sanitized recovery failure categories without financial content.
+enum JournalSnapshotImportFailureReason {
+  /// Recovery can only populate a completely empty local journal.
+  localJournalNotEmpty,
+
+  /// An empty archive cannot represent a configured REBOOT profile.
+  snapshotEmpty,
+
+  /// Source positions must be contiguous and start at one.
+  invalidSourceOrder,
+}
+
 /// Local-first command boundary owning one journal and its live projections.
 ///
 /// All mutations are serialized to prevent two rapid UI actions from deriving
@@ -1437,6 +1456,44 @@ final class LocalRebootService {
       return _cash.walletTransfers.singleWhere(
         (transfer) => transfer.eventId == command.transferEventId,
       );
+    });
+  }
+
+  /// Returns one consistent ordered event snapshot for an explicit export.
+  Future<List<LocalJournalEntry>> readJournalSnapshot() {
+    return _runExclusive(() async {
+      _requireOpen();
+      return List<LocalJournalEntry>.unmodifiable(await _journal.readAll());
+    });
+  }
+
+  /// Restores a validated archive into a new, still-empty local profile.
+  ///
+  /// Source positions are verified but not persisted: the destination journal
+  /// assigns its own contiguous local positions to the original immutable
+  /// events in the exact same order.
+  Future<void> restoreJournalSnapshot(List<LocalJournalEntry> snapshot) {
+    return _runExclusive(() async {
+      _requireOpen();
+      if (_configuration.lastPosition != null ||
+          (await _journal.readAll()).isNotEmpty) {
+        throw const JournalSnapshotImportException(
+          JournalSnapshotImportFailureReason.localJournalNotEmpty,
+        );
+      }
+      if (snapshot.isEmpty) {
+        throw const JournalSnapshotImportException(
+          JournalSnapshotImportFailureReason.snapshotEmpty,
+        );
+      }
+      for (var index = 0; index < snapshot.length; index++) {
+        if (snapshot[index].position.value != index + 1) {
+          throw const JournalSnapshotImportException(
+            JournalSnapshotImportFailureReason.invalidSourceOrder,
+          );
+        }
+      }
+      await _appendValidated([for (final entry in snapshot) entry.event]);
     });
   }
 

@@ -960,6 +960,71 @@ void main() {
       },
     );
   });
+
+  group('LocalRebootService recovery snapshots', () {
+    test('copies immutable events into a fresh local journal', () async {
+      final source = await _Harness.initialized();
+      await source.service.recordExpense(_expense('Courses', 4200));
+      final snapshot = await source.service.readJournalSnapshot();
+      final destination = await _Harness.create();
+
+      await destination.service.restoreJournalSnapshot(snapshot);
+
+      expect(destination.journal.entries, hasLength(snapshot.length));
+      expect(
+        destination.journal.entries.map((entry) => entry.event.id),
+        snapshot.map((entry) => entry.event.id),
+      );
+      expect(destination.service.configuration.household, isNotNull);
+      expect(
+        destination.service.expenses.activeExpenses.single.label,
+        'Courses',
+      );
+    });
+
+    test('refuses to overwrite a non-empty local journal', () async {
+      final source = await _Harness.initialized();
+      final destination = await _Harness.initialized();
+      final original = List<LocalJournalEntry>.of(destination.journal.entries);
+
+      await expectLater(
+        destination.service.restoreJournalSnapshot(
+          await source.service.readJournalSnapshot(),
+        ),
+        throwsA(
+          isA<JournalSnapshotImportException>().having(
+            (error) => error.reason,
+            'reason',
+            JournalSnapshotImportFailureReason.localJournalNotEmpty,
+          ),
+        ),
+      );
+      expect(destination.journal.entries, original);
+    });
+
+    test('refuses invalid source positions without a partial append', () async {
+      final source = await _Harness.initialized();
+      final sourceEntry = (await source.service.readJournalSnapshot()).single;
+      final destination = await _Harness.create();
+
+      await expectLater(
+        destination.service.restoreJournalSnapshot([
+          LocalJournalEntry(
+            position: LocalJournalPosition(2),
+            event: sourceEntry.event,
+          ),
+        ]),
+        throwsA(
+          isA<JournalSnapshotImportException>().having(
+            (error) => error.reason,
+            'reason',
+            JournalSnapshotImportFailureReason.invalidSourceOrder,
+          ),
+        ),
+      );
+      expect(destination.journal.entries, isEmpty);
+    });
+  });
 }
 
 InitializeHouseholdCommand _initialize(FirstCycleStartChoice choice) {

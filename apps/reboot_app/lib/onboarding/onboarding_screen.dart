@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 
 import '../infrastructure/device_context_providers.dart';
+import '../infrastructure/profile_providers.dart';
 import '../l10n/app_localizations.dart';
+import '../settings/local_backup_controller.dart';
 import 'onboarding_controller.dart';
 
 /// Two-stage introduction and initial weekly-cycle configuration.
@@ -54,6 +56,7 @@ final class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildWelcome(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final backupOperation = ref.watch(localBackupControllerProvider);
     return Padding(
       padding: const EdgeInsets.only(top: 48),
       child: Column(
@@ -88,9 +91,49 @@ final class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               label: Text(l10n.startSetup),
             ),
           ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              key: const ValueKey('restore-encrypted-backup'),
+              onPressed: backupOperation.isLoading
+                  ? null
+                  : () => _restoreBackup(context),
+              icon: backupOperation.isLoading
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.restore),
+              label: Text(
+                backupOperation.isLoading
+                    ? l10n.backupRestoring
+                    : l10n.restoreEncryptedBackup,
+              ),
+            ),
+          ),
+          if (backupOperation.hasError) ...[
+            const SizedBox(height: 12),
+            Text(
+              l10n.backupRestoreFailed,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  Future<void> _restoreBackup(BuildContext context) async {
+    final recoveryCode = await showDialog<String>(
+      context: context,
+      builder: (_) => const _RecoveryCodeDialog(),
+    );
+    if (recoveryCode == null || !mounted) return;
+    final service = await ref.read(localRebootServiceProvider.future);
+    await ref
+        .read(localBackupControllerProvider.notifier)
+        .restore(service: service, recoveryCode: recoveryCode);
   }
 
   Widget _buildConfiguration(BuildContext context) {
@@ -321,6 +364,71 @@ final class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _selectFirstCycle(FirstCycleStartChoice value) {
     setState(() => _firstCycleChoice = value);
+  }
+}
+
+final class _RecoveryCodeDialog extends StatefulWidget {
+  const _RecoveryCodeDialog();
+
+  @override
+  State<_RecoveryCodeDialog> createState() => _RecoveryCodeDialogState();
+}
+
+final class _RecoveryCodeDialogState extends State<_RecoveryCodeDialog> {
+  final _key = GlobalKey<FormState>();
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.restoreEncryptedBackup),
+      content: Form(
+        key: _key,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.restoreBackupIntro),
+            const SizedBox(height: 16),
+            TextFormField(
+              key: const ValueKey('restore-recovery-code'),
+              controller: _controller,
+              autocorrect: false,
+              enableSuggestions: false,
+              keyboardType: TextInputType.visiblePassword,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: l10n.backupRecoveryCodeLabel,
+              ),
+              validator: (value) => value == null || value.trim().isEmpty
+                  ? l10n.requiredField
+                  : null,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          key: const ValueKey('select-backup-file'),
+          onPressed: () {
+            if (!_key.currentState!.validate()) return;
+            Navigator.pop(context, _controller.text.trim());
+          },
+          child: Text(l10n.selectBackupFile),
+        ),
+      ],
+    );
   }
 }
 

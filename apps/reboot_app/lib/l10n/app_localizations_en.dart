@@ -1819,11 +1819,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'REBOOT currently works offline on this Android device only. Encrypted sharing and synchronization will be added only after their security model is validated.';
 
   @override
-  String get recoveryUnavailableTitle => 'No recovery is available yet';
+  String get recoveryUnavailableTitle => 'No automatic recovery';
 
   @override
   String get recoveryUnavailableBody =>
-      'If the application is uninstalled, its data is erased, or this device and its key are lost, this local profile cannot currently be restored. Encrypted export and recovery remain to be implemented.';
+      'If this device is lost, recovery requires an encrypted backup file and its separate code. Without both, REBOOT cannot restore this local profile.';
 
   @override
   String get financialAssumptionsStatusTitle => 'Financial assumptions';
@@ -1958,4 +1958,61 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cashDashboardWalletMethod =>
       'Withdrawals are transfers; cash purchases reduce the weekly budget.';
+
+  @override
+  String get encryptedBackupTitle => 'Encrypted recovery backup';
+
+  @override
+  String get encryptedBackupBody =>
+      'Create a recovery file protected by a new random key. REBOOT never sends the file or its code anywhere.';
+
+  @override
+  String get createEncryptedBackup => 'Create an encrypted backup';
+
+  @override
+  String get backupCreating => 'Creating backup…';
+
+  @override
+  String get backupOperationFailed =>
+      'The backup could not be completed. No unencrypted fallback was created.';
+
+  @override
+  String get backupRecoveryCodeTitle => 'Save your recovery code';
+
+  @override
+  String get backupRecoveryCodeBody =>
+      'This code is the only way to open the backup you just saved. REBOOT cannot retrieve or reset it.';
+
+  @override
+  String get backupRecoveryCodeLabel => 'Recovery code';
+
+  @override
+  String get backupKeepSeparateWarning =>
+      'Keep the backup file and this code in two different safe places. Anyone with both can read your financial data.';
+
+  @override
+  String get copyRecoveryCode => 'Copy code';
+
+  @override
+  String get recoveryCodeCopied => 'Recovery code copied as sensitive data.';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get restoreEncryptedBackup => 'Restore an encrypted backup';
+
+  @override
+  String get backupRestoring => 'Restoring backup…';
+
+  @override
+  String get backupRestoreFailed =>
+      'The archive, recovery code, or journal is invalid. Nothing was imported.';
+
+  @override
+  String get restoreBackupIntro =>
+      'Enter the code kept separately from your backup, then select the .reboot-backup file. Restoration is only available before creating a new profile.';
+
+  @override
+  String get selectBackupFile => 'Select backup file';
 }

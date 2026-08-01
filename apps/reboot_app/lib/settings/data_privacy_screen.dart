@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 
 import '../financial_setup/cash_flow_management_screen.dart';
 import '../l10n/app_localizations.dart';
+import 'local_backup_controller.dart';
 
-/// States what the current Android product actually protects and cannot yet do.
-final class DataPrivacyScreen extends StatelessWidget {
+/// States current protection and creates explicit encrypted recovery backups.
+final class DataPrivacyScreen extends ConsumerWidget {
   const DataPrivacyScreen({
     required this.service,
     required this.today,
@@ -18,8 +20,9 @@ final class DataPrivacyScreen extends StatelessWidget {
   final LocalDate today;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final backupOperation = ref.watch(localBackupControllerProvider);
     final household = service.configuration.household!;
     final cycleStart = today.isBefore(household.firstCycleStart)
         ? household.firstCycleStart
@@ -106,11 +109,46 @@ final class DataPrivacyScreen extends StatelessWidget {
               ),
             ),
             Card(
-              color: Theme.of(context).colorScheme.errorContainer,
-              child: ListTile(
-                leading: const Icon(Icons.warning_amber_rounded),
-                title: Text(l10n.recoveryUnavailableTitle),
-                subtitle: Text(l10n.recoveryUnavailableBody),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.backup_outlined),
+                      title: Text(l10n.encryptedBackupTitle),
+                      subtitle: Text(l10n.encryptedBackupBody),
+                    ),
+                    const SizedBox(height: 8),
+                    FilledButton.icon(
+                      key: const ValueKey('create-encrypted-backup'),
+                      onPressed: backupOperation.isLoading
+                          ? null
+                          : () => _export(context, ref),
+                      icon: backupOperation.isLoading
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.save_alt),
+                      label: Text(
+                        backupOperation.isLoading
+                            ? l10n.backupCreating
+                            : l10n.createEncryptedBackup,
+                      ),
+                    ),
+                    if (backupOperation.hasError) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.backupOperationFailed,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -163,6 +201,71 @@ final class DataPrivacyScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _export(BuildContext context, WidgetRef ref) async {
+    final code = await ref
+        .read(localBackupControllerProvider.notifier)
+        .export(
+          service: service,
+          suggestedName: 'reboot-${today.toString()}.reboot-backup',
+        );
+    if (code == null || !context.mounted) return;
+    final l10n = AppLocalizations.of(context);
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.backupRecoveryCodeTitle),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.backupRecoveryCodeBody),
+              const SizedBox(height: 16),
+              Text(l10n.backupRecoveryCodeLabel),
+              const SizedBox(height: 6),
+              SelectableText(
+                code,
+                key: const ValueKey('backup-recovery-code'),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontFamily: 'monospace'),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                color: Theme.of(context).colorScheme.errorContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(l10n.backupKeepSeparateWarning),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton.icon(
+            key: const ValueKey('copy-recovery-code'),
+            onPressed: () async {
+              await ref
+                  .read(localBackupDocumentPortalProvider)
+                  .copySensitive(code);
+              if (!dialogContext.mounted) return;
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(l10n.recoveryCodeCopied)));
+            },
+            icon: const Icon(Icons.copy),
+            label: Text(l10n.copyRecoveryCode),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.done),
+          ),
+        ],
       ),
     );
   }

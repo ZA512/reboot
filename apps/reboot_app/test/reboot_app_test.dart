@@ -876,10 +876,7 @@ void main() {
     expect(find.text('Profil local chiffré'), findsOneWidget);
     expect(find.text('Sauvegarde système Android désactivée'), findsOneWidget);
     expect(find.text('Aucune télémétrie'), findsOneWidget);
-    expect(
-      find.text('Aucune récupération disponible pour le moment'),
-      findsOneWidget,
-    );
+    expect(find.text('Sauvegarde de récupération chiffrée'), findsOneWidget);
 
     final assumptions = find.text('2 hypothèses actives');
     await tester.scrollUntilVisible(

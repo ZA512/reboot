@@ -41,7 +41,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] PRD REBOOT 2.1 publié comme source de vérité
 - [x] Garde-fous Git et sécurité posés
 - [x] Analyse initiale des contradictions et questions ouvertes
-- [x] Huit ADR d’architecture acceptés
+- [x] Neuf ADR d’architecture acceptés
 - [x] Méthode REBOOT formalisée
 - [x] Création du workspace Flutter/Dart
 - [x] Type monétaire et tests de référence
@@ -67,6 +67,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Primes déjà reçues lissées jusqu’à leur prochaine confirmation
 - [x] Explication détaillée du budget semaine, de ses hypothèses et de ses arrondis
 - [x] Widget Android confidentiel du restant hebdomadaire
+- [x] Sauvegarde locale Android chiffrée et restauration sur une installation neuve
 - [x] Stratégie de distribution Android et Web/PWA acceptée
 - [x] Shell Flutter Web compilable, sans persistance non validée
 - [ ] Prototype de stockage Web chiffré et garde des clés

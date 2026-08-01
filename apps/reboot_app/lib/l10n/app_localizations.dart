@@ -2978,13 +2978,13 @@ abstract class AppLocalizations {
   /// Warning title for unavailable profile recovery.
   ///
   /// In en, this message translates to:
-  /// **'No recovery is available yet'**
+  /// **'No automatic recovery'**
   String get recoveryUnavailableTitle;
 
   /// Explicit current local profile recovery limitation.
   ///
   /// In en, this message translates to:
-  /// **'If the application is uninstalled, its data is erased, or this device and its key are lost, this local profile cannot currently be restored. Encrypted export and recovery remain to be implemented.'**
+  /// **'If this device is lost, recovery requires an encrypted backup file and its separate code. Without both, REBOOT cannot restore this local profile.'**
   String get recoveryUnavailableBody;
 
   /// Heading for the status of active income and expense assumptions.
@@ -3190,6 +3190,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Withdrawals are transfers; cash purchases reduce the weekly budget.'**
   String get cashDashboardWalletMethod;
+
+  /// Title for explicit local encrypted backup.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted recovery backup'**
+  String get encryptedBackupTitle;
+
+  /// Explains local encrypted backup privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a recovery file protected by a new random key. REBOOT never sends the file or its code anywhere.'**
+  String get encryptedBackupBody;
+
+  /// Starts local encrypted backup creation.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an encrypted backup'**
+  String get createEncryptedBackup;
+
+  /// Backup creation progress label.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating backup…'**
+  String get backupCreating;
+
+  /// Sanitized backup failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup could not be completed. No unencrypted fallback was created.'**
+  String get backupOperationFailed;
+
+  /// Title shown after saving an encrypted backup.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your recovery code'**
+  String get backupRecoveryCodeTitle;
+
+  /// Explains recovery code importance.
+  ///
+  /// In en, this message translates to:
+  /// **'This code is the only way to open the backup you just saved. REBOOT cannot retrieve or reset it.'**
+  String get backupRecoveryCodeBody;
+
+  /// Recovery code field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery code'**
+  String get backupRecoveryCodeLabel;
+
+  /// Backup separation and disclosure warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the backup file and this code in two different safe places. Anyone with both can read your financial data.'**
+  String get backupKeepSeparateWarning;
+
+  /// Copies recovery code as sensitive clipboard data.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get copyRecoveryCode;
+
+  /// Recovery code copy confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery code copied as sensitive data.'**
+  String get recoveryCodeCopied;
+
+  /// Closes a completed flow.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// Starts first-run local backup restoration.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore an encrypted backup'**
+  String get restoreEncryptedBackup;
+
+  /// Backup restoration progress label.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring backup…'**
+  String get backupRestoring;
+
+  /// Sanitized atomic restore failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The archive, recovery code, or journal is invalid. Nothing was imported.'**
+  String get backupRestoreFailed;
+
+  /// First-run backup restoration instructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code kept separately from your backup, then select the .reboot-backup file. Restoration is only available before creating a new profile.'**
+  String get restoreBackupIntro;
+
+  /// Opens Android document picker for a backup.
+  ///
+  /// In en, this message translates to:
+  /// **'Select backup file'**
+  String get selectBackupFile;
 }
 
 class _AppLocalizationsDelegate

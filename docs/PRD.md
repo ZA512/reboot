@@ -428,7 +428,8 @@ Les décisions acceptées sont :
 - [ADR-0005 — SQLite chiffrée, Drift et migrations](adr/0005-encrypted-sqlite-and-migrations.md) ;
 - [ADR-0006 — Cycle de vie des clés, révocation et récupération](adr/0006-key-lifecycle-revocation-and-recovery.md) ;
 - [ADR-0007 — État Flutter et racine de composition](adr/0007-riverpod-state-and-composition.md) ;
-- [ADR-0008 — Distribution Android et Web/PWA](adr/0008-android-and-web-pwa-distribution.md).
+- [ADR-0008 — Distribution Android et Web/PWA](adr/0008-android-and-web-pwa-distribution.md) ;
+- [ADR-0010 — Export local chiffré et restauration](adr/0010-encrypted-local-recovery-export.md).
 
 ## 20. Écrans du premier produit
 
@@ -470,7 +471,8 @@ Les décisions acceptées sont :
 4. rendre la composition compatible Web ;
 5. ajouter installation PWA et fonctionnement hors ligne ;
 6. valider Safari sur iPhone réel ;
-7. livrer l’export local.
+7. livrer l’export local — archive de récupération Android chiffrée livrée ;
+   export lisible de portabilité encore à définir.
 
 ### Partage chiffré
 
@@ -521,7 +523,8 @@ Les décisions suivantes doivent être prises avant le code concerné :
 - hébergeur PWA et chaîne de déploiement sécurisée ;
 - fournisseur Drive, OAuth et permissions ;
 - modèle de conflits multi-appareils ;
-- formats d’export et de portabilité.
+- formats lisibles d’export et de portabilité au-delà de l’archive de
+  récupération chiffrée Android.
 
 ## 24. Définition de réussite
 

@@ -8,6 +8,7 @@ import '../infrastructure/profile_providers.dart';
 import '../l10n/app_localizations.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../onboarding/onboarding_screen.dart';
+import '../settings/local_backup_controller.dart';
 import '../trajectory_setup/trajectory_setup_controller.dart';
 import '../trajectory_setup/trajectory_setup_screen.dart';
 
@@ -48,6 +49,7 @@ final class ProfileStartupGate extends ConsumerWidget {
       data: (service) {
         if (service.configuration.household == null) {
           ref.watch(onboardingControllerProvider);
+          ref.watch(localBackupControllerProvider);
           return const OnboardingScreen();
         }
         if (service.configuration.cashFlows.isEmpty) {
