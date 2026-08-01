@@ -245,6 +245,8 @@
   "reserveFundingLabel": "Motif",
   "reserveFundingHint": "Surplus hebdomadaire, cadeau, virement manuel…",
   "confirmReserveFunding": "Enregistrer les fonds",
+  "realReserveFundingTransferBody": "Cette saisie ajoutera {amount} à {reserveName}. Pensez à virer {amount} du compte principal vers ce compte de réserve. REBOOT n’effectuera ni ne vérifiera le virement.",
+  "confirmRealReserveFunding": "J’ai compris, ajouter les fonds",
   "reserveHistory": "Mouvements récents",
   "reversedReserveMovement": "Saisie erronée annulée",
   "reverseReserveMovement": "Annuler la saisie",

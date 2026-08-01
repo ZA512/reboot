@@ -111,6 +111,33 @@ final class ReservesScreen extends ConsumerWidget {
       builder: (_) => const _MovementDialog(),
     );
     if (draft == null || !context.mounted) return;
+    if (reserve.kind == ReserveKind.real) {
+      final l10n = AppLocalizations.of(context);
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.realReserveTransferTitle),
+          content: Text(
+            l10n.realReserveFundingTransferBody(
+              _formatMoney(context, draft.amount),
+              reserve.name,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              key: const ValueKey('confirm-real-reserve-funding'),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(l10n.confirmRealReserveFunding),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !context.mounted) return;
+    }
     await ref
         .read(reserveControllerProvider.notifier)
         .addFunds(

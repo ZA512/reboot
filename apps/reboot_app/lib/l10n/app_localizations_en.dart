@@ -925,6 +925,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmReserveFunding => 'Record the funds';
 
   @override
+  String realReserveFundingTransferBody(String amount, String reserveName) {
+    return 'This will declare $amount more in $reserveName. Remember to transfer $amount from the main account to that reserve account. REBOOT will not perform or verify the transfer.';
+  }
+
+  @override
+  String get confirmRealReserveFunding => 'I understand, add the funds';
+
+  @override
   String get reserveHistory => 'Recent movements';
 
   @override

@@ -1577,6 +1577,18 @@ abstract class AppLocalizations {
   /// **'Record the funds'**
   String get confirmReserveFunding;
 
+  /// Real reserve funding bank transfer reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'This will declare {amount} more in {reserveName}. Remember to transfer {amount} from the main account to that reserve account. REBOOT will not perform or verify the transfer.'**
+  String realReserveFundingTransferBody(String amount, String reserveName);
+
+  /// Confirms real reserve funding after the physical transfer reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand, add the funds'**
+  String get confirmRealReserveFunding;
+
   /// Reserve movement history title.
   ///
   /// In en, this message translates to:

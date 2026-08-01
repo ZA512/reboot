@@ -932,6 +932,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get confirmReserveFunding => 'Enregistrer les fonds';
 
   @override
+  String realReserveFundingTransferBody(String amount, String reserveName) {
+    return 'Cette saisie ajoutera $amount à $reserveName. Pensez à virer $amount du compte principal vers ce compte de réserve. REBOOT n’effectuera ni ne vérifiera le virement.';
+  }
+
+  @override
+  String get confirmRealReserveFunding => 'J’ai compris, ajouter les fonds';
+
+  @override
   String get reserveHistory => 'Mouvements récents';
 
   @override

@@ -13,6 +13,7 @@ import 'package:reboot_app/infrastructure/profile_providers.dart';
 import 'package:reboot_app/l10n/app_localizations.dart';
 import 'package:reboot_app/method/budget_explanation_screen.dart';
 import 'package:reboot_app/refunds/refunds_screen.dart';
+import 'package:reboot_app/reserves/reserves_screen.dart';
 import 'package:reboot_app/src/reboot_app.dart';
 import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
@@ -991,6 +992,44 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(service.reserves.reserves.values.single.balance.minorUnits, 50000);
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Ajouter des fonds'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('reserve-funding-amount')),
+      '25',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('reserve-funding-label')),
+      'Surplus conservé',
+    );
+    await tester.tap(find.byKey(const ValueKey('confirm-reserve-funding')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Rappel de virement'), findsOneWidget);
+    expect(find.textContaining('du compte principal vers'), findsOneWidget);
+    expect(service.reserves.reserves.values.single.balance.minorUnits, 50000);
+    await tester.tap(find.widgetWithText(TextButton, 'Annuler'));
+    await tester.pumpAndSettle();
+    expect(service.reserves.reserves.values.single.balance.minorUnits, 50000);
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Ajouter des fonds'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('reserve-funding-amount')),
+      '25',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('reserve-funding-label')),
+      'Surplus conservé',
+    );
+    await tester.tap(find.byKey(const ValueKey('confirm-reserve-funding')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey('confirm-real-reserve-funding')),
+    );
+    await tester.pumpAndSettle();
+    expect(service.reserves.reserves.values.single.balance.minorUnits, 52500);
+
     await tester.tap(find.widgetWithText(FilledButton, 'Utiliser'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('expense-amount')), '125');
@@ -1016,12 +1055,57 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(service.reserves.reserves.values.single.balance.minorUnits, 37500);
+    expect(service.reserves.reserves.values.single.balance.minorUnits, 40000);
     expect(service.expenses.activeExpenses, isEmpty);
     expect(
       service.buildRollingBudget(LocalDate(2026, 4, 5)).cycles.first.remaining,
       weeklyBefore,
     );
+  });
+
+  testWidgets('funds a virtual reserve without a bank transfer reminder', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final service = await _readyService(_MemoryJournal());
+    await service.createReserve(
+      CreateReserveCommand(
+        name: 'Coussin virtuel',
+        kind: ReserveKind.virtual,
+        openingBalance: Money.zero(Currency.eur),
+        businessDate: LocalDate(2026, 4, 5),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ReservesScreen(service: service, today: LocalDate(2026, 4, 5)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Ajouter des fonds'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('reserve-funding-amount')),
+      '25',
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('reserve-funding-label')),
+      'Surplus conservé',
+    );
+    await tester.tap(find.byKey(const ValueKey('confirm-reserve-funding')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Rappel de virement'), findsNothing);
+    expect(service.reserves.reserves.values.single.balance.minorUnits, 2500);
   });
 
   testWidgets('separates a strong latest-week alert from a healthy trend', (
