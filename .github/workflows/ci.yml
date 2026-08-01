@@ -50,7 +50,10 @@ jobs:
 
       - name: Verify encrypted browser journal in Chrome
         working-directory: apps/reboot_app
-        run: dart test -p chrome test/browser/browser_encrypted_journal_prototype_test.dart
+        run: >-
+          dart test -p chrome
+          test/browser/browser_encrypted_journal_prototype_test.dart
+          test/browser/browser_storage_durability_test.dart
 
       - name: Compile browser storage for JavaScript and WebAssembly
         working-directory: apps/reboot_app

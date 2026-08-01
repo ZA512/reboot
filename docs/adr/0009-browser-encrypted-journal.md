@@ -90,7 +90,12 @@ Les tests Chrome exécutent réellement Web Crypto et IndexedDB et vérifient :
 - positions uniques avec deux connexions concurrentes à la même base ;
 - rollback intégral lorsqu’une requête d’une transaction échoue ;
 - rejet d’un ciphertext et d’un en-tête authentifié modifiés ;
-- perte de clé et suppression isolée de la base sans régénération silencieuse.
+- perte de clé et suppression isolée de la base sans régénération silencieuse ;
+- cohérence transactionnelle entre la position finale, les enveloppes et
+  l’index UUID complet ;
+- algorithme, taille, non-extractibilité et usages exacts de la clé rechargée ;
+- détection explicite du mode persistant ou `best effort` et cohérence du quota
+  annoncé par le navigateur.
 
 ## Options étudiées
 

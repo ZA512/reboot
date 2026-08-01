@@ -85,7 +85,7 @@ final class BrowserEncryptedJournalPrototype {
       final web.CryptoKey key;
       try {
         key = storedKey as web.CryptoKey;
-        if (key.extractable || key.type != 'secret') {
+        if (!_isExpectedDataKey(key)) {
           throw const WebJournalKeyUnavailableException();
         }
       } on WebJournalKeyUnavailableException {
@@ -146,7 +146,13 @@ final class BrowserEncryptedJournalPrototype {
   /// Reads, authenticates and decrypts every event in monotone position order.
   Future<List<WebPrototypePlainEvent>> readAll() async {
     _ensureOpen();
-    final values = await _readAllValues(_database, _entryStore);
+    final snapshot = await _readIntegritySnapshot(_database);
+    final values = snapshot.entries;
+    if (BigInt.from(values.length) != snapshot.lastPosition ||
+        snapshot.eventIds.length != values.length) {
+      throw const WebJournalIntegrityException();
+    }
+
     final result = <WebPrototypePlainEvent>[];
     var expected = BigInt.one;
     for (final value in values) {
@@ -155,6 +161,9 @@ final class BrowserEncryptedJournalPrototype {
           _dartMap(value),
         );
         if (envelope.position != expected) {
+          throw const WebJournalIntegrityException();
+        }
+        if (snapshot.eventIds[envelope.eventId] != envelope.positionKey) {
           throw const WebJournalIntegrityException();
         }
         result.add(await _decrypt(envelope));
@@ -206,6 +215,23 @@ final class BrowserEncryptedJournalPrototype {
   Future<void> deleteKeyForTesting() async {
     _ensureOpen();
     await _deleteValue(_database, _keyStore, WebEncryptedEventEnvelope.keyId);
+  }
+
+  /// Corrupts the metadata tail so tests can prove whole-journal validation.
+  Future<void> corruptLastPositionForTesting(String replacement) async {
+    _ensureOpen();
+    await _putValue(
+      _database,
+      _metadataStore,
+      _lastPositionKey,
+      replacement.toJS,
+    );
+  }
+
+  /// Removes one UUID index entry while retaining its encrypted envelope.
+  Future<void> deleteEventIdIndexForTesting(String eventId) async {
+    _ensureOpen();
+    await _deleteValue(_database, _eventIdStore, eventId);
   }
 
   /// Forces one request in a read/write transaction to fail so tests can
@@ -478,7 +504,7 @@ Future<web.CryptoKey> _generateDataKey() async {
         )
         .toDart;
     final key = generated as web.CryptoKey;
-    if (key.extractable || key.type != 'secret') {
+    if (!_isExpectedDataKey(key)) {
       throw const WebJournalStorageException();
     }
     return key;
@@ -487,6 +513,20 @@ Future<web.CryptoKey> _generateDataKey() async {
   } on Object {
     throw const WebJournalStorageException();
   }
+}
+
+bool _isExpectedDataKey(web.CryptoKey key) {
+  if (key.extractable || key.type != 'secret') return false;
+  final algorithm = key.algorithm.dartify();
+  if (algorithm is! Map<Object?, Object?> ||
+      algorithm['name'] != 'AES-GCM' ||
+      algorithm['length'] != 256) {
+    return false;
+  }
+  final usages = key.usages.dartify();
+  if (usages is! List<Object?>) return false;
+  return usages.length == 2 &&
+      usages.toSet().containsAll(const <String>{'encrypt', 'decrypt'});
 }
 
 Future<void> _initialize(web.IDBDatabase database, web.CryptoKey key) async {
@@ -564,6 +604,77 @@ Future<List<JSAny?>> _readAllValues(
   } on Object {
     await _ignoreAbort(completed);
     throw const WebJournalStorageException();
+  }
+}
+
+Future<
+  ({List<JSAny?> entries, Map<String, String> eventIds, BigInt lastPosition})
+>
+_readIntegritySnapshot(web.IDBDatabase database) async {
+  final transaction = database.transaction(
+    <JSString>[
+      BrowserEncryptedJournalPrototype._metadataStore.toJS,
+      BrowserEncryptedJournalPrototype._entryStore.toJS,
+      BrowserEncryptedJournalPrototype._eventIdStore.toJS,
+    ].toJS,
+    'readonly',
+  );
+  final completed = _transactionCompleted(transaction);
+  try {
+    final metadata = transaction.objectStore(
+      BrowserEncryptedJournalPrototype._metadataStore,
+    );
+    final entries = transaction.objectStore(
+      BrowserEncryptedJournalPrototype._entryStore,
+    );
+    final eventIds = transaction.objectStore(
+      BrowserEncryptedJournalPrototype._eventIdStore,
+    );
+    final results = await Future.wait(<Future<JSAny?>>[
+      _requestResult(
+        metadata.get(BrowserEncryptedJournalPrototype._lastPositionKey.toJS),
+      ),
+      _requestResult(entries.getAll()),
+      _requestResult(eventIds.getAllKeys()),
+      _requestResult(eventIds.getAll()),
+    ]);
+    await completed;
+
+    final eventIdKeys = _jsArrayValues(results[2]);
+    final eventIdPositions = _jsArrayValues(results[3]);
+    if (eventIdKeys.length != eventIdPositions.length) {
+      throw const WebJournalIntegrityException();
+    }
+    final eventIdIndex = <String, String>{};
+    for (var index = 0; index < eventIdKeys.length; index += 1) {
+      final eventId = eventIdKeys[index]?.dartify();
+      final position = eventIdPositions[index]?.dartify();
+      if (eventId is! String || position is! String) {
+        throw const WebJournalIntegrityException();
+      }
+      if (eventIdIndex.putIfAbsent(eventId, () => position) != position) {
+        throw const WebJournalIntegrityException();
+      }
+    }
+    return (
+      entries: _jsArrayValues(results[1]),
+      eventIds: Map<String, String>.unmodifiable(eventIdIndex),
+      lastPosition: _parsePosition(results[0], allowZero: true),
+    );
+  } on WebJournalIntegrityException {
+    await _ignoreAbort(completed);
+    rethrow;
+  } on Object {
+    await _ignoreAbort(completed);
+    throw const WebJournalStorageException();
+  }
+}
+
+List<JSAny?> _jsArrayValues(JSAny? value) {
+  try {
+    return (value as JSArray<JSAny?>).toDart;
+  } on Object {
+    throw const WebJournalIntegrityException();
   }
 }
 

@@ -53,9 +53,18 @@ Les tests Chrome prouvent la réouverture, l’ordre, l’idempotence, le confli
 d’UUID, l’attribution de positions uniques entre deux connexions concurrentes,
 le rollback intégral d’une transaction en échec, le refus d’export de clé, la
 détection d’une altération du ciphertext ou de l’en-tête, la perte de clé et
-l’effacement isolé d’IndexedDB. Les valeurs de test sont exclusivement
-synthétiques. Le prototype n’implémente pas encore le port applicatif et le
-shell Web reste bloqué.
+l’effacement isolé d’IndexedDB. La lecture contrôle aussi, dans un même instantané
+transactionnel, la cohérence entre la position finale, toutes les enveloppes et
+l’index complet des UUID. La clé rechargée doit être une clé secrète AES-GCM de
+256 bits, non extractible, dont les seuls usages sont le chiffrement et le
+déchiffrement. Les valeurs de test sont exclusivement synthétiques. Le prototype
+n’implémente pas encore le port applicatif et le shell Web reste bloqué.
+
+La politique de durabilité n’est plus implicite : le prototype interroge le
+quota de l’origine, vérifie sa cohérence et peut demander au navigateur le mode
+persistant. Un refus reste un résultat valide mais classé `best effort`; il devra
+être annoncé à l’utilisateur et interdit de présenter la copie locale comme une
+sauvegarde. Une API absente ou incohérente échoue fermée.
 
 Drift/SQLite WebAssembly est différé : il ne supprimerait pas le besoin du
 chiffrement applicatif et ajouterait des pages, caches et migrations à auditer.

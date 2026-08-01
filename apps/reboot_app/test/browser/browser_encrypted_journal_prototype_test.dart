@@ -175,6 +175,49 @@ void main() {
     );
   });
 
+  test('rejects a journal tail inconsistent with its entries', () async {
+    final databaseName = _databaseName('tail-corruption');
+    final journal = await BrowserEncryptedJournalPrototype.open(
+      databaseName: databaseName,
+    );
+    addTearDown(() async {
+      journal.close();
+      await BrowserEncryptedJournalPrototype.deleteDatabaseForTesting(
+        databaseName,
+      );
+      BrowserEncryptedJournalPrototype.removeMarkerForTesting(databaseName);
+    });
+    await journal.append(_event(12, '{"value":"confidential"}'));
+    await journal.corruptLastPositionForTesting('2');
+
+    expect(
+      () => journal.readAll(),
+      throwsA(isA<WebJournalIntegrityException>()),
+    );
+  });
+
+  test('rejects an envelope missing from the UUID index', () async {
+    final databaseName = _databaseName('index-corruption');
+    final journal = await BrowserEncryptedJournalPrototype.open(
+      databaseName: databaseName,
+    );
+    addTearDown(() async {
+      journal.close();
+      await BrowserEncryptedJournalPrototype.deleteDatabaseForTesting(
+        databaseName,
+      );
+      BrowserEncryptedJournalPrototype.removeMarkerForTesting(databaseName);
+    });
+    final event = _event(13, '{"value":"confidential"}');
+    await journal.append(event);
+    await journal.deleteEventIdIndexForTesting(event.eventId);
+
+    expect(
+      () => journal.readAll(),
+      throwsA(isA<WebJournalIntegrityException>()),
+    );
+  });
+
   test('missing key fails closed and is never regenerated', () async {
     final databaseName = _databaseName('key-loss');
     final journal = await BrowserEncryptedJournalPrototype.open(
