@@ -889,6 +889,77 @@ void main() {
       expect(harness.journal.entries, hasLength(entryCount));
     });
   });
+
+  group('LocalRebootService cash handling', () {
+    test('dates methods and restores corrected wallet transfers', () async {
+      final harness = await _Harness.initialized();
+      await harness.service.configureCashHandling(
+        ConfigureCashHandlingCommand(
+          method: CashWithdrawalMethod.withdrawalAsExpense,
+          businessDate: LocalDate(2026, 4, 1),
+        ),
+      );
+      await harness.service.configureCashHandling(
+        ConfigureCashHandlingCommand(
+          method: CashWithdrawalMethod.cashWallet,
+          businessDate: LocalDate(2026, 5, 1),
+        ),
+      );
+      final transfer = await harness.service.recordCashWalletTransfer(
+        RecordCashWalletTransferCommand(
+          amount: _eur(5000),
+          label: ' Retrait espèces ',
+          businessDate: LocalDate(2026, 5, 2),
+        ),
+      );
+
+      expect(
+        harness.service.cash.methodOn(LocalDate(2026, 4, 30)),
+        CashWithdrawalMethod.withdrawalAsExpense,
+      );
+      expect(transfer.label, 'Retrait espèces');
+      await harness.service.reverseCashWalletTransfer(
+        ReverseCashWalletTransferCommand(
+          transferEventId: transfer.eventId,
+          businessDate: LocalDate(2026, 5, 3),
+        ),
+      );
+
+      final restored = await LocalRebootService.restore(
+        journal: harness.journal,
+        clock: const _FixedClock(),
+        identities: _SequentialIdentities(100),
+      );
+      expect(restored.cash.methodRevisions, hasLength(2));
+      expect(restored.cash.walletTransfers.single.isReversed, isTrue);
+    });
+
+    test(
+      'rejects wallet transfers under the withdrawal-expense method',
+      () async {
+        final harness = await _Harness.initialized();
+        await harness.service.configureCashHandling(
+          ConfigureCashHandlingCommand(
+            method: CashWithdrawalMethod.withdrawalAsExpense,
+            businessDate: LocalDate(2026, 4, 1),
+          ),
+        );
+        final entryCount = harness.journal.entries.length;
+
+        await expectLater(
+          harness.service.recordCashWalletTransfer(
+            RecordCashWalletTransferCommand(
+              amount: _eur(5000),
+              label: 'Retrait',
+              businessDate: LocalDate(2026, 4, 2),
+            ),
+          ),
+          throwsA(isA<IncompleteConfigurationException>()),
+        );
+        expect(harness.journal.entries, hasLength(entryCount));
+      },
+    );
+  });
 }
 
 InitializeHouseholdCommand _initialize(FirstCycleStartChoice choice) {

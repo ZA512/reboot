@@ -1613,6 +1613,129 @@ void main() {
     );
   });
 
+  testWidgets('counts a cash withdrawal once as a weekly expense', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('en'));
+    final service = await _readyService(_MemoryJournal());
+    final today = LocalDate(2026, 4, 6);
+    final remainingBefore = service
+        .buildRollingBudget(today)
+        .cycles
+        .first
+        .remaining;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: today,
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final cashCard = find.byKey(const ValueKey('open-cash'));
+    await tester.scrollUntilVisible(cashCard, 250);
+    await tester.tap(cashCard);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey('cash-method-withdrawal-expense')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('record-cash-withdrawal')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('cash-withdrawal-amount')),
+      '50',
+    );
+    await tester.tap(find.byKey(const ValueKey('confirm-cash-withdrawal')));
+    await tester.pumpAndSettle();
+
+    expect(service.expenses.activeExpenses, hasLength(1));
+    expect(service.expenses.activeExpenses.single.amount.minorUnits, 5000);
+    expect(service.cash.walletTransfers, isEmpty);
+    expect(
+      service.buildRollingBudget(today).cycles.first.remaining.minorUnits,
+      remainingBefore.minorUnits - 5000,
+    );
+    expect(
+      find.textContaining('Do not enter later cash purchases again'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('keeps a cash-wallet transfer outside the weekly budget', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('en'));
+    final service = await _readyService(_MemoryJournal());
+    final today = LocalDate(2026, 4, 6);
+    final remainingBefore = service
+        .buildRollingBudget(today)
+        .cycles
+        .first
+        .remaining;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: today,
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final cashCard = find.byKey(const ValueKey('open-cash'));
+    await tester.scrollUntilVisible(cashCard, 250);
+    await tester.tap(cashCard);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cash-method-wallet')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('record-cash-withdrawal')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('cash-withdrawal-amount')),
+      '50',
+    );
+    await tester.tap(find.byKey(const ValueKey('confirm-cash-withdrawal')));
+    await tester.pumpAndSettle();
+
+    expect(service.expenses.activeExpenses, isEmpty);
+    expect(service.cash.activeWalletTransfers, hasLength(1));
+    expect(
+      service.buildRollingBudget(today).cycles.first.remaining,
+      remainingBefore,
+    );
+    expect(find.textContaining('not a wallet balance'), findsOneWidget);
+
+    final reverseTransfer = find.byTooltip('Reverse transfer');
+    await tester.scrollUntilVisible(reverseTransfer, 200);
+    await tester.ensureVisible(reverseTransfer);
+    await tester.pumpAndSettle();
+    await tester.tap(reverseTransfer);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Reverse transfer'));
+    await tester.pumpAndSettle();
+
+    expect(service.cash.activeWalletTransfers, isEmpty);
+    expect(service.cash.walletTransfers.single.isReversed, isTrue);
+    expect(find.text('Erroneous transfer reversed'), findsOneWidget);
+  });
+
   testWidgets('does not expose a device time-zone failure', (tester) async {
     _useLocale(tester, const Locale('en'));
     final service = await LocalRebootService.restore(journal: _MemoryJournal());

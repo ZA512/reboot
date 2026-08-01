@@ -8,6 +8,8 @@ import 'package:reboot_projection/reboot_projection.dart';
 
 import '../bonuses/received_bonus_controller.dart';
 import '../bonuses/received_bonus_screen.dart';
+import '../cash/cash_controller.dart';
+import '../cash/cash_screen.dart';
 import '../commitments/future_commitments_screen.dart';
 import '../cycle_settings/cycle_settings_controller.dart';
 import '../cycle_settings/cycle_settings_screen.dart';
@@ -54,6 +56,7 @@ final class _WeeklyDashboardScreenState
     ref.watch(healthControllerProvider);
     ref.watch(cycleSettingsControllerProvider);
     ref.watch(receivedBonusControllerProvider);
+    ref.watch(cashControllerProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
@@ -447,6 +450,27 @@ final class _DashboardBody extends ConsumerWidget {
             onOpen: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => HealthScreen(service: service, today: today),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              key: const ValueKey('open-cash'),
+              leading: const Icon(Icons.local_atm_outlined),
+              title: Text(l10n.cashDashboardTitle),
+              subtitle: Text(switch (service.cash.methodOn(today)) {
+                null => l10n.cashDashboardUnconfigured,
+                CashWithdrawalMethod.withdrawalAsExpense =>
+                  l10n.cashDashboardExpenseMethod,
+                CashWithdrawalMethod.cashWallet =>
+                  l10n.cashDashboardWalletMethod,
+              }),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => CashScreen(service: service, today: today),
+                ),
               ),
             ),
           ),

@@ -1,6 +1,7 @@
 /// Pure domain values, rules, and events for REBOOT.
 library;
 
+export 'src/cash_events.dart';
 export 'src/cash_flows.dart';
 export 'src/configuration_events.dart';
 export 'src/cycles.dart';

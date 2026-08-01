@@ -3022,6 +3022,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Review income and expenses'**
   String get manageFinancialAssumptions;
+
+  /// Title of cash handling screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get cashTitle;
+
+  /// Introduction to cash handling choices.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one simple rule and use it consistently. REBOOT must never count the same cash twice.'**
+  String get cashIntro;
+
+  /// Cash withdrawal method selection heading.
+  ///
+  /// In en, this message translates to:
+  /// **'How should withdrawals be handled?'**
+  String get cashMethodTitle;
+
+  /// Cash method counting withdrawal immediately.
+  ///
+  /// In en, this message translates to:
+  /// **'Count the withdrawal as the expense'**
+  String get cashMethodWithdrawalExpense;
+
+  /// Explanation of withdrawal-as-expense method.
+  ///
+  /// In en, this message translates to:
+  /// **'The weekly budget decreases at withdrawal. Do not enter purchases made with this cash again.'**
+  String get cashMethodWithdrawalExpenseHelp;
+
+  /// Cash method treating withdrawal as a transfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer to a cash wallet'**
+  String get cashMethodWallet;
+
+  /// Explanation of cash-wallet method.
+  ///
+  /// In en, this message translates to:
+  /// **'The withdrawal does not change the weekly budget. Enter every later cash purchase like any other expense.'**
+  String get cashMethodWalletHelp;
+
+  /// Effective date of active cash method.
+  ///
+  /// In en, this message translates to:
+  /// **'Method effective since {date}'**
+  String cashMethodEffectiveSince(String date);
+
+  /// Action and dialog title for cash withdrawal.
+  ///
+  /// In en, this message translates to:
+  /// **'Record a withdrawal'**
+  String get recordCashWithdrawal;
+
+  /// Atomic cash operation error.
+  ///
+  /// In en, this message translates to:
+  /// **'The cash operation could not be saved. No partial change was recorded.'**
+  String get cashMutationError;
+
+  /// Heading for cash wallet transfer audit history.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash-wallet transfers'**
+  String get cashWalletTransferHistory;
+
+  /// Explains why no misleading cash balance is displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'These transfers are an audit trail, not a wallet balance. REBOOT cannot know the remaining cash until purchases are explicitly linked.'**
+  String get cashWalletNoBalanceHelp;
+
+  /// Status for a reversed cash transfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Erroneous transfer reversed'**
+  String get reversedCashTransfer;
+
+  /// Action reversing a cash transfer error.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse transfer'**
+  String get reverseCashTransfer;
+
+  /// Confirmation title for changing cash method.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the cash method?'**
+  String get changeCashMethodTitle;
+
+  /// Effective-date behavior of cash method changes.
+  ///
+  /// In en, this message translates to:
+  /// **'The new method applies from {date}. Earlier withdrawals and expenses are never reinterpreted.'**
+  String changeCashMethodBody(String date);
+
+  /// Confirmation action for cash method change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change method'**
+  String get changeCashMethod;
+
+  /// Success message for withdrawal counted as expense.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} was deducted from this week. Do not enter later cash purchases again.'**
+  String cashWithdrawalReducedWeek(String amount);
+
+  /// Success message for wallet transfer.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} was recorded as a transfer. Enter every later cash purchase normally.'**
+  String cashWithdrawalRecordedAsTransfer(String amount);
+
+  /// Cash transfer reversal confirmation title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse this erroneous transfer?'**
+  String get reverseCashTransferTitle;
+
+  /// Cash transfer reversal audit explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Its effect will be neutralized, while both events remain in the local audit history.'**
+  String get reverseCashTransferBody;
+
+  /// Default label for a cash withdrawal.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash withdrawal'**
+  String get defaultCashWithdrawalLabel;
+
+  /// Cash withdrawal amount field.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount withdrawn'**
+  String get cashWithdrawalAmount;
+
+  /// Cash withdrawal label field.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get cashWithdrawalLabel;
+
+  /// Dashboard cash card title.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get cashDashboardTitle;
+
+  /// Dashboard prompt before configuring cash.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how cash withdrawals affect your weekly budget.'**
+  String get cashDashboardUnconfigured;
+
+  /// Dashboard summary of withdrawal-as-expense method.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawals reduce the weekly budget immediately.'**
+  String get cashDashboardExpenseMethod;
+
+  /// Dashboard summary of cash-wallet method.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawals are transfers; cash purchases reduce the weekly budget.'**
+  String get cashDashboardWalletMethod;
 }
 
 class _AppLocalizationsDelegate

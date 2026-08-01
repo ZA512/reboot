@@ -1866,4 +1866,106 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get manageFinancialAssumptions => 'Vérifier les revenus et charges';
+
+  @override
+  String get cashTitle => 'Espèces';
+
+  @override
+  String get cashIntro =>
+      'Choisissez une règle simple et appliquez-la toujours de la même façon. REBOOT ne doit jamais compter deux fois les mêmes espèces.';
+
+  @override
+  String get cashMethodTitle => 'Comment traiter les retraits ?';
+
+  @override
+  String get cashMethodWithdrawalExpense => 'Compter le retrait comme dépense';
+
+  @override
+  String get cashMethodWithdrawalExpenseHelp =>
+      'Le budget semaine diminue au moment du retrait. Ne saisissez pas ensuite les achats payés avec ces espèces.';
+
+  @override
+  String get cashMethodWallet => 'Transférer vers un portefeuille espèces';
+
+  @override
+  String get cashMethodWalletHelp =>
+      'Le retrait ne change pas le budget semaine. Saisissez ensuite chaque achat en espèces comme toute autre dépense.';
+
+  @override
+  String cashMethodEffectiveSince(String date) {
+    return 'Méthode appliquée depuis le $date';
+  }
+
+  @override
+  String get recordCashWithdrawal => 'Saisir un retrait';
+
+  @override
+  String get cashMutationError =>
+      'L’opération en espèces n’a pas pu être enregistrée. Aucune modification partielle n’a été conservée.';
+
+  @override
+  String get cashWalletTransferHistory =>
+      'Transferts vers le portefeuille espèces';
+
+  @override
+  String get cashWalletNoBalanceHelp =>
+      'Ces transferts forment un historique, pas un solde du portefeuille. REBOOT ne peut pas connaître les espèces restantes tant que les achats ne sont pas explicitement reliés.';
+
+  @override
+  String get reversedCashTransfer => 'Transfert erroné annulé';
+
+  @override
+  String get reverseCashTransfer => 'Annuler le transfert';
+
+  @override
+  String get changeCashMethodTitle => 'Changer la méthode pour les espèces ?';
+
+  @override
+  String changeCashMethodBody(String date) {
+    return 'La nouvelle méthode s’appliquera à partir du $date. Les retraits et dépenses antérieurs ne seront jamais réinterprétés.';
+  }
+
+  @override
+  String get changeCashMethod => 'Changer de méthode';
+
+  @override
+  String cashWithdrawalReducedWeek(String amount) {
+    return '$amount ont été déduits de cette semaine. Ne saisissez pas ensuite les achats payés avec ces espèces.';
+  }
+
+  @override
+  String cashWithdrawalRecordedAsTransfer(String amount) {
+    return '$amount ont été enregistrés comme transfert. Saisissez ensuite chaque achat en espèces normalement.';
+  }
+
+  @override
+  String get reverseCashTransferTitle => 'Annuler ce transfert erroné ?';
+
+  @override
+  String get reverseCashTransferBody =>
+      'Son effet sera neutralisé, mais les deux événements resteront dans l’historique local d’audit.';
+
+  @override
+  String get defaultCashWithdrawalLabel => 'Retrait d’espèces';
+
+  @override
+  String get cashWithdrawalAmount => 'Montant retiré';
+
+  @override
+  String get cashWithdrawalLabel => 'Libellé';
+
+  @override
+  String get cashDashboardTitle => 'Espèces';
+
+  @override
+  String get cashDashboardUnconfigured =>
+      'Choisissez comment les retraits influencent votre budget semaine.';
+
+  @override
+  String get cashDashboardExpenseMethod =>
+      'Les retraits réduisent immédiatement le budget semaine.';
+
+  @override
+  String get cashDashboardWalletMethod =>
+      'Les retraits sont des transferts ; les achats en espèces réduisent le budget semaine.';
 }

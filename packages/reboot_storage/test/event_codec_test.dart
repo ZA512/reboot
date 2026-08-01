@@ -251,6 +251,14 @@ List<EventPayload> _allPayloads() {
     HealthEntryReversedPayload(
       entryEventId: EventId('018f2b8a-7d3c-7a1b-8c4d-1234567890ab'),
     ),
+    const CashHandlingMethodSetPayload(method: CashWithdrawalMethod.cashWallet),
+    CashWalletTransferRecordedPayload(
+      amount: _eur(5000),
+      label: 'Retrait espèces',
+    ),
+    CashWalletTransferReversedPayload(
+      transferEventId: EventId('018f2b8a-7d3c-7a1b-8c4d-1234567890ab'),
+    ),
   ];
 }
 

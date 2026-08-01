@@ -706,7 +706,11 @@ Le retrait réduit immédiatement le budget. Les achats effectués avec ces esp�
 
 Le retrait est un transfert vers un portefeuille virtuel. Chaque achat en espèces réduit ensuite le budget au moment de sa saisie.
 
+Les transferts servent de trace, mais ne constituent pas à eux seuls un solde fiable : sans rapprochement explicite entre retraits et achats, la méthode ne peut pas savoir combien d’espèces restent réellement dans le portefeuille. Elle n’invente donc pas ce solde.
+
 Un changement de méthode possède une date d’effet et ne réinterprète pas les opérations passées.
+
+Une erreur de transfert peut être annulée. L’opération initiale et son annulation restent toutes deux visibles dans l’historique afin que la correction soit vérifiable.
 
 ## Invariants de simplicité
 

@@ -455,6 +455,41 @@ final class ReverseHealthEntryCommand {
   final LocalDate businessDate;
 }
 
+/// Selects how withdrawals affect the budget from this civil date onward.
+final class ConfigureCashHandlingCommand {
+  const ConfigureCashHandlingCommand({
+    required this.method,
+    required this.businessDate,
+  });
+
+  final CashWithdrawalMethod method;
+  final LocalDate businessDate;
+}
+
+/// Records a withdrawal that is only a transfer to the cash wallet.
+final class RecordCashWalletTransferCommand {
+  const RecordCashWalletTransferCommand({
+    required this.amount,
+    required this.label,
+    required this.businessDate,
+  });
+
+  final Money amount;
+  final String label;
+  final LocalDate businessDate;
+}
+
+/// Corrects one erroneous cash-wallet transfer without deleting history.
+final class ReverseCashWalletTransferCommand {
+  const ReverseCashWalletTransferCommand({
+    required this.transferEventId,
+    required this.businessDate,
+  });
+
+  final EventId transferEventId;
+  final LocalDate businessDate;
+}
+
 /// Local-first command boundary owning one journal and its live projections.
 ///
 /// All mutations are serialized to prevent two rapid UI actions from deriving
@@ -469,6 +504,7 @@ final class LocalRebootService {
     this._expenses,
     this._reserves,
     this._health,
+    this._cash,
   );
 
   /// Restores all observable state from the append-only journal.
@@ -486,6 +522,7 @@ final class LocalRebootService {
       ExpenseLedger.replay(entries),
       ReserveLedger.replay(entries),
       HealthLedger.replay(entries),
+      CashLedger.replay(entries),
     );
   }
 
@@ -496,6 +533,7 @@ final class LocalRebootService {
   ExpenseLedger _expenses;
   ReserveLedger _reserves;
   HealthLedger _health;
+  CashLedger _cash;
   Future<void> _commandTail = Future<void>.value();
   bool _closed = false;
 
@@ -510,6 +548,9 @@ final class LocalRebootService {
 
   /// Optional aggregate health tracking projection.
   HealthLedger get health => _health;
+
+  /// Effective-dated cash method and cash-wallet transfer audit trail.
+  CashLedger get cash => _cash;
 
   /// Establishes the household exactly once.
   Future<HouseholdInitializationResult> initializeHousehold(
@@ -1318,6 +1359,87 @@ final class LocalRebootService {
     });
   }
 
+  /// Appends one dated choice without reinterpreting earlier withdrawals.
+  Future<CashMethodRevision> configureCashHandling(
+    ConfigureCashHandlingCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      if (_configuration.household == null) {
+        throw const IncompleteConfigurationException(
+          'The household must exist before configuring cash handling.',
+        );
+      }
+      final cashId = _cash.id ?? _identities.nextEntityId();
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(kind: EntityKind.cashHandling, id: cashId),
+        payload: CashHandlingMethodSetPayload(method: command.method),
+      );
+      await _appendValidated([event]);
+      return _cash.latestMethodRevision!;
+    });
+  }
+
+  /// Records a withdrawal transfer only while the cash-wallet method applies.
+  Future<ProjectedCashWalletTransfer> recordCashWalletTransfer(
+    RecordCashWalletTransferCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final cashId = _cash.id;
+      if (cashId == null ||
+          _cash.methodOn(command.businessDate) !=
+              CashWithdrawalMethod.cashWallet) {
+        throw const IncompleteConfigurationException(
+          'The cash-wallet method must apply before recording a transfer.',
+        );
+      }
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(kind: EntityKind.cashHandling, id: cashId),
+        payload: CashWalletTransferRecordedPayload(
+          amount: command.amount,
+          label: command.label.trim(),
+        ),
+      );
+      await _appendValidated([event]);
+      return _cash.walletTransfers.last;
+    });
+  }
+
+  /// Neutralizes one erroneous cash-wallet transfer and retains both events.
+  Future<ProjectedCashWalletTransfer> reverseCashWalletTransfer(
+    ReverseCashWalletTransferCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final cashId = _cash.id;
+      if (cashId == null) {
+        throw const IncompleteConfigurationException(
+          'Cash handling must exist before correcting a transfer.',
+        );
+      }
+      final event = EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: EntityReference(kind: EntityKind.cashHandling, id: cashId),
+        payload: CashWalletTransferReversedPayload(
+          transferEventId: command.transferEventId,
+        ),
+      );
+      await _appendValidated([event]);
+      return _cash.walletTransfers.singleWhere(
+        (transfer) => transfer.eventId == command.transferEventId,
+      );
+    });
+  }
+
   /// Closes the owned journal after all earlier commands have completed.
   Future<void> close() {
     return _runExclusive(() async {
@@ -1334,6 +1456,7 @@ final class LocalRebootService {
     var nextExpenses = _expenses;
     var nextReserves = _reserves;
     var nextHealth = _health;
+    var nextCash = _cash;
     var nextPosition = _configuration.lastPosition?.value ?? 0;
     for (final event in events) {
       nextPosition++;
@@ -1345,6 +1468,7 @@ final class LocalRebootService {
       nextExpenses = nextExpenses.apply(provisional);
       nextReserves = nextReserves.apply(provisional);
       nextHealth = nextHealth.apply(provisional);
+      nextCash = nextCash.apply(provisional);
     }
 
     final appended = await _journal.appendAll(events);
@@ -1355,16 +1479,19 @@ final class LocalRebootService {
     var committedExpenses = _expenses;
     var committedReserves = _reserves;
     var committedHealth = _health;
+    var committedCash = _cash;
     for (final entry in appended) {
       committedConfiguration = committedConfiguration.apply(entry);
       committedExpenses = committedExpenses.apply(entry);
       committedReserves = committedReserves.apply(entry);
       committedHealth = committedHealth.apply(entry);
+      committedCash = committedCash.apply(entry);
     }
     _configuration = committedConfiguration;
     _expenses = committedExpenses;
     _reserves = committedReserves;
     _health = committedHealth;
+    _cash = committedCash;
   }
 
   Future<T> _runExclusive<T>(Future<T> Function() action) {

@@ -123,6 +123,16 @@ final class EventPayloadJsonCodec {
       HealthEntryReversedPayload() => <String, Object?>{
         'entryEventId': payload.entryEventId.value,
       },
+      CashHandlingMethodSetPayload() => <String, Object?>{
+        'method': payload.method.name,
+      },
+      CashWalletTransferRecordedPayload() => <String, Object?>{
+        'amount': _encodeMoney(payload.amount),
+        'label': payload.label,
+      },
+      CashWalletTransferReversedPayload() => <String, Object?>{
+        'transferEventId': payload.transferEventId.value,
+      },
       _ => throw UnsupportedStoredEventException(
         payload.eventType,
         payload.schemaVersion,
@@ -294,6 +304,21 @@ final class EventPayloadJsonCodec {
       ),
       'health.entry-reversed' => HealthEntryReversedPayload(
         entryEventId: EventId(_asString(map['entryEventId'], 'entryEventId')),
+      ),
+      'cash-handling.method-set' => CashHandlingMethodSetPayload(
+        method: _enumByName(
+          CashWithdrawalMethod.values,
+          _asString(map['method'], 'method'),
+        ),
+      ),
+      'cash-wallet.transfer-recorded' => CashWalletTransferRecordedPayload(
+        amount: _decodeMoney(_asMap(map['amount'], 'amount')),
+        label: _asString(map['label'], 'label'),
+      ),
+      'cash-wallet.transfer-reversed' => CashWalletTransferReversedPayload(
+        transferEventId: EventId(
+          _asString(map['transferEventId'], 'transferEventId'),
+        ),
       ),
       _ => throw UnsupportedStoredEventException(eventType, schemaVersion),
     };

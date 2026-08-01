@@ -1856,4 +1856,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get manageFinancialAssumptions => 'Review income and expenses';
+
+  @override
+  String get cashTitle => 'Cash';
+
+  @override
+  String get cashIntro =>
+      'Choose one simple rule and use it consistently. REBOOT must never count the same cash twice.';
+
+  @override
+  String get cashMethodTitle => 'How should withdrawals be handled?';
+
+  @override
+  String get cashMethodWithdrawalExpense =>
+      'Count the withdrawal as the expense';
+
+  @override
+  String get cashMethodWithdrawalExpenseHelp =>
+      'The weekly budget decreases at withdrawal. Do not enter purchases made with this cash again.';
+
+  @override
+  String get cashMethodWallet => 'Transfer to a cash wallet';
+
+  @override
+  String get cashMethodWalletHelp =>
+      'The withdrawal does not change the weekly budget. Enter every later cash purchase like any other expense.';
+
+  @override
+  String cashMethodEffectiveSince(String date) {
+    return 'Method effective since $date';
+  }
+
+  @override
+  String get recordCashWithdrawal => 'Record a withdrawal';
+
+  @override
+  String get cashMutationError =>
+      'The cash operation could not be saved. No partial change was recorded.';
+
+  @override
+  String get cashWalletTransferHistory => 'Cash-wallet transfers';
+
+  @override
+  String get cashWalletNoBalanceHelp =>
+      'These transfers are an audit trail, not a wallet balance. REBOOT cannot know the remaining cash until purchases are explicitly linked.';
+
+  @override
+  String get reversedCashTransfer => 'Erroneous transfer reversed';
+
+  @override
+  String get reverseCashTransfer => 'Reverse transfer';
+
+  @override
+  String get changeCashMethodTitle => 'Change the cash method?';
+
+  @override
+  String changeCashMethodBody(String date) {
+    return 'The new method applies from $date. Earlier withdrawals and expenses are never reinterpreted.';
+  }
+
+  @override
+  String get changeCashMethod => 'Change method';
+
+  @override
+  String cashWithdrawalReducedWeek(String amount) {
+    return '$amount was deducted from this week. Do not enter later cash purchases again.';
+  }
+
+  @override
+  String cashWithdrawalRecordedAsTransfer(String amount) {
+    return '$amount was recorded as a transfer. Enter every later cash purchase normally.';
+  }
+
+  @override
+  String get reverseCashTransferTitle => 'Reverse this erroneous transfer?';
+
+  @override
+  String get reverseCashTransferBody =>
+      'Its effect will be neutralized, while both events remain in the local audit history.';
+
+  @override
+  String get defaultCashWithdrawalLabel => 'Cash withdrawal';
+
+  @override
+  String get cashWithdrawalAmount => 'Amount withdrawn';
+
+  @override
+  String get cashWithdrawalLabel => 'Label';
+
+  @override
+  String get cashDashboardTitle => 'Cash';
+
+  @override
+  String get cashDashboardUnconfigured =>
+      'Choose how cash withdrawals affect your weekly budget.';
+
+  @override
+  String get cashDashboardExpenseMethod =>
+      'Withdrawals reduce the weekly budget immediately.';
+
+  @override
+  String get cashDashboardWalletMethod =>
+      'Withdrawals are transfers; cash purchases reduce the weekly budget.';
 }

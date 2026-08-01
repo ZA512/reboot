@@ -355,6 +355,12 @@ L’utilisateur choisit :
 
 Un changement de méthode possède une date d’effet et ne réinterprète pas le passé.
 
+Dans le second mode, les transferts forment un historique d’audit mais ne suffisent
+pas à calculer un solde d’espèces fiable. Aucun solde de portefeuille n’est donc
+affiché tant que les achats en espèces ne sont pas explicitement reliés aux
+transferts. Une erreur de transfert est corrigée par annulation, sans effacer
+l’événement d’origine.
+
 ## 16. État des données
 
 Chaque hypothèse indique sa provenance, sa méthode et sa dernière confirmation.

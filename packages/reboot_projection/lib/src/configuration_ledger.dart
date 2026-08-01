@@ -870,6 +870,7 @@ final class ConfigurationLedger {
       case EntityKind.expense:
       case EntityKind.reserve:
       case EntityKind.healthTracking:
+      case EntityKind.cashHandling:
         // Operational facts share the journal but do not alter configuration.
         break;
     }

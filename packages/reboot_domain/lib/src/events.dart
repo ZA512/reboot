@@ -79,6 +79,9 @@ enum EntityKind {
   /// Optional aggregate household health tracking.
   healthTracking,
 
+  /// Effective-dated cash withdrawal method and cash-wallet transfers.
+  cashHandling,
+
   /// One already-received bonus amount assigned to ordinary daily life.
   receivedBonus,
 }
