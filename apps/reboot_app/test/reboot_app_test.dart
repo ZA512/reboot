@@ -679,6 +679,94 @@ void main() {
     expect(find.text('Essence'), findsOneWidget);
   });
 
+  testWidgets('confirms unchanged assumptions from the next REBOOT', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final service = await _readyService(_MemoryJournal());
+    final currentCycle = LocalDate(2026, 4, 4);
+    final nextCycle = LocalDate(2026, 4, 11);
+    final currentBudget = service.weeklyBudgetForCycleStarting(currentCycle);
+    final nextBudget = service.weeklyBudgetForCycleStarting(nextCycle);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 4, 5),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('open-assumptions')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const ValueKey('open-assumptions')));
+    await tester.pumpAndSettle();
+
+    final salaryTile = find.ancestor(
+      of: find.text('Salaire 1'),
+      matching: find.byType(ListTile),
+    );
+    await tester.tap(
+      find.descendant(of: salaryTile, matching: find.byIcon(Icons.more_vert)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirmer ces valeurs'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Ces valeurs sont-elles toujours correctes ?'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('la semaine en cours ne changera pas'),
+      findsOneWidget,
+    );
+    await tester.tap(find.widgetWithText(TextButton, 'Annuler'));
+    await tester.pumpAndSettle();
+    var salary = service.configuration.cashFlows.values.singleWhere(
+      (flow) =>
+          flow.definitionForCycleStarting(currentCycle)?.title == 'Salaire 1',
+    );
+    expect(salary.revisions, hasLength(1));
+
+    await tester.tap(
+      find.descendant(of: salaryTile, matching: find.byIcon(Icons.more_vert)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirmer ces valeurs'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('confirm-assumption-values')));
+    await tester.pumpAndSettle();
+
+    salary = service.configuration.cashFlows.values.singleWhere(
+      (flow) =>
+          flow.definitionForCycleStarting(currentCycle)?.title == 'Salaire 1',
+    );
+    expect(salary.revisions, hasLength(2));
+    expect(
+      salary.definitionForCycleStarting(currentCycle)!.lastConfirmedOn,
+      LocalDate(2026, 4, 1),
+    );
+    expect(
+      salary.definitionForCycleStarting(nextCycle)!.lastConfirmedOn,
+      LocalDate(2026, 4, 5),
+    );
+    expect(service.weeklyBudgetForCycleStarting(currentCycle), currentBudget);
+    expect(service.weeklyBudgetForCycleStarting(nextCycle), nextBudget);
+    expect(find.textContaining('Confirmation à partir du'), findsOneWidget);
+    expect(find.textContaining('Nouvelle valeur à partir du'), findsNothing);
+  });
+
   testWidgets('explains every accepted input behind the weekly budget', (
     tester,
   ) async {

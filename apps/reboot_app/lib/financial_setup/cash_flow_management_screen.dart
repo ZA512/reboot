@@ -159,6 +159,8 @@ final class CashFlowManagementScreen extends ConsumerWidget {
               enabled: !mutation.isLoading,
               onAdd: () => _add(context, ref, CashFlowDirection.income),
               onEdit: (flow) => _edit(context, ref, flow),
+              onConfirm: (flow) =>
+                  _confirm(context, ref, flow, currentCycle, effectiveCycle),
               onDelete: (flow) => _delete(context, ref, flow, effectiveCycle),
             ),
             const SizedBox(height: 24),
@@ -171,6 +173,8 @@ final class CashFlowManagementScreen extends ConsumerWidget {
               enabled: !mutation.isLoading,
               onAdd: () => _add(context, ref, CashFlowDirection.outflow),
               onEdit: (flow) => _edit(context, ref, flow),
+              onConfirm: (flow) =>
+                  _confirm(context, ref, flow, currentCycle, effectiveCycle),
               onDelete: (flow) => _delete(context, ref, flow, effectiveCycle),
             ),
           ],
@@ -262,6 +266,48 @@ final class CashFlowManagementScreen extends ConsumerWidget {
         .read(cashFlowManagementControllerProvider.notifier)
         .delete(cashFlowId: flow.id, businessDate: today);
   }
+
+  Future<void> _confirm(
+    BuildContext context,
+    WidgetRef ref,
+    ProjectedCashFlow flow,
+    LocalDate currentCycle,
+    LocalDate effectiveCycle,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final definition = _displayedDefinition(flow, currentCycle, effectiveCycle);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.confirmAssumptionTitle),
+        content: Text(
+          l10n.confirmAssumptionBody(
+            definition.title,
+            _formatDate(context, effectiveCycle),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            key: const ValueKey('confirm-assumption-values'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.confirmAssumptionValues),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await ref
+        .read(cashFlowManagementControllerProvider.notifier)
+        .replace(
+          cashFlowId: flow.id,
+          definition: _withConfirmationDate(definition, today),
+          businessDate: today,
+        );
+  }
 }
 
 final class _AssumptionSection extends StatelessWidget {
@@ -274,6 +320,7 @@ final class _AssumptionSection extends StatelessWidget {
     required this.enabled,
     required this.onAdd,
     required this.onEdit,
+    required this.onConfirm,
     required this.onDelete,
   });
 
@@ -285,6 +332,7 @@ final class _AssumptionSection extends StatelessWidget {
   final bool enabled;
   final VoidCallback onAdd;
   final ValueChanged<ProjectedCashFlow> onEdit;
+  final ValueChanged<ProjectedCashFlow> onConfirm;
   final ValueChanged<ProjectedCashFlow> onDelete;
 
   @override
@@ -315,6 +363,7 @@ final class _AssumptionSection extends StatelessWidget {
             effectiveCycle: effectiveCycle,
             enabled: enabled,
             onEdit: () => onEdit(flow),
+            onConfirm: () => onConfirm(flow),
             onDelete: () => onDelete(flow),
           ),
       ],
@@ -329,6 +378,7 @@ final class _AssumptionTile extends StatelessWidget {
     required this.effectiveCycle,
     required this.enabled,
     required this.onEdit,
+    required this.onConfirm,
     required this.onDelete,
   });
 
@@ -337,6 +387,7 @@ final class _AssumptionTile extends StatelessWidget {
   final LocalDate effectiveCycle;
   final bool enabled;
   final VoidCallback onEdit;
+  final VoidCallback onConfirm;
   final VoidCallback onDelete;
 
   @override
@@ -349,6 +400,11 @@ final class _AssumptionTile extends StatelessWidget {
     final pending = latest.effectiveFromCycleStart == effectiveCycle;
     final pendingDeletion = pending && latest.isDeletion;
     final pendingCreation = pending && current == null && future != null;
+    final pendingConfirmation =
+        pending &&
+        current != null &&
+        future != null &&
+        _sameAssumptionExceptConfirmation(current, future);
     final lastConfirmedOn = displayed.lastConfirmedOn;
     return Card(
       child: ListTile(
@@ -381,9 +437,13 @@ final class _AssumptionTile extends StatelessWidget {
                 )
               else if (pending)
                 Text(
-                  l10n.assumptionChangesOn(
-                    _formatDate(context, effectiveCycle),
-                  ),
+                  pendingConfirmation
+                      ? l10n.assumptionConfirmationAppliesOn(
+                          _formatDate(context, effectiveCycle),
+                        )
+                      : l10n.assumptionChangesOn(
+                          _formatDate(context, effectiveCycle),
+                        ),
                 ),
             ],
           ),
@@ -391,10 +451,16 @@ final class _AssumptionTile extends StatelessWidget {
         trailing: PopupMenuButton<_AssumptionAction>(
           enabled: enabled && !pendingDeletion,
           onSelected: (action) => switch (action) {
+            _AssumptionAction.confirm => onConfirm(),
             _AssumptionAction.edit => onEdit(),
             _AssumptionAction.delete => onDelete(),
           },
           itemBuilder: (_) => [
+            if (!pending)
+              PopupMenuItem(
+                value: _AssumptionAction.confirm,
+                child: Text(l10n.confirmAssumption),
+              ),
             PopupMenuItem(
               value: _AssumptionAction.edit,
               child: Text(l10n.editAssumption),
@@ -410,7 +476,7 @@ final class _AssumptionTile extends StatelessWidget {
   }
 }
 
-enum _AssumptionAction { edit, delete }
+enum _AssumptionAction { confirm, edit, delete }
 
 final class _BudgetValue extends StatelessWidget {
   const _BudgetValue({required this.label, required this.amount, super.key});
@@ -475,6 +541,60 @@ String _assumptionMethodLabel(
         VariableEstimateStrategy.balanced => l10n.strategyBalanced,
         VariableEstimateStrategy.custom => l10n.strategyCustom,
       });
+
+CashFlowDefinition _withConfirmationDate(
+  CashFlowDefinition definition,
+  LocalDate confirmationDate,
+) => switch (definition.behavior) {
+  AmountBehavior.fixed => CashFlowDefinition.fixed(
+    title: definition.title,
+    direction: definition.direction,
+    schedule: definition.schedule,
+    amountPerOccurrence: definition.referenceAmountPerOccurrence,
+    lastConfirmedOn: confirmationDate,
+  ),
+  AmountBehavior.variable => CashFlowDefinition.variable(
+    title: definition.title,
+    direction: definition.direction,
+    schedule: definition.schedule,
+    historicalAveragePerOccurrence: definition.referenceAmountPerOccurrence,
+    strategy: definition.variableStrategy!,
+    customAmountPerOccurrence: definition.customAmountPerOccurrence,
+    lastConfirmedOn: confirmationDate,
+  ),
+};
+
+bool _sameAssumptionExceptConfirmation(
+  CashFlowDefinition left,
+  CashFlowDefinition right,
+) =>
+    left.title == right.title &&
+    left.direction == right.direction &&
+    left.behavior == right.behavior &&
+    left.referenceAmountPerOccurrence == right.referenceAmountPerOccurrence &&
+    left.variableStrategy == right.variableStrategy &&
+    left.customAmountPerOccurrence == right.customAmountPerOccurrence &&
+    _sameSchedule(left.schedule, right.schedule);
+
+bool _sameSchedule(OccurrenceSchedule left, OccurrenceSchedule right) {
+  if (left case final RecurringSchedule leftRecurring) {
+    return right is RecurringSchedule &&
+        leftRecurring.firstOccurrence == right.firstOccurrence &&
+        leftRecurring.frequency == right.frequency &&
+        leftRecurring.lastOccurrence == right.lastOccurrence;
+  }
+  if (left case final CustomDateSchedule leftCustom) {
+    if (right is! CustomDateSchedule ||
+        leftCustom.dates.length != right.dates.length) {
+      return false;
+    }
+    for (var index = 0; index < leftCustom.dates.length; index += 1) {
+      if (leftCustom.dates[index] != right.dates[index]) return false;
+    }
+    return true;
+  }
+  return false;
+}
 
 String _formatMoney(BuildContext context, Money money) => formatMoneyExact(
   money,

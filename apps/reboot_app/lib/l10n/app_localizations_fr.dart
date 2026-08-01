@@ -1342,6 +1342,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get assumptionConfirmationMissingShort => 'À confirmer';
 
   @override
+  String get confirmAssumption => 'Confirmer ces valeurs';
+
+  @override
+  String get confirmAssumptionTitle =>
+      'Ces valeurs sont-elles toujours correctes ?';
+
+  @override
+  String confirmAssumptionBody(String title, String date) {
+    return 'Confirmez que le montant, le rythme et la méthode de « $title » sont toujours corrects. La confirmation s’appliquera à partir du $date ; la semaine en cours ne changera pas.';
+  }
+
+  @override
+  String get confirmAssumptionValues => 'Oui, confirmer';
+
+  @override
+  String assumptionConfirmationAppliesOn(String date) {
+    return 'Confirmation à partir du $date';
+  }
+
+  @override
   String get deleteAssumptionTitle => 'Mettre fin à cette hypothèse ?';
 
   @override

@@ -1336,6 +1336,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assumptionConfirmationMissingShort => 'Confirmation required';
 
   @override
+  String get confirmAssumption => 'Confirm these values';
+
+  @override
+  String get confirmAssumptionTitle => 'Are these values still correct?';
+
+  @override
+  String confirmAssumptionBody(String title, String date) {
+    return 'Confirm that the amount, frequency and method for “$title” are still correct. The confirmation will apply from $date; the current week will not change.';
+  }
+
+  @override
+  String get confirmAssumptionValues => 'Yes, confirm';
+
+  @override
+  String assumptionConfirmationAppliesOn(String date) {
+    return 'Confirmation applies from $date';
+  }
+
+  @override
   String get deleteAssumptionTitle => 'End this assumption?';
 
   @override

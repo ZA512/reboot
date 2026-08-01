@@ -2249,6 +2249,36 @@ abstract class AppLocalizations {
   /// **'Confirmation required'**
   String get assumptionConfirmationMissingShort;
 
+  /// Action for confirming an unchanged financial assumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm these values'**
+  String get confirmAssumption;
+
+  /// Financial assumption confirmation dialog title.
+  ///
+  /// In en, this message translates to:
+  /// **'Are these values still correct?'**
+  String get confirmAssumptionTitle;
+
+  /// Financial assumption confirmation consequence.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm that the amount, frequency and method for “{title}” are still correct. The confirmation will apply from {date}; the current week will not change.'**
+  String confirmAssumptionBody(String title, String date);
+
+  /// Confirms unchanged financial assumption values.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, confirm'**
+  String get confirmAssumptionValues;
+
+  /// Pending confirmation-only revision status.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmation applies from {date}'**
+  String assumptionConfirmationAppliesOn(String date);
+
   /// Future cash-flow deletion confirmation title.
   ///
   /// In en, this message translates to:
