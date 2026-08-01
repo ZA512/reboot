@@ -83,6 +83,24 @@ restauration et le rejeu authentifié des 100 événements suivants prennent 69 
 Le mécanisme satisfait la cible desktop ; le vrai codec des projections REBOOT
 reste à implémenter avant activation.
 
+## Étape 2 — Cœur de récupération portable
+
+Une première archive de récupération indépendante de la clé locale est
+implémentée derrière une API Web non encore exposée dans l’interface. Elle
+chiffre l’intégralité du journal canonique avec une nouvelle clé AES-256-GCM et
+produit un code séparé `RBP1`. Le format est versionné comme portable afin que
+l’adaptateur Android puisse l’adopter ultérieurement ; la sauvegarde SQLite
+Android actuelle n’est pas encore compatible avec ce nouveau format.
+
+Avant tout import, l’archive complète est authentifiée, tous les événements
+sont décodés, leurs UUID sont contrôlés puis les cinq projections métier sont
+rejouées dans un journal éphémère en lecture seule. Le profil de destination
+n’est modifié qu’après cette validation et seulement s’il est vide. Les tests
+Chrome couvrent l’opacité, le mauvais code, la corruption authentifiée et le
+refus d’une fusion. Il reste à brancher le téléchargement et le sélecteur de
+fichier PWA, à adopter ou convertir ce format sur Android et à le valider dans
+Safari réel.
+
 Drift/SQLite WebAssembly est différé : il ne supprimerait pas le besoin du
 chiffrement applicatif et ajouterait des pages, caches et migrations à auditer.
 Il pourra être réévalué seulement si le benchmark montre que le journal direct
@@ -110,7 +128,8 @@ La proposition complète et ses limites sont consignées dans
 - corruption, duplication, ordre et reprise transactionnelle testés ;
 - perte de clé et effacement isolé du stockage détectés sans réinitialisation
   silencieuse ;
-- scénario de récupération documenté et testé ;
+- cœur cryptographique de récupération testé ; téléchargement, import de
+  fichier et validation Safari encore requis ;
 - codec versionné des projections métier branché sur le snapshot chiffré ;
 - comportement du stockage détecté et annoncé, sans repli mémoire silencieux ;
 - benchmark sur 300 000 événements effectué sur ordinateur, puis confirmé sur

@@ -100,6 +100,12 @@ minimum : codec versionné des projections métier, récupération chiffrée,
 validation Safari iPhone réelle, politique de persistance navigateur, CSP et
 hébergement durci et tests de concurrence multi-onglets.
 
+Le cœur d’une récupération chiffrée est désormais prototypé : une archive
+AES-256-GCM indépendante de la clé locale, accompagnée d’un code séparé `RBP1`,
+est authentifiée et intégralement rejouée avant tout import atomique dans un
+profil vide. Son format vise la portabilité future avec Android. Le branchement
+aux fichiers PWA, l’adoption côté Android et la validation Safari restent requis.
+
 ## Preuves obtenues
 
 Les tests Chrome exécutent réellement Web Crypto et IndexedDB et vérifient :
@@ -123,7 +129,9 @@ Les tests Chrome exécutent réellement Web Crypto et IndexedDB et vérifient :
 - benchmark reproductible de 300 000 enveloppes sur Chrome desktop, incluant
   écriture, fermeture, réouverture et rejeu authentifié complet ;
 - snapshot opaque, suffixe authentifié, corruption supprimable et migration de
-  schéma v1 vers v2 sans perte de clé ni d’événement.
+  schéma v1 vers v2 sans perte de clé ni d’événement ;
+- archive de récupération opaque, mauvais code et corruption refusés avant
+  toute écriture, projections métier intégralement validées avant restauration.
 
 ## Options étudiées
 
