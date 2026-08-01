@@ -40,7 +40,7 @@ Statuts autorisés :
 
 ## Prochaines décisions à traiter
 
-1. stockage Web chiffré, garde des clés et récupération locale ;
+1. validation puis acceptation du stockage Web proposé par l’ADR-0009 ;
 2. modèle de synchronisation et résolution des conflits ;
 3. hébergement PWA, en-têtes de sécurité et chaîne de déploiement ;
 4. format d’export chiffré et portabilité.
@@ -64,3 +64,7 @@ L’ADR-0006 a été décidé par le responsable de l’implémentation le 2026-
 L’ADR-0007 a été décidé par le responsable de l’implémentation le 2026-07-31.
 L’ADR-0008 a été accepté le 2026-08-01 à la demande du porteur du projet ; ses
 choix techniques ont été précisés par le responsable de l’implémentation.
+
+## ADR proposés
+
+- [ADR-0009 — Journal Web chiffré et garde locale de clé](0009-browser-encrypted-journal.md)

@@ -30,7 +30,7 @@ nativement, sans arrondi. Un exécutable de contrôle est compilé en JavaScript
 puis exécuté en CI au-delà de la limite de précision de `Number` et aux bornes
 signées 64 bits.
 
-## Hypothèses à éprouver ensuite
+## Étape 1 — Enveloppes chiffrées et IndexedDB direct
 
 Deux couches restent séparées :
 
@@ -38,11 +38,29 @@ Deux couches restent séparées :
    authentifiée avant persistance ;
 2. une garde de clé Web indépendante du stockage des enveloppes.
 
-Le prototype comparera :
+Le premier prototype retient provisoirement IndexedDB direct :
 
-- IndexedDB direct, avec une enveloppe AES-256-GCM par événement ;
-- Drift/SQLite WebAssembly, uniquement s’il apporte un gain mesurable sans
-  laisser le fichier ou les pages SQLite en clair.
+- clé AES-256-GCM générée par Web Crypto avec `extractable = false` ;
+- `CryptoKey` cloné directement dans IndexedDB, jamais exporté en octets ;
+- nonce aléatoire de 96 bits et tag de 128 bits par événement ;
+- en-tête de routage authentifié comme données associées ;
+- événement métier intégralement à l’intérieur du ciphertext ;
+- transaction atomique entre enveloppe, UUID et position locale ;
+- marqueur non sensible séparé pour détecter une suppression isolée de la
+  base.
+
+Les tests Chrome prouvent la réouverture, l’ordre, l’idempotence, le conflit
+d’UUID, l’attribution de positions uniques entre deux connexions concurrentes,
+le rollback intégral d’une transaction en échec, le refus d’export de clé, la
+détection d’une altération du ciphertext ou de l’en-tête, la perte de clé et
+l’effacement isolé d’IndexedDB. Les valeurs de test sont exclusivement
+synthétiques. Le prototype n’implémente pas encore le port applicatif et le
+shell Web reste bloqué.
+
+Drift/SQLite WebAssembly est différé : il ne supprimerait pas le besoin du
+chiffrement applicatif et ajouterait des pages, caches et migrations à auditer.
+Il pourra être réévalué seulement si le benchmark montre que le journal direct
+ne satisfait pas les performances.
 
 Une clé non extractible Web Crypto conservée dans IndexedDB peut protéger la
 clé de données locale contre une simple lecture du stockage. Elle ne protège
@@ -54,13 +72,17 @@ La récupération devra utiliser une enveloppe distincte de la clé de données.
 Le stockage navigateur peut être effacé à tout moment et ne sera jamais
 présenté comme l’unique sauvegarde fiable.
 
+La proposition complète et ses limites sont consignées dans
+[l’ADR-0009](adr/0009-browser-encrypted-journal.md), encore au statut
+`Proposed`.
+
 ## Critères avant activation des saisies Web
 
 - build JavaScript compatible Safari iPhone et build WebAssembly compatibles ;
 - exactitude des centimes et positions aux deux bornes signées 64 bits ;
 - aucun payload, libellé ou montant en clair dans IndexedDB, OPFS ou caches ;
 - corruption, duplication, ordre et reprise transactionnelle testés ;
-- perte de clé et effacement du stockage détectés sans réinitialisation
+- perte de clé et effacement isolé du stockage détectés sans réinitialisation
   silencieuse ;
 - scénario de récupération documenté et testé ;
 - comportement du stockage détecté et annoncé, sans repli mémoire silencieux ;
@@ -73,3 +95,4 @@ présenté comme l’unique sauvegarde fiable.
 - [Flutter WebAssembly et repli JavaScript](https://docs.flutter.dev/platform-integration/web/wasm)
 - [Drift sur le Web](https://drift.simonbinder.eu/platforms/web/)
 - [Web Cryptography Level 2](https://www.w3.org/TR/webcrypto-2/)
+- [Package Dart `web`](https://pub.dev/packages/web)
