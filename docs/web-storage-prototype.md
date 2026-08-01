@@ -115,6 +115,25 @@ manuel du code.
 Il reste à exposer ce workflow dans l’interface PWA, à adopter ou convertir le
 format sur Android et à le valider dans Safari réel.
 
+## Étape 3 — Shell installable et hors ligne
+
+Le build de livraison génère un service worker REBOOT à partir de la liste
+exacte des ressources produites par Flutter. Le nom de cache inclut l’empreinte
+de ce manifeste afin qu’une nouvelle version attende son activation puis
+remplace atomiquement l’ancien shell. Seuls les fichiers statiques de
+l’application sont précachés : ni IndexedDB, ni événement, ni sauvegarde ne
+transitent par le cache du service worker.
+
+Le démarrage hors ligne après une première visite est validé dans Chrome sur
+ordinateur. Le shell explique aussi comment installer la PWA sur iPhone ou sur
+un navigateur compatible et détecte le mode `standalone` pour confirmer qu’il
+est ouvert comme application installée. Cette aide ne simule pas de bouton
+d’installation sur Safari : elle décrit le parcours système et laisse les
+données financières bloquées.
+
+La validation sur un iPhone réel reste obligatoire avant de déclarer la PWA
+installable et utilisable hors ligne sur la plateforme cible.
+
 Drift/SQLite WebAssembly est différé : il ne supprimerait pas le besoin du
 chiffrement applicatif et ajouterait des pages, caches et migrations à auditer.
 Il pourra être réévalué seulement si le benchmark montre que le journal direct

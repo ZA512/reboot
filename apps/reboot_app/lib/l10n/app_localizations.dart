@@ -2888,7 +2888,7 @@ abstract class AppLocalizations {
   /// Honest status of the Web storage prototype.
   ///
   /// In en, this message translates to:
-  /// **'The REBOOT interface now runs in a browser, but encrypted persistence and recovery are not ready for real financial data yet.'**
+  /// **'The REBOOT interface now runs in a browser, but encrypted storage, recovery, and real-iPhone behavior are still undergoing final validation before real financial data is enabled.'**
   String get webPrototypeBody;
 
   /// Safety guarantee while Web persistence remains blocked.
@@ -2896,6 +2896,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing you enter is stored in an unencrypted or temporary fallback. Use the Android application while this security proof is in progress.'**
   String get webPrototypeSafety;
+
+  /// Title of the PWA installation help.
+  ///
+  /// In en, this message translates to:
+  /// **'Install the REBOOT web app'**
+  String get webInstallTitle;
+
+  /// Short explanation of the PWA installation benefit.
+  ///
+  /// In en, this message translates to:
+  /// **'Installation gives REBOOT its own Home Screen icon and lets the verified shell start without a connection.'**
+  String get webInstallIntro;
+
+  /// Heading for current iPhone Safari installation steps.
+  ///
+  /// In en, this message translates to:
+  /// **'On iPhone in Safari'**
+  String get webInstallIosTitle;
+
+  /// Current iPhone Safari PWA installation steps.
+  ///
+  /// In en, this message translates to:
+  /// **'Open More or Share, choose Add to Home Screen, turn on Open as Web App, then tap Add.'**
+  String get webInstallIosSteps;
+
+  /// Heading for non-iPhone PWA installation steps.
+  ///
+  /// In en, this message translates to:
+  /// **'On Android or a computer'**
+  String get webInstallOtherTitle;
+
+  /// Generic PWA installation steps for other supported browsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Open your browser menu and choose Install REBOOT or Add to Home Screen when offered.'**
+  String get webInstallOtherSteps;
+
+  /// Confirmation displayed in standalone PWA mode.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT is open as an installed web app'**
+  String get webInstalledTitle;
+
+  /// Installed-mode status while real Web data remains blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The offline shell is active. Financial entry remains locked until the Web security validation is complete.'**
+  String get webInstalledBody;
 
   /// Title and dashboard action for the data and privacy status screen.
   ///

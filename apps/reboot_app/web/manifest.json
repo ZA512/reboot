@@ -8,6 +8,9 @@
     "background_color": "#f7fbf8",
     "theme_color": "#315c4b",
     "description": "Take back control of your spending, one week at a time.",
+    "lang": "en",
+    "dir": "ltr",
+    "categories": ["finance", "productivity"],
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

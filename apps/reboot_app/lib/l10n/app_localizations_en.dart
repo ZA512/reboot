@@ -1768,11 +1768,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get webPrototypeBody =>
-      'The REBOOT interface now runs in a browser, but encrypted persistence and recovery are not ready for real financial data yet.';
+      'The REBOOT interface now runs in a browser, but encrypted storage, recovery, and real-iPhone behavior are still undergoing final validation before real financial data is enabled.';
 
   @override
   String get webPrototypeSafety =>
       'Nothing you enter is stored in an unencrypted or temporary fallback. Use the Android application while this security proof is in progress.';
+
+  @override
+  String get webInstallTitle => 'Install the REBOOT web app';
+
+  @override
+  String get webInstallIntro =>
+      'Installation gives REBOOT its own Home Screen icon and lets the verified shell start without a connection.';
+
+  @override
+  String get webInstallIosTitle => 'On iPhone in Safari';
+
+  @override
+  String get webInstallIosSteps =>
+      'Open More or Share, choose Add to Home Screen, turn on Open as Web App, then tap Add.';
+
+  @override
+  String get webInstallOtherTitle => 'On Android or a computer';
+
+  @override
+  String get webInstallOtherSteps =>
+      'Open your browser menu and choose Install REBOOT or Add to Home Screen when offered.';
+
+  @override
+  String get webInstalledTitle => 'REBOOT is open as an installed web app';
+
+  @override
+  String get webInstalledBody =>
+      'The offline shell is active. Financial entry remains locked until the Web security validation is complete.';
 
   @override
   String get dataPrivacyTitle => 'Data and privacy';

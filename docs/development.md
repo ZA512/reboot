@@ -53,9 +53,12 @@ stockage local chiffré et la garde des clés doivent d’abord disposer
 d’implémentations Web validées conformément à l’ADR-0008.
 
 Le shell Web actuel est volontairement bloqué avant toute saisie. Il permet de
-valider la chaîne de compilation et le responsive sans utiliser un stockage en
-clair, temporaire ou non récupérable. Les constats du prototype sont suivis
-dans [`docs/web-storage-prototype.md`](web-storage-prototype.md).
+valider la chaîne de compilation, le responsive, l’installation et le
+redémarrage hors ligne sans utiliser un stockage en clair, temporaire ou non
+récupérable. Dans Safari iPhone, l’aide reprend le flux système actuel :
+`Partager` ou `Plus`, `Sur l’écran d’accueil`, `Ouvrir comme app web`, puis
+`Ajouter`. Les constats du prototype sont suivis dans
+[`docs/web-storage-prototype.md`](web-storage-prototype.md).
 
 Le prototype utilise Chrome pour le développement local, puis Safari sur un
 iPhone réel pour valider installation, redémarrage, mise à jour et hors-ligne.

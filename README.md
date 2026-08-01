@@ -70,6 +70,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Sauvegarde locale Android chiffrée et restauration sur une installation neuve
 - [x] Stratégie de distribution Android et Web/PWA acceptée
 - [x] Shell Flutter Web compilable, sans persistance non validée
+- [x] Shell PWA versionné, redémarrage hors ligne et aide d’installation localisée
 - [ ] Prototype de stockage Web chiffré et garde des clés
 - [ ] PWA installable et utilisable hors ligne sur iPhone
 

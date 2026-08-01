@@ -1776,11 +1776,39 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get webPrototypeBody =>
-      'L’interface REBOOT fonctionne désormais dans un navigateur, mais la persistance chiffrée et la récupération ne sont pas encore prêtes pour de vraies données financières.';
+      'L’interface REBOOT fonctionne désormais dans un navigateur, mais le stockage chiffré, la récupération et le comportement sur iPhone réel restent en validation finale avant d’autoriser de vraies données financières.';
 
   @override
   String get webPrototypeSafety =>
       'Aucune saisie n’est enregistrée dans un stockage non chiffré ou temporaire. Utilisez l’application Android pendant cette preuve de sécurité.';
+
+  @override
+  String get webInstallTitle => 'Installer l’app Web REBOOT';
+
+  @override
+  String get webInstallIntro =>
+      'L’installation ajoute une icône REBOOT à l’écran d’accueil et permet au shell validé de redémarrer sans connexion.';
+
+  @override
+  String get webInstallIosTitle => 'Sur iPhone dans Safari';
+
+  @override
+  String get webInstallIosSteps =>
+      'Ouvrez Plus ou Partager, choisissez Sur l’écran d’accueil, activez Ouvrir comme app web, puis touchez Ajouter.';
+
+  @override
+  String get webInstallOtherTitle => 'Sur Android ou ordinateur';
+
+  @override
+  String get webInstallOtherSteps =>
+      'Ouvrez le menu du navigateur et choisissez Installer REBOOT ou Ajouter à l’écran d’accueil lorsque l’option est proposée.';
+
+  @override
+  String get webInstalledTitle => 'REBOOT est ouvert comme app Web installée';
+
+  @override
+  String get webInstalledBody =>
+      'Le shell hors ligne est actif. La saisie financière reste verrouillée jusqu’à la fin de la validation de sécurité Web.';
 
   @override
   String get dataPrivacyTitle => 'Données et confidentialité';

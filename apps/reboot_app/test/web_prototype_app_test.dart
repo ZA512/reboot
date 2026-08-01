@@ -20,10 +20,30 @@ void main() {
     );
     expect(find.byType(TextField), findsNothing);
     expect(find.byType(TextFormField), findsNothing);
+    expect(find.text('Installer l’app Web REBOOT'), findsOneWidget);
+    expect(find.text('Sur iPhone dans Safari'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    final card = tester.getRect(find.byType(Card));
-    expect(card.left, greaterThanOrEqualTo(24));
-    expect(card.right, lessThanOrEqualTo(366));
+    final cards = find.byType(Card);
+    expect(cards, findsNWidgets(2));
+    for (var index = 0; index < 2; index += 1) {
+      final card = tester.getRect(cards.at(index));
+      expect(card.left, greaterThanOrEqualTo(24));
+      expect(card.right, lessThanOrEqualTo(366));
+    }
+  });
+
+  testWidgets('confirms standalone mode without repeating install steps', (
+    tester,
+  ) async {
+    tester.binding.platformDispatcher.localesTestValue = const [Locale('en')];
+    addTearDown(tester.binding.platformDispatcher.clearLocalesTestValue);
+
+    await tester.pumpWidget(const WebPrototypeApp(isStandalone: true));
+    await tester.pumpAndSettle();
+
+    expect(find.text('REBOOT is open as an installed web app'), findsOneWidget);
+    expect(find.text('On iPhone in Safari'), findsNothing);
+    expect(find.byType(TextField), findsNothing);
   });
 }
