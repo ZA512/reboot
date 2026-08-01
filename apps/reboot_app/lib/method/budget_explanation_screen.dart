@@ -335,6 +335,7 @@ final class _CashFlowTile extends StatelessWidget {
         definition.variableStrategy == VariableEstimateStrategy.custom
         ? definition.customAmountPerOccurrence!
         : definition.referenceAmountPerOccurrence;
+    final lastConfirmedOn = definition.lastConfirmedOn;
     return ExpansionTile(
       key: ValueKey('explained-cash-flow-${definition.title}'),
       title: Text(definition.title),
@@ -356,11 +357,21 @@ final class _CashFlowTile extends StatelessWidget {
               ? l10n.fixedAmount
               : l10n.variableAmount,
         ),
+        _DetailLine(
+          label: l10n.assumptionSourceLabel,
+          value: l10n.assumptionSourceManual,
+        ),
         if (definition.behavior == AmountBehavior.variable)
           _DetailLine(
             label: l10n.cashFlowEstimation,
             value: _strategyLabel(l10n, definition.variableStrategy!),
           ),
+        _DetailLine(
+          label: l10n.assumptionLastConfirmedLabel,
+          value: lastConfirmedOn != null
+              ? _formatDate(context, lastConfirmedOn)
+              : l10n.assumptionConfirmationMissingShort,
+        ),
       ],
     );
   }

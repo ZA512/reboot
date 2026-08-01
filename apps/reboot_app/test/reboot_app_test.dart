@@ -576,12 +576,16 @@ void main() {
     await tester.tap(find.text('Modifier').last);
     await tester.pumpAndSettle();
     expect(find.text('Modifier cette hypothèse'), findsOneWidget);
+    await tester.tap(find.text('Variable'));
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField).at(1), '3200');
     await tester.scrollUntilVisible(
       find.text('Planifier cette modification'),
       400,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -120));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Planifier cette modification'));
     await tester.pumpAndSettle();
 
@@ -614,7 +618,21 @@ void main() {
       isNot(currentBudget),
     );
     expect(find.textContaining('Nouvelle valeur à partir du'), findsOneWidget);
+    expect(find.textContaining('Source : Saisie manuelle'), findsWidgets);
+    expect(
+      find.textContaining('Méthode : Estimation variable · Prudente'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Dernière confirmation : dimanche 5 avril 2026'),
+      findsOneWidget,
+    );
 
+    await tester.scrollUntilVisible(
+      find.text('Logement'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     final housingTile = find.ancestor(
       of: find.text('Logement'),
       matching: find.byType(ListTile),
@@ -734,6 +752,9 @@ void main() {
     );
     expect(find.text('Montant par occurrence'), findsOneWidget);
     expect(find.text('Fixe'), findsOneWidget);
+    expect(find.text('Saisie manuelle'), findsOneWidget);
+    expect(find.text('Dernière confirmation'), findsOneWidget);
+    expect(find.text('mercredi 1 avril 2026'), findsOneWidget);
   });
 
   testWidgets('states the real local protection and recovery limits', (

@@ -349,18 +349,44 @@ final class _AssumptionTile extends StatelessWidget {
     final pending = latest.effectiveFromCycleStart == effectiveCycle;
     final pendingDeletion = pending && latest.isDeletion;
     final pendingCreation = pending && current == null && future != null;
+    final lastConfirmedOn = displayed.lastConfirmedOn;
     return Card(
       child: ListTile(
         title: Text(displayed.title),
-        subtitle: Text(
-          '${_definitionSummary(context, displayed)}'
-          '${pendingDeletion
-              ? '\n${l10n.assumptionEndsOn(_formatDate(context, effectiveCycle))}'
-              : pendingCreation
-              ? '\n${l10n.assumptionStartsOn(_formatDate(context, effectiveCycle))}'
-              : pending
-              ? '\n${l10n.assumptionChangesOn(_formatDate(context, effectiveCycle))}'
-              : ''}',
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(_definitionSummary(context, displayed)),
+              const SizedBox(height: 4),
+              Text(l10n.assumptionSource(l10n.assumptionSourceManual)),
+              Text(
+                l10n.assumptionMethod(_assumptionMethodLabel(l10n, displayed)),
+              ),
+              Text(
+                lastConfirmedOn != null
+                    ? l10n.assumptionLastConfirmed(
+                        _formatDate(context, lastConfirmedOn),
+                      )
+                    : l10n.assumptionConfirmationMissing,
+              ),
+              if (pendingDeletion)
+                Text(
+                  l10n.assumptionEndsOn(_formatDate(context, effectiveCycle)),
+                )
+              else if (pendingCreation)
+                Text(
+                  l10n.assumptionStartsOn(_formatDate(context, effectiveCycle)),
+                )
+              else if (pending)
+                Text(
+                  l10n.assumptionChangesOn(
+                    _formatDate(context, effectiveCycle),
+                  ),
+                ),
+            ],
+          ),
         ),
         trailing: PopupMenuButton<_AssumptionAction>(
           enabled: enabled && !pendingDeletion,
@@ -438,6 +464,17 @@ String _definitionSummary(BuildContext context, CashFlowDefinition definition) {
         : l10n.variableAmount,
   );
 }
+
+String _assumptionMethodLabel(
+  AppLocalizations l10n,
+  CashFlowDefinition definition,
+) => definition.behavior == AmountBehavior.fixed
+    ? l10n.assumptionMethodFixed
+    : l10n.assumptionMethodVariable(switch (definition.variableStrategy!) {
+        VariableEstimateStrategy.prudent => l10n.strategyPrudent,
+        VariableEstimateStrategy.balanced => l10n.strategyBalanced,
+        VariableEstimateStrategy.custom => l10n.strategyCustom,
+      });
 
 String _formatMoney(BuildContext context, Money money) => formatMoneyExact(
   money,

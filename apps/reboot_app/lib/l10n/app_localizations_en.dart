@@ -1297,6 +1297,45 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String assumptionSource(String source) {
+    return 'Source: $source';
+  }
+
+  @override
+  String get assumptionSourceLabel => 'Source';
+
+  @override
+  String get assumptionSourceManual => 'Entered manually';
+
+  @override
+  String assumptionMethod(String method) {
+    return 'Method: $method';
+  }
+
+  @override
+  String get assumptionMethodFixed => 'Declared fixed amount';
+
+  @override
+  String assumptionMethodVariable(String strategy) {
+    return 'Variable estimate · $strategy';
+  }
+
+  @override
+  String assumptionLastConfirmed(String date) {
+    return 'Last confirmed: $date';
+  }
+
+  @override
+  String get assumptionLastConfirmedLabel => 'Last confirmed';
+
+  @override
+  String get assumptionConfirmationMissing =>
+      'Last confirmed: confirmation required';
+
+  @override
+  String get assumptionConfirmationMissingShort => 'Confirmation required';
+
+  @override
   String get deleteAssumptionTitle => 'End this assumption?';
 
   @override

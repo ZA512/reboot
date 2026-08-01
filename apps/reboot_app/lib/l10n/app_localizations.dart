@@ -2189,6 +2189,66 @@ abstract class AppLocalizations {
   /// **'Starts on {date}'**
   String assumptionStartsOn(String date);
 
+  /// Source of one financial assumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {source}'**
+  String assumptionSource(String source);
+
+  /// Financial assumption source detail label.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get assumptionSourceLabel;
+
+  /// Current manually entered assumption source.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered manually'**
+  String get assumptionSourceManual;
+
+  /// Calculation method of one financial assumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Method: {method}'**
+  String assumptionMethod(String method);
+
+  /// Fixed financial assumption method.
+  ///
+  /// In en, this message translates to:
+  /// **'Declared fixed amount'**
+  String get assumptionMethodFixed;
+
+  /// Variable financial assumption method and strategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Variable estimate · {strategy}'**
+  String assumptionMethodVariable(String strategy);
+
+  /// Last confirmation date of one financial assumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Last confirmed: {date}'**
+  String assumptionLastConfirmed(String date);
+
+  /// Financial assumption confirmation detail label.
+  ///
+  /// In en, this message translates to:
+  /// **'Last confirmed'**
+  String get assumptionLastConfirmedLabel;
+
+  /// Warning for an assumption without a confirmation date.
+  ///
+  /// In en, this message translates to:
+  /// **'Last confirmed: confirmation required'**
+  String get assumptionConfirmationMissing;
+
+  /// Compact warning for an assumption without a confirmation date.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmation required'**
+  String get assumptionConfirmationMissingShort;
+
   /// Future cash-flow deletion confirmation title.
   ///
   /// In en, this message translates to:
