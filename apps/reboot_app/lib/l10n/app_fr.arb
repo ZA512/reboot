@@ -417,5 +417,8 @@
   "methodStepBlock": "Bloquer les réserves, projets et une marge de sécurité avant le quotidien.",
   "methodStepOrganize": "Organiser la capacité restante en budgets semaine identiques.",
   "methodStepObserve": "Observer le restant avant de dépenser, pas le solde bancaire.",
-  "methodStepTune": "Réajuster les hypothèses uniquement quand les revenus, dépenses ou habitudes changent."
+  "methodStepTune": "Réajuster les hypothèses uniquement quand les revenus, dépenses ou habitudes changent.",
+  "webPrototypeTitle": "Le stockage Web sécurisé est en cours de validation",
+  "webPrototypeBody": "L’interface REBOOT fonctionne désormais dans un navigateur, mais la persistance chiffrée et la récupération ne sont pas encore prêtes pour de vraies données financières.",
+  "webPrototypeSafety": "Aucune saisie n’est enregistrée dans un stockage non chiffré ou temporaire. Utilisez l’application Android pendant cette preuve de sécurité."
 }

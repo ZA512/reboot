@@ -1,9 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'src/run_reboot_app_native.dart'
+    if (dart.library.js_interop) 'src/run_reboot_app_web.dart';
 
-import 'src/reboot_app.dart';
-
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: RebootApp()));
-}
+void main() => runRebootApp();

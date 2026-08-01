@@ -35,3 +35,7 @@ jobs:
 
       - name: Validate workspace
         run: dart run tool/check.dart
+
+      - name: Build blocked Web safety shell
+        working-directory: apps/reboot_app
+        run: flutter build web --release

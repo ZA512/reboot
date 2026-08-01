@@ -1581,4 +1581,16 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get methodStepTune =>
       'Réajuster les hypothèses uniquement quand les revenus, dépenses ou habitudes changent.';
+
+  @override
+  String get webPrototypeTitle =>
+      'Le stockage Web sécurisé est en cours de validation';
+
+  @override
+  String get webPrototypeBody =>
+      'L’interface REBOOT fonctionne désormais dans un navigateur, mais la persistance chiffrée et la récupération ne sont pas encore prêtes pour de vraies données financières.';
+
+  @override
+  String get webPrototypeSafety =>
+      'Aucune saisie n’est enregistrée dans un stockage non chiffré ou temporaire. Utilisez l’application Android pendant cette preuve de sécurité.';
 }

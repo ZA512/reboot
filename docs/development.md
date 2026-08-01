@@ -52,6 +52,11 @@ important directement les adaptateurs Android : la racine de composition, le
 stockage local chiffré et la garde des clés doivent d’abord disposer
 d’implémentations Web validées conformément à l’ADR-0008.
 
+Le shell Web actuel est volontairement bloqué avant toute saisie. Il permet de
+valider la chaîne de compilation et le responsive sans utiliser un stockage en
+clair, temporaire ou non récupérable. Les constats du prototype sont suivis
+dans [`docs/web-storage-prototype.md`](web-storage-prototype.md).
+
 Le prototype utilise Chrome pour le développement local, puis Safari sur un
 iPhone réel pour valider installation, redémarrage, mise à jour et hors-ligne.
 Une inspection WebKit approfondie pourra nécessiter ponctuellement un Mac, mais
@@ -90,6 +95,14 @@ natif SQLite3MultipleCiphers :
 ```shell
 cd apps/reboot_app
 flutter build apk --debug
+```
+
+La sortie JavaScript compatible Safari iPhone doit également continuer à
+compiler, même si le shell interdit encore les saisies :
+
+```shell
+cd apps/reboot_app
+flutter build web --release
 ```
 
 ## Politique de dépendances

@@ -2609,6 +2609,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tune assumptions only when real income, expenses or habits change.'**
   String get methodStepTune;
+
+  /// Web pre-prototype blocking screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Web storage is being validated'**
+  String get webPrototypeTitle;
+
+  /// Honest status of the Web storage prototype.
+  ///
+  /// In en, this message translates to:
+  /// **'The REBOOT interface now runs in a browser, but encrypted persistence and recovery are not ready for real financial data yet.'**
+  String get webPrototypeBody;
+
+  /// Safety guarantee while Web persistence remains blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing you enter is stored in an unencrypted or temporary fallback. Use the Android application while this security proof is in progress.'**
+  String get webPrototypeSafety;
 }
 
 class _AppLocalizationsDelegate

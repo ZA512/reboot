@@ -1,8 +1,9 @@
 # REBOOT application
 
 Flutter application for native Android and the future Web/PWA client. Android
-is the current implementation target. The Web target will be enabled only
-after its encrypted local storage and key custody prototype is validated.
+is the current implementation target. The Web shell builds and honestly blocks
+all financial input until its encrypted local storage, exact integer model,
+key custody, and recovery prototype is validated.
 
 Business rules and financial calculations belong to the pure Dart workspace
 packages, never to widgets.
@@ -15,5 +16,9 @@ amount back to every accepted annual assumption, deduction and prudent
 rounding. Its Android home-screen widget stores only an encrypted,
 already-formatted remaining amount, masks it by default, and reveals it for
 two seconds on demand.
+
+The Web entry point is deliberately independent from the native composition.
+It never falls back to plaintext or ephemeral financial storage while the
+security proof is incomplete.
 
 REBOOT weekly remaining-to-live budget application.

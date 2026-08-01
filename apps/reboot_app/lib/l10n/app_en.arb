@@ -835,5 +835,11 @@
   "methodStepObserve": "Observe the remaining amount before spending, not the bank balance.",
   "@methodStepObserve": {"description": "Fifth REBOOT method step."},
   "methodStepTune": "Tune assumptions only when real income, expenses or habits change.",
-  "@methodStepTune": {"description": "Sixth REBOOT method step."}
+  "@methodStepTune": {"description": "Sixth REBOOT method step."},
+  "webPrototypeTitle": "Secure Web storage is being validated",
+  "@webPrototypeTitle": {"description": "Web pre-prototype blocking screen title."},
+  "webPrototypeBody": "The REBOOT interface now runs in a browser, but encrypted persistence and recovery are not ready for real financial data yet.",
+  "@webPrototypeBody": {"description": "Honest status of the Web storage prototype."},
+  "webPrototypeSafety": "Nothing you enter is stored in an unencrypted or temporary fallback. Use the Android application while this security proof is in progress.",
+  "@webPrototypeSafety": {"description": "Safety guarantee while Web persistence remains blocked."}
 }

@@ -68,6 +68,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Explication détaillée du budget semaine, de ses hypothèses et de ses arrondis
 - [x] Widget Android confidentiel du restant hebdomadaire
 - [x] Stratégie de distribution Android et Web/PWA acceptée
+- [x] Shell Flutter Web compilable, sans persistance non validée
 - [ ] Prototype de stockage Web chiffré et garde des clés
 - [ ] PWA installable et utilisable hors ligne sur iPhone
 

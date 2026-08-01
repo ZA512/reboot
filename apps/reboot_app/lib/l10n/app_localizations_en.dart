@@ -1576,4 +1576,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get methodStepTune =>
       'Tune assumptions only when real income, expenses or habits change.';
+
+  @override
+  String get webPrototypeTitle => 'Secure Web storage is being validated';
+
+  @override
+  String get webPrototypeBody =>
+      'The REBOOT interface now runs in a browser, but encrypted persistence and recovery are not ready for real financial data yet.';
+
+  @override
+  String get webPrototypeSafety =>
+      'Nothing you enter is stored in an unencrypted or temporary fallback. Use the Android application while this security proof is in progress.';
 }
