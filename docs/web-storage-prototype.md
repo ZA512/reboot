@@ -67,10 +67,16 @@ persistant. Un refus reste un résultat valide mais classé `best effort`; il de
 sauvegarde. Une API absente ou incohérente échoue fermée.
 
 Le [benchmark sur 300 000 événements](web-storage-benchmark.md) valide une
-écriture p95 à 4,4 ms et la capacité du journal direct. Le rejeu authentifié
-complet prend toutefois 19,5 secondes sur la machine de référence. La PWA ne
-sera donc pas activée avant l’ajout d’un snapshot ou cache de projection chiffré
-et versionné ; le journal restera l’unique source de vérité.
+écriture p95 à 5,9 ms et la capacité du journal direct. Le rejeu authentifié
+complet varie de 19,5 à 34,0 secondes sur la machine de référence. Le schéma v2
+ajoute donc un snapshot de projection chiffré, versionné, remplaçable et ancré
+sur l’empreinte d’une enveloppe exacte du journal. Sa corruption le supprime sans
+toucher au journal. La migration v1 vers v2 conserve la clé et les événements.
+
+Avec un snapshot synthétique de 262 228 octets à la position 299 900, la
+restauration et le rejeu authentifié des 100 événements suivants prennent 69 ms.
+Le mécanisme satisfait la cible desktop ; le vrai codec des projections REBOOT
+et son intégration à `LocalEventJournal` restent à implémenter avant activation.
 
 Drift/SQLite WebAssembly est différé : il ne supprimerait pas le besoin du
 chiffrement applicatif et ajouterait des pages, caches et migrations à auditer.
@@ -100,6 +106,7 @@ La proposition complète et ses limites sont consignées dans
 - perte de clé et effacement isolé du stockage détectés sans réinitialisation
   silencieuse ;
 - scénario de récupération documenté et testé ;
+- codec versionné des projections métier branché sur le snapshot chiffré ;
 - comportement du stockage détecté et annoncé, sans repli mémoire silencieux ;
 - benchmark sur 300 000 événements effectué sur ordinateur, puis confirmé sur
   Safari iPhone réel ;

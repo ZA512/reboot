@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:web/web.dart' as web;
 
 import 'encrypted_event_envelope.dart';
+import 'encrypted_projection_snapshot.dart';
 
 /// Browser-only proof that clear event payloads never enter IndexedDB.
 ///
@@ -16,13 +18,16 @@ final class BrowserEncryptedJournalPrototype {
     required this.databaseName,
   });
 
-  static const int schemaVersion = 1;
+  static const int schemaVersion = 2;
+  static const int _legacySchemaVersion = 1;
   static const String _keyStore = 'keys';
   static const String _metadataStore = 'metadata';
   static const String _entryStore = 'entries';
   static const String _eventIdStore = 'event_ids';
+  static const String _snapshotStore = 'projection_snapshots';
   static const String _initializedKey = 'initialized';
   static const String _lastPositionKey = 'last_position';
+  static const String _latestSnapshotKey = 'latest';
   static const String _markerPrefix = 'reboot.web.prototype.marker.';
   static final BigInt _maximumPosition = BigInt.parse('9223372036854775807');
 
@@ -105,6 +110,40 @@ final class BrowserEncryptedJournalPrototype {
     }
   }
 
+  /// Creates a valid version-one database so browser tests can prove that the
+  /// version-two snapshot migration preserves the encrypted journal and key.
+  static Future<void> createLegacyVersionOneForTesting({
+    required String databaseName,
+    required WebPrototypePlainEvent event,
+  }) async {
+    final opened = await _openDatabase(
+      databaseName,
+      version: _legacySchemaVersion,
+    );
+    if (!opened.created) {
+      opened.database.close();
+      throw StateError('The legacy test database already exists.');
+    }
+    try {
+      final key = await _generateDataKey();
+      await _initialize(opened.database, key);
+      _writeMarker(databaseName);
+      final journal = BrowserEncryptedJournalPrototype._(
+        database: opened.database,
+        dataKey: key,
+        databaseName: databaseName,
+      );
+      try {
+        await journal.append(event);
+      } finally {
+        journal.close();
+      }
+    } on Object {
+      opened.database.close();
+      rethrow;
+    }
+  }
+
   /// Appends an immutable encrypted event and returns its exact local position.
   Future<BigInt> append(WebPrototypePlainEvent event) {
     _ensureOpen();
@@ -177,11 +216,128 @@ final class BrowserEncryptedJournalPrototype {
     return List<WebPrototypePlainEvent>.unmodifiable(result);
   }
 
+  /// Reads only the authenticated journal suffix strictly after [position].
+  ///
+  /// This is the fast-start companion to a validated projection snapshot. It
+  /// still checks contiguous positions and every suffix UUID index entry.
+  Future<List<WebPrototypePlainEvent>> readAfter(BigInt position) async {
+    _ensureOpen();
+    if (position < BigInt.zero || position > _maximumPosition) {
+      throw ArgumentError.value(position, 'position', 'Outside signed int64.');
+    }
+    final suffix = await _readEntriesAfter(_database, position);
+    if (position > suffix.lastPosition) {
+      throw ArgumentError.value(
+        position,
+        'position',
+        'Beyond the current journal tail.',
+      );
+    }
+    final envelopes = <WebEncryptedEventEnvelope>[];
+    var expected = position + BigInt.one;
+    for (final value in suffix.entries) {
+      try {
+        final envelope = WebEncryptedEventEnvelope.fromPersistedMap(
+          _dartMap(value),
+        );
+        if (envelope.position != expected) {
+          throw const WebJournalIntegrityException();
+        }
+        envelopes.add(envelope);
+        expected += BigInt.one;
+      } on WebJournalIntegrityException {
+        rethrow;
+      } on Object {
+        throw const WebJournalIntegrityException();
+      }
+    }
+    if (expected - BigInt.one != suffix.lastPosition) {
+      throw const WebJournalIntegrityException();
+    }
+
+    final indexedPositions = await _readIndexedPositions(
+      _database,
+      envelopes.map((envelope) => envelope.eventId).toList(growable: false),
+    );
+    final result = <WebPrototypePlainEvent>[];
+    for (var index = 0; index < envelopes.length; index += 1) {
+      final envelope = envelopes[index];
+      if (indexedPositions[index] != envelope.positionKey) {
+        throw const WebJournalIntegrityException();
+      }
+      result.add(await _decrypt(envelope));
+    }
+    return List<WebPrototypePlainEvent>.unmodifiable(result);
+  }
+
+  /// Replaces the derived projection cache at the exact current journal tail.
+  ///
+  /// The snapshot is mutable and disposable; journal entries remain the only
+  /// source of truth and are never changed by this operation.
+  Future<void> writeProjectionSnapshot(
+    WebPrototypeProjectionSnapshot snapshot,
+  ) async {
+    _ensureOpen();
+    final lastPosition = await _readLastPosition();
+    if (snapshot.journalPosition != lastPosition) {
+      throw const WebJournalSnapshotPositionException();
+    }
+    final eventEnvelope = await _readEnvelopeAt(snapshot.journalPosition);
+    final anchor = await _journalAnchor(eventEnvelope);
+    final encrypted = await _encryptProjectionSnapshot(snapshot, anchor);
+    await _putValue(
+      _database,
+      _snapshotStore,
+      _latestSnapshotKey,
+      encrypted.toPersistedMap().jsify(),
+    );
+  }
+
+  /// Returns the latest valid derived projection cache, or null when absent or
+  /// disposable corruption is detected.
+  Future<WebPrototypeProjectionSnapshot?> readProjectionSnapshot() async {
+    _ensureOpen();
+    final raw = await _readValue(_database, _snapshotStore, _latestSnapshotKey);
+    if (raw == null) return null;
+
+    final WebEncryptedProjectionSnapshotEnvelope encrypted;
+    try {
+      encrypted = WebEncryptedProjectionSnapshotEnvelope.fromPersistedMap(
+        _dartMap(raw),
+      );
+    } on Object {
+      return _discardProjectionSnapshot();
+    }
+
+    final lastPosition = await _readLastPosition();
+    if (encrypted.journalPosition > lastPosition) {
+      return _discardProjectionSnapshot();
+    }
+
+    final eventEnvelope = await _readEnvelopeAt(encrypted.journalPosition);
+    final expectedAnchor = await _journalAnchor(eventEnvelope);
+    if (encrypted.journalAnchorBase64Url != expectedAnchor) {
+      return _discardProjectionSnapshot();
+    }
+
+    try {
+      return await _decryptProjectionSnapshot(encrypted);
+    } on WebJournalIntegrityException {
+      return _discardProjectionSnapshot();
+    }
+  }
+
   /// Returns opaque persisted records for confidentiality assertions only.
   Future<List<Map<String, Object?>>> inspectEncryptedRecordsForTesting() async {
     _ensureOpen();
     final values = await _readAllValues(_database, _entryStore);
     return List<Map<String, Object?>>.unmodifiable(values.map(_dartMap));
+  }
+
+  Future<Map<String, Object?>?> inspectEncryptedSnapshotForTesting() async {
+    _ensureOpen();
+    final raw = await _readValue(_database, _snapshotStore, _latestSnapshotKey);
+    return raw == null ? null : _dartMap(raw);
   }
 
   /// Corrupts one ciphertext so browser integration tests can prove fail-closed.
@@ -232,6 +388,17 @@ final class BrowserEncryptedJournalPrototype {
   Future<void> deleteEventIdIndexForTesting(String eventId) async {
     _ensureOpen();
     await _deleteValue(_database, _eventIdStore, eventId);
+  }
+
+  Future<void> corruptSnapshotCiphertextForTesting() async {
+    _ensureOpen();
+    final raw = await _readValue(_database, _snapshotStore, _latestSnapshotKey);
+    if (raw == null) throw StateError('Missing projection snapshot.');
+    final map = _dartMap(raw);
+    final ciphertext = map['ciphertext']! as String;
+    map['ciphertext'] =
+        '${ciphertext.startsWith('A') ? 'B' : 'A'}${ciphertext.substring(1)}';
+    await _putValue(_database, _snapshotStore, _latestSnapshotKey, map.jsify());
   }
 
   /// Forces one request in a read/write transaction to fail so tests can
@@ -368,6 +535,28 @@ final class BrowserEncryptedJournalPrototype {
     return _parsePosition(raw, allowZero: true);
   }
 
+  Future<WebEncryptedEventEnvelope> _readEnvelopeAt(BigInt position) async {
+    final raw = await _readValue(
+      _database,
+      _entryStore,
+      _positionKey(position),
+    );
+    if (raw == null) throw const WebJournalIntegrityException();
+    try {
+      final envelope = WebEncryptedEventEnvelope.fromPersistedMap(
+        _dartMap(raw),
+      );
+      if (envelope.position != position) {
+        throw const WebJournalIntegrityException();
+      }
+      return envelope;
+    } on WebJournalIntegrityException {
+      rethrow;
+    } on Object {
+      throw const WebJournalIntegrityException();
+    }
+  }
+
   Future<WebEncryptedEventEnvelope> _encrypt(
     BigInt position,
     WebPrototypePlainEvent event,
@@ -445,6 +634,106 @@ final class BrowserEncryptedJournalPrototype {
     }
   }
 
+  Future<String> _journalAnchor(WebEncryptedEventEnvelope envelope) async {
+    try {
+      final canonicalEnvelope = utf8.encode(
+        jsonEncode(envelope.toPersistedMap()),
+      );
+      final digest = await web.window.crypto.subtle
+          .digest('SHA-256'.toJS, Uint8List.fromList(canonicalEnvelope).toJS)
+          .toDart;
+      return encodeBase64UrlCanonical(_arrayBufferBytes(digest));
+    } on Object {
+      throw const WebJournalStorageException();
+    }
+  }
+
+  Future<WebEncryptedProjectionSnapshotEnvelope> _encryptProjectionSnapshot(
+    WebPrototypeProjectionSnapshot snapshot,
+    String journalAnchor,
+  ) async {
+    final nonce = Uint8List(
+      WebEncryptedProjectionSnapshotEnvelope.nonceLengthBytes,
+    );
+    web.window.crypto.getRandomValues(nonce.toJS);
+    final provisional = WebEncryptedProjectionSnapshotEnvelope(
+      journalPosition: snapshot.journalPosition,
+      journalAnchorBase64Url: journalAnchor,
+      nonceBase64Url: encodeBase64UrlCanonical(nonce),
+      ciphertextBase64Url: encodeBase64UrlCanonical(
+        List<int>.filled(
+          WebEncryptedProjectionSnapshotEnvelope.authenticationTagLengthBytes,
+          0,
+        ),
+      ),
+    );
+    try {
+      final encrypted = await web.window.crypto.subtle
+          .encrypt(
+            <String, Object?>{
+              'name': 'AES-GCM',
+              'iv': nonce,
+              'additionalData': Uint8List.fromList(
+                provisional.authenticatedData(),
+              ),
+              'tagLength': 128,
+            }.jsify()!,
+            _dataKey,
+            Uint8List.fromList(snapshot.encode()).toJS,
+          )
+          .toDart;
+      return WebEncryptedProjectionSnapshotEnvelope(
+        journalPosition: snapshot.journalPosition,
+        journalAnchorBase64Url: journalAnchor,
+        nonceBase64Url: provisional.nonceBase64Url,
+        ciphertextBase64Url: encodeBase64UrlCanonical(
+          _arrayBufferBytes(encrypted),
+        ),
+      );
+    } on Object {
+      throw const WebJournalStorageException();
+    }
+  }
+
+  Future<WebPrototypeProjectionSnapshot> _decryptProjectionSnapshot(
+    WebEncryptedProjectionSnapshotEnvelope envelope,
+  ) async {
+    try {
+      final decrypted = await web.window.crypto.subtle
+          .decrypt(
+            <String, Object?>{
+              'name': 'AES-GCM',
+              'iv': Uint8List.fromList(
+                decodeBase64UrlCanonical(envelope.nonceBase64Url, 'nonce'),
+              ),
+              'additionalData': Uint8List.fromList(
+                envelope.authenticatedData(),
+              ),
+              'tagLength': 128,
+            }.jsify()!,
+            _dataKey,
+            Uint8List.fromList(
+              decodeBase64UrlCanonical(
+                envelope.ciphertextBase64Url,
+                'ciphertext',
+              ),
+            ).toJS,
+          )
+          .toDart;
+      return WebPrototypeProjectionSnapshot.decode(
+        journalPosition: envelope.journalPosition,
+        bytes: _arrayBufferBytes(decrypted),
+      );
+    } on Object {
+      throw const WebJournalIntegrityException();
+    }
+  }
+
+  Future<WebPrototypeProjectionSnapshot?> _discardProjectionSnapshot() async {
+    await _deleteValue(_database, _snapshotStore, _latestSnapshotKey);
+    return null;
+  }
+
   void _ensureOpen() {
     if (_closed) throw StateError('The prototype journal is closed.');
   }
@@ -457,20 +746,32 @@ enum _CommitResult { committed, retry }
   bool created,
 ) => (database: request.result as web.IDBDatabase, created: created);
 
-Future<({web.IDBDatabase database, bool created})> _openDatabase(String name) {
+Future<({web.IDBDatabase database, bool created})> _openDatabase(
+  String name, {
+  int version = BrowserEncryptedJournalPrototype.schemaVersion,
+}) {
   final completer = Completer<({web.IDBDatabase database, bool created})>();
-  final request = web.window.indexedDB.open(
-    name,
-    BrowserEncryptedJournalPrototype.schemaVersion,
-  );
+  final request = web.window.indexedDB.open(name, version);
   var created = false;
-  request.onupgradeneeded = ((web.Event _) {
-    created = true;
+  request.onupgradeneeded = ((web.Event event) {
+    final versionChange = event as web.IDBVersionChangeEvent;
+    created = versionChange.oldVersion == 0;
     final database = request.result as web.IDBDatabase;
-    database.createObjectStore(BrowserEncryptedJournalPrototype._keyStore);
-    database.createObjectStore(BrowserEncryptedJournalPrototype._metadataStore);
-    database.createObjectStore(BrowserEncryptedJournalPrototype._entryStore);
-    database.createObjectStore(BrowserEncryptedJournalPrototype._eventIdStore);
+    if (versionChange.oldVersion < 1) {
+      database.createObjectStore(BrowserEncryptedJournalPrototype._keyStore);
+      database.createObjectStore(
+        BrowserEncryptedJournalPrototype._metadataStore,
+      );
+      database.createObjectStore(BrowserEncryptedJournalPrototype._entryStore);
+      database.createObjectStore(
+        BrowserEncryptedJournalPrototype._eventIdStore,
+      );
+    }
+    if (versionChange.oldVersion < 2 && version >= 2) {
+      database.createObjectStore(
+        BrowserEncryptedJournalPrototype._snapshotStore,
+      );
+    }
   }).toJS;
   request.onsuccess = ((web.Event _) {
     if (!completer.isCompleted) {
@@ -664,6 +965,80 @@ _readIntegritySnapshot(web.IDBDatabase database) async {
   } on WebJournalIntegrityException {
     await _ignoreAbort(completed);
     rethrow;
+  } on Object {
+    await _ignoreAbort(completed);
+    throw const WebJournalStorageException();
+  }
+}
+
+Future<({List<JSAny?> entries, BigInt lastPosition})> _readEntriesAfter(
+  web.IDBDatabase database,
+  BigInt position,
+) async {
+  final transaction = database.transaction(
+    <JSString>[
+      BrowserEncryptedJournalPrototype._metadataStore.toJS,
+      BrowserEncryptedJournalPrototype._entryStore.toJS,
+    ].toJS,
+    'readonly',
+  );
+  final completed = _transactionCompleted(transaction);
+  try {
+    final metadataRequest = transaction
+        .objectStore(BrowserEncryptedJournalPrototype._metadataStore)
+        .get(BrowserEncryptedJournalPrototype._lastPositionKey.toJS);
+    final entries = transaction.objectStore(
+      BrowserEncryptedJournalPrototype._entryStore,
+    );
+    final web.IDBRequest entriesRequest;
+    if (position == BigInt.zero) {
+      entriesRequest = entries.getAll();
+    } else {
+      entriesRequest = entries.getAll(
+        web.IDBKeyRange.lowerBound(_positionKey(position).toJS, true),
+      );
+    }
+    final results = await Future.wait(<Future<JSAny?>>[
+      _requestResult(metadataRequest),
+      _requestResult(entriesRequest),
+    ]);
+    await completed;
+    return (
+      entries: _jsArrayValues(results[1]),
+      lastPosition: _parsePosition(results[0], allowZero: true),
+    );
+  } on WebJournalIntegrityException {
+    await _ignoreAbort(completed);
+    rethrow;
+  } on Object {
+    await _ignoreAbort(completed);
+    throw const WebJournalStorageException();
+  }
+}
+
+Future<List<String?>> _readIndexedPositions(
+  web.IDBDatabase database,
+  List<String> eventIds,
+) async {
+  if (eventIds.isEmpty) return const <String?>[];
+  final transaction = database.transaction(
+    BrowserEncryptedJournalPrototype._eventIdStore.toJS,
+    'readonly',
+  );
+  final completed = _transactionCompleted(transaction);
+  try {
+    final store = transaction.objectStore(
+      BrowserEncryptedJournalPrototype._eventIdStore,
+    );
+    final requests = eventIds
+        .map((eventId) => _requestResult(store.get(eventId.toJS)))
+        .toList(growable: false);
+    final values = await Future.wait(requests);
+    await completed;
+    return values
+        .map((value) => value?.dartify())
+        .map((value) => value is String ? value : null)
+        .toList(growable: false);
   } on Object {
     await _ignoreAbort(completed);
     throw const WebJournalStorageException();

@@ -6,9 +6,12 @@ import 'dart:convert';
 import 'package:reboot_app/web_storage/browser_encrypted_journal_prototype.dart';
 import 'package:reboot_app/web_storage/browser_storage_durability.dart';
 import 'package:reboot_app/web_storage/encrypted_event_envelope.dart';
+import 'package:reboot_app/web_storage/encrypted_projection_snapshot.dart';
 import 'package:test/test.dart';
 
 const int _eventCount = 300000;
+const int _snapshotTailEventCount = 100;
+const int _snapshotPaddingBytes = 256 * 1024;
 const String _payload =
     '{"amountMinorUnits":"12345","currency":"EUR",'
     '"label":"synthetic-groceries","occurredOn":"2026-08-01",'
@@ -32,12 +35,31 @@ void main() {
       });
 
       final appendMicros = <int>[];
+      final snapshotPosition = _eventCount - _snapshotTailEventCount;
+      final projectionJson = jsonEncode(<String, Object?>{
+        'remainingMinorUnits': '12345',
+        'cycleStart': '2026-08-01',
+        'syntheticCachePadding': 'x' * _snapshotPaddingBytes,
+      });
+      var snapshotWriteMicros = 0;
       final appendTotal = Stopwatch()..start();
       for (var sequence = 1; sequence <= _eventCount; sequence += 1) {
         final singleAppend = Stopwatch()..start();
         await journal.append(_event(sequence));
         singleAppend.stop();
         appendMicros.add(singleAppend.elapsedMicroseconds);
+        if (sequence == snapshotPosition) {
+          final snapshotWrite = Stopwatch()..start();
+          await journal.writeProjectionSnapshot(
+            WebPrototypeProjectionSnapshot(
+              journalPosition: BigInt.from(snapshotPosition),
+              schemaVersion: 1,
+              projectionJson: projectionJson,
+            ),
+          );
+          snapshotWrite.stop();
+          snapshotWriteMicros = snapshotWrite.elapsedMicroseconds;
+        }
       }
       appendTotal.stop();
 
@@ -47,6 +69,21 @@ void main() {
         databaseName: databaseName,
       );
       reopen.stop();
+
+      final fastStart = Stopwatch()..start();
+      final restoredSnapshot = await journal.readProjectionSnapshot();
+      expect(restoredSnapshot, isNotNull);
+      expect(restoredSnapshot!.journalPosition, BigInt.from(snapshotPosition));
+      expect(restoredSnapshot.projectionJson, projectionJson);
+      final suffixReplay = Stopwatch()..start();
+      final suffixEvents = await journal.readAfter(
+        restoredSnapshot.journalPosition,
+      );
+      suffixReplay.stop();
+      fastStart.stop();
+      expect(suffixEvents, hasLength(_snapshotTailEventCount));
+      expect(suffixEvents.first.eventId, _event(snapshotPosition + 1).eventId);
+      expect(suffixEvents.last.eventId, _event(_eventCount).eventId);
 
       final replay = Stopwatch()..start();
       final events = await journal.readAll();
@@ -67,7 +104,12 @@ void main() {
         'appendP95Ms': _percentile(appendMicros, 0.95) / 1000,
         'appendP99Ms': _percentile(appendMicros, 0.99) / 1000,
         'appendMaxMs': appendMicros.last / 1000,
+        'projectionSnapshotBytes': utf8.encode(projectionJson).length,
+        'snapshotWriteMs': snapshotWriteMicros / 1000,
         'reopenMs': reopen.elapsedMilliseconds,
+        'snapshotAndSuffixRestoreMs': fastStart.elapsedMilliseconds,
+        'suffixEventCount': suffixEvents.length,
+        'suffixReplayMs': suffixReplay.elapsedMilliseconds,
         'authenticatedReplayMs': replay.elapsedMilliseconds,
         'replayEventsPerSecond':
             _eventCount * 1000 / replay.elapsedMilliseconds,

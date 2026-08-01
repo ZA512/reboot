@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:reboot_app/web_storage/browser_encrypted_journal_prototype.dart';
 import 'package:reboot_app/web_storage/encrypted_event_envelope.dart';
+import 'package:reboot_app/web_storage/encrypted_projection_snapshot.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -149,6 +150,10 @@ void main() {
       () => journal.readAll(),
       throwsA(isA<WebJournalIntegrityException>()),
     );
+    expect(
+      () => journal.readAfter(BigInt.zero),
+      throwsA(isA<WebJournalIntegrityException>()),
+    );
   });
 
   test('authenticates clear routing metadata with the ciphertext', () async {
@@ -266,6 +271,137 @@ void main() {
       );
     },
   );
+
+  test('encrypts a replaceable snapshot anchored to the journal', () async {
+    final databaseName = _databaseName('snapshot');
+    final journal = await BrowserEncryptedJournalPrototype.open(
+      databaseName: databaseName,
+    );
+    addTearDown(() async {
+      journal.close();
+      await BrowserEncryptedJournalPrototype.deleteDatabaseForTesting(
+        databaseName,
+      );
+      BrowserEncryptedJournalPrototype.removeMarkerForTesting(databaseName);
+    });
+    final first = _event(14, '{"value":"first"}');
+    final second = _event(15, '{"value":"second"}');
+    await journal.append(first);
+    final snapshot = WebPrototypeProjectionSnapshot(
+      journalPosition: BigInt.one,
+      schemaVersion: 1,
+      projectionJson: '{"secretRemainingMinorUnits":"12345"}',
+    );
+
+    await journal.writeProjectionSnapshot(snapshot);
+    final persisted = await journal.inspectEncryptedSnapshotForTesting();
+    expect(persisted, isNotNull);
+    expect(jsonEncode(persisted), isNot(contains('secretRemainingMinorUnits')));
+    expect(jsonEncode(persisted), isNot(contains('12345')));
+
+    await journal.append(second);
+    final restored = await journal.readProjectionSnapshot();
+    expect(restored, isNotNull);
+    expect(restored!.journalPosition, BigInt.one);
+    expect(restored.schemaVersion, 1);
+    expect(restored.projectionJson, snapshot.projectionJson);
+    expect(
+      await journal.readAfter(restored.journalPosition),
+      <WebPrototypePlainEvent>[second],
+    );
+    expect(await journal.readAfter(BigInt.two), isEmpty);
+    expect(await journal.readAfter(BigInt.zero), <WebPrototypePlainEvent>[
+      first,
+      second,
+    ]);
+    expect(await journal.readAll(), <WebPrototypePlainEvent>[first, second]);
+  });
+
+  test('discards a corrupt snapshot without touching the journal', () async {
+    final databaseName = _databaseName('snapshot-corruption');
+    final journal = await BrowserEncryptedJournalPrototype.open(
+      databaseName: databaseName,
+    );
+    addTearDown(() async {
+      journal.close();
+      await BrowserEncryptedJournalPrototype.deleteDatabaseForTesting(
+        databaseName,
+      );
+      BrowserEncryptedJournalPrototype.removeMarkerForTesting(databaseName);
+    });
+    final event = _event(16, '{"value":"journal-remains"}');
+    await journal.append(event);
+    await journal.writeProjectionSnapshot(
+      WebPrototypeProjectionSnapshot(
+        journalPosition: BigInt.one,
+        schemaVersion: 1,
+        projectionJson: '{"derived":"discardable"}',
+      ),
+    );
+    await journal.corruptSnapshotCiphertextForTesting();
+
+    expect(await journal.readProjectionSnapshot(), isNull);
+    expect(await journal.inspectEncryptedSnapshotForTesting(), isNull);
+    expect(await journal.readAll(), <WebPrototypePlainEvent>[event]);
+  });
+
+  test('refuses to snapshot anything other than the current tail', () async {
+    final databaseName = _databaseName('snapshot-position');
+    final journal = await BrowserEncryptedJournalPrototype.open(
+      databaseName: databaseName,
+    );
+    addTearDown(() async {
+      journal.close();
+      await BrowserEncryptedJournalPrototype.deleteDatabaseForTesting(
+        databaseName,
+      );
+      BrowserEncryptedJournalPrototype.removeMarkerForTesting(databaseName);
+    });
+    await journal.append(_event(17, '{"value":1}'));
+
+    expect(
+      () => journal.writeProjectionSnapshot(
+        WebPrototypeProjectionSnapshot(
+          journalPosition: BigInt.two,
+          schemaVersion: 1,
+          projectionJson: '{"derived":"future"}',
+        ),
+      ),
+      throwsA(isA<WebJournalSnapshotPositionException>()),
+    );
+  });
+
+  test('migrates a version-one journal without changing its event', () async {
+    final databaseName = _databaseName('migration-v1-v2');
+    final event = _event(18, '{"value":"legacy"}');
+    await BrowserEncryptedJournalPrototype.createLegacyVersionOneForTesting(
+      databaseName: databaseName,
+      event: event,
+    );
+    final journal = await BrowserEncryptedJournalPrototype.open(
+      databaseName: databaseName,
+    );
+    addTearDown(() async {
+      journal.close();
+      await BrowserEncryptedJournalPrototype.deleteDatabaseForTesting(
+        databaseName,
+      );
+      BrowserEncryptedJournalPrototype.removeMarkerForTesting(databaseName);
+    });
+
+    expect(await journal.readAll(), <WebPrototypePlainEvent>[event]);
+    await journal.writeProjectionSnapshot(
+      WebPrototypeProjectionSnapshot(
+        journalPosition: BigInt.one,
+        schemaVersion: 1,
+        projectionJson: '{"migrated":true}',
+      ),
+    );
+    expect(
+      (await journal.readProjectionSnapshot())?.projectionJson,
+      '{"migrated":true}',
+    );
+  });
 }
 
 WebPrototypePlainEvent _event(int sequence, String payloadJson) {

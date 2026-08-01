@@ -64,22 +64,37 @@ distante chiffrée liée au profil.
 
 ### Atomicité et concurrence
 
-Utiliser quatre object stores : clés, métadonnées, enveloppes et index UUID.
+Utiliser cinq object stores : clés, métadonnées, enveloppes, index UUID et
+snapshots de projection.
 L’ajout vérifie la dernière position et l’UUID dans une transaction IndexedDB
 `readwrite`, puis ajoute l’enveloppe, l’index UUID et la nouvelle position dans
 la même transaction. Un conflit optimiste provoque un nouveau chiffrement avec
 une nouvelle position et un nouveau nonce. Un UUID identique avec le même
 contenu est idempotent ; avec un contenu différent, il est refusé.
 
+### Snapshot de projection dérivé
+
+Le schéma IndexedDB v2 ajoute un snapshot AES-256-GCM remplaçable. Il contient
+uniquement un état dérivé versionné, jamais une nouvelle source de vérité. Son
+enveloppe authentifie son type, sa position de journal et l’empreinte SHA-256 de
+l’enveloppe située à cette position. Le démarrage déchiffre ce snapshot puis lit
+et vérifie uniquement le suffixe postérieur.
+
+Une structure, une authentification ou un ancrage invalide provoque la
+suppression du snapshot et la reconstruction depuis le journal. Aucun échec de
+cache ne supprime ou ne réécrit un événement. La migration v1 vers v2 ajoute
+l’object store sans remplacer la clé non extractible ni les événements existants.
+
 ### Activation
 
 Le prototype reste déconnecté de `LocalEventJournal` et le shell Web reste sans
 saisie. Le benchmark de 300 000 événements sur Chrome desktop valide le débit
-d’une saisie, mais mesure 19,5 secondes pour un rejeu intégral. Passer cet ADR à
-`Accepted` et activer les données réelles exigera donc au minimum : récupération
-chiffrée, snapshot ou cache de projection chiffré, validation Safari iPhone
-réelle, politique de persistance navigateur, CSP et hébergement durci, tests de
-concurrence multi-onglets et stratégie de migration.
+d’une saisie et mesure 69 ms pour restaurer un snapshot synthétique puis rejouer
+100 événements, contre 34,0 secondes pour un rejeu intégral lors du même passage.
+Passer cet ADR à `Accepted` et activer les données réelles exigera donc encore au
+minimum : codec versionné des projections métier, récupération chiffrée,
+validation Safari iPhone réelle, politique de persistance navigateur, CSP et
+hébergement durci et tests de concurrence multi-onglets.
 
 ## Preuves obtenues
 
@@ -99,7 +114,9 @@ Les tests Chrome exécutent réellement Web Crypto et IndexedDB et vérifient :
 - détection explicite du mode persistant ou `best effort` et cohérence du quota
   annoncé par le navigateur ;
 - benchmark reproductible de 300 000 enveloppes sur Chrome desktop, incluant
-  écriture, fermeture, réouverture et rejeu authentifié complet.
+  écriture, fermeture, réouverture et rejeu authentifié complet ;
+- snapshot opaque, suffixe authentifié, corruption supprimable et migration de
+  schéma v1 vers v2 sans perte de clé ni d’événement.
 
 ## Options étudiées
 

@@ -40,8 +40,8 @@ Statuts autorisés :
 
 ## Prochaines décisions à traiter
 
-1. snapshot de projection chiffré, récupération et validation Safari requis
-   avant acceptation du stockage Web proposé par l’ADR-0009 ;
+1. codec de projection, récupération et validation Safari requis avant
+   acceptation du stockage Web proposé par l’ADR-0009 ;
 2. modèle de synchronisation et résolution des conflits ;
 3. hébergement PWA, en-têtes de sécurité et chaîne de déploiement ;
 4. format lisible d’export et portabilité au-delà de l’archive de récupération.
