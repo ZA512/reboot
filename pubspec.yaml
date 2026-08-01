@@ -10,6 +10,7 @@ workspace:
   - packages/reboot_application
   - packages/reboot_domain
   - packages/reboot_projection
+  - packages/reboot_serialization
   - packages/reboot_storage
 
 dev_dependencies:

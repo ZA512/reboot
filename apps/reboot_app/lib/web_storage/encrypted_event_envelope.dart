@@ -3,9 +3,10 @@ import 'dart:convert';
 /// Maximum clear payload accepted by the storage prototype.
 const int webPrototypeMaximumPayloadBytes = 1024 * 1024;
 
-/// Synthetic event used only to prove the encrypted Web journal.
+/// Decrypted event representation used at the encrypted storage boundary.
 ///
-/// The real application remains disconnected from this prototype until the
+/// [payloadJson] may contain the canonical complete domain event through the
+/// application adapter. The application shell remains disconnected until the
 /// complete Web storage decision is accepted.
 final class WebPrototypePlainEvent {
   WebPrototypePlainEvent({
@@ -190,7 +191,9 @@ final class WebJournalKeyUnavailableException implements Exception {
 
 /// Raised when one event UUID is reused for different immutable content.
 final class WebJournalEventConflictException implements Exception {
-  const WebJournalEventConflictException();
+  const WebJournalEventConflictException(this.eventId);
+
+  final String eventId;
 
   @override
   String toString() => 'WebJournalEventConflictException';

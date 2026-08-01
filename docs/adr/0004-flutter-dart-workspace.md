@@ -94,6 +94,12 @@ Les packages techniques comme `reboot_storage`, `reboot_sync` ou
 `reboot_import` ne sont créés qu’après la décision d’architecture correspondante
 et lorsqu’un premier code réel doit y vivre.
 
+Après cette topologie initiale, `reboot_storage` a été créé pour l’adaptateur
+SQLite chiffré. `reboot_serialization` a ensuite été ajouté lorsque le codec
+canonique des événements est devenu une API Dart pure réellement partagée par
+les stockages Android et Web. Il dépend uniquement de `reboot_domain` et évite
+au client Web d’importer les dépendances natives de SQLite.
+
 Un nouveau package doit matérialiser au moins une frontière parmi les suivantes :
 
 - indépendance vis-à-vis de Flutter ;

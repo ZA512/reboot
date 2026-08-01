@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:reboot_domain/reboot_domain.dart';
 
-/// Version-aware canonical JSON codec for immutable event payloads.
+/// Cross-platform, version-aware JSON codec for immutable event payloads.
 final class EventPayloadJsonCodec {
   /// Encodes only the payload; event metadata lives in dedicated SQL columns.
   String encode(EventPayload payload) {

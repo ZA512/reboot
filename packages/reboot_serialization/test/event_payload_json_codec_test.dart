@@ -1,5 +1,5 @@
 import 'package:reboot_domain/reboot_domain.dart';
-import 'package:reboot_storage/src/event_codec.dart';
+import 'package:reboot_serialization/reboot_serialization.dart';
 import 'package:test/test.dart';
 
 void main() {

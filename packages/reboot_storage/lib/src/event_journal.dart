@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
+import 'package:reboot_serialization/reboot_serialization.dart';
 
 import 'database.dart';
-import 'event_codec.dart';
 
 /// Drift-backed implementation of the one encrypted local event journal.
 final class RebootEventJournal implements LocalEventJournal {
@@ -115,18 +115,6 @@ final class RebootEventJournal implements LocalEventJournal {
       ),
     );
   }
-}
-
-/// Reuse of an event UUID with different immutable content.
-final class JournalEventConflictException implements Exception {
-  /// Creates a UUID collision error that contains no financial data.
-  const JournalEventConflictException(this.eventId);
-
-  /// Colliding event identity.
-  final EventId eventId;
-
-  @override
-  String toString() => 'JournalEventConflictException: $eventId';
 }
 
 EntityKind _entityKind(String name) {

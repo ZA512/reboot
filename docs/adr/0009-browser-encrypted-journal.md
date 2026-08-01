@@ -66,9 +66,10 @@ distante chiffrée liée au profil.
 
 Utiliser cinq object stores : clés, métadonnées, enveloppes, index UUID et
 snapshots de projection.
-L’ajout vérifie la dernière position et l’UUID dans une transaction IndexedDB
-`readwrite`, puis ajoute l’enveloppe, l’index UUID et la nouvelle position dans
-la même transaction. Un conflit optimiste provoque un nouveau chiffrement avec
+L’ajout d’un ou plusieurs événements vérifie la dernière position et tous les
+UUID dans une transaction IndexedDB `readwrite`, puis ajoute les enveloppes,
+les index UUID et la nouvelle position dans la même transaction. Le lot entier
+est validé ou annulé. Un conflit optimiste provoque un nouveau chiffrement avec
 une nouvelle position et un nouveau nonce. Un UUID identique avec le même
 contenu est idempotent ; avec un contenu différent, il est refusé.
 
@@ -87,8 +88,11 @@ l’object store sans remplacer la clé non extractible ni les événements exis
 
 ### Activation
 
-Le prototype reste déconnecté de `LocalEventJournal` et le shell Web reste sans
-saisie. Le benchmark de 300 000 événements sur Chrome desktop valide le débit
+Le journal dispose désormais d’un adaptateur `LocalEventJournal` couvert avec
+de vrais `EventRecord`, mais cet adaptateur reste déconnecté de la composition
+du shell Web, qui demeure sans saisie. Le codec complet est partagé dans un
+package Dart pur avec le stockage Android. Le benchmark de 300 000 événements
+sur Chrome desktop valide le débit
 d’une saisie et mesure 69 ms pour restaurer un snapshot synthétique puis rejouer
 100 événements, contre 34,0 secondes pour un rejeu intégral lors du même passage.
 Passer cet ADR à `Accepted` et activer les données réelles exigera donc encore au
@@ -104,6 +108,9 @@ Les tests Chrome exécutent réellement Web Crypto et IndexedDB et vérifient :
 - absence des payloads synthétiques dans les enveloppes persistées ;
 - réouverture et déchiffrement ordonné ;
 - UUID idempotent et conflit immuable ;
+- lots atomiques, doublons internes et absence d’écriture partielle en cas de
+  conflit ;
+- aller-retour canonique de vrais événements métier via `LocalEventJournal` ;
 - positions uniques avec deux connexions concurrentes à la même base ;
 - rollback intégral lorsqu’une requête d’une transaction échoue ;
 - rejet d’un ciphertext et d’un en-tête authentifié modifiés ;

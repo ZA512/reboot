@@ -1,0 +1,5 @@
+/// Cross-platform canonical persistence formats for REBOOT.
+library;
+
+export 'src/event_payload_json_codec.dart';
+export 'src/event_record_json_codec.dart';

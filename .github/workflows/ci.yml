@@ -53,6 +53,7 @@ jobs:
         run: >-
           dart test -p chrome
           test/browser/browser_encrypted_journal_prototype_test.dart
+          test/browser/browser_local_event_journal_test.dart
           test/browser/browser_storage_durability_test.dart
 
       - name: Compile browser storage for JavaScript and WebAssembly

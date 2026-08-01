@@ -21,6 +21,7 @@ dependencies:
   reboot_application: ^0.1.0
   reboot_domain: ^0.1.0
   reboot_projection: ^0.1.0
+  reboot_serialization: ^0.1.0
   reboot_storage: ^0.1.0
   timezone: 0.11.1
   web: 1.1.1

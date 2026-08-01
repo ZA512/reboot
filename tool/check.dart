@@ -17,6 +17,7 @@ Future<void> main() async {
     'packages/reboot_domain',
     'packages/reboot_projection',
     'packages/reboot_application',
+    'packages/reboot_serialization',
     'packages/reboot_storage',
   ]) {
     await _runTestsWhenPresent(
@@ -43,6 +44,8 @@ const List<String> _sourceRoots = [
   'packages/reboot_domain/tool',
   'packages/reboot_projection/lib',
   'packages/reboot_projection/test',
+  'packages/reboot_serialization/lib',
+  'packages/reboot_serialization/test',
   'packages/reboot_storage/lib',
   'packages/reboot_storage/test',
   'tool',

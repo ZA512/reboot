@@ -145,12 +145,22 @@ final class BrowserEncryptedJournalPrototype {
   }
 
   /// Appends an immutable encrypted event and returns its exact local position.
-  Future<BigInt> append(WebPrototypePlainEvent event) {
+  Future<BigInt> append(WebPrototypePlainEvent event) async {
+    return (await appendAll(<WebPrototypePlainEvent>[event])).single;
+  }
+
+  /// Atomically appends a batch and returns one position for every input event.
+  ///
+  /// Repeated identical UUIDs are idempotent, including inside one batch. A
+  /// conflicting UUID rejects the entire batch without persisting siblings.
+  Future<List<BigInt>> appendAll(List<WebPrototypePlainEvent> events) {
     _ensureOpen();
-    final completer = Completer<BigInt>();
+    if (events.isEmpty) return Future<List<BigInt>>.value(const <BigInt>[]);
+    final immutableEvents = List<WebPrototypePlainEvent>.unmodifiable(events);
+    final completer = Completer<List<BigInt>>();
     _appendTail = _appendTail.then((_) async {
       try {
-        completer.complete(await _appendSerialized(event));
+        completer.complete(await _appendAllSerialized(immutableEvents));
       } on Object catch (error, stackTrace) {
         completer.completeError(error, stackTrace);
       }
@@ -158,26 +168,64 @@ final class BrowserEncryptedJournalPrototype {
     return completer.future;
   }
 
-  Future<BigInt> _appendSerialized(WebPrototypePlainEvent event) async {
+  Future<List<BigInt>> _appendAllSerialized(
+    List<WebPrototypePlainEvent> events,
+  ) async {
+    final unique = <String, WebPrototypePlainEvent>{};
+    for (final event in events) {
+      final duplicate = unique[event.eventId];
+      if (duplicate != null && duplicate != event) {
+        throw WebJournalEventConflictException(event.eventId);
+      }
+      unique[event.eventId] = event;
+    }
+
     for (var attempt = 0; attempt < 8; attempt += 1) {
-      final existing = await _readByEventId(event.eventId);
-      if (existing != null) {
+      final positions = <String, BigInt>{};
+      final newEvents = <WebPrototypePlainEvent>[];
+      for (final event in unique.values) {
+        final existing = await _readByEventId(event.eventId);
+        if (existing == null) {
+          newEvents.add(event);
+          continue;
+        }
         final decrypted = await _decrypt(existing);
-        if (decrypted == event) return existing.position;
-        throw const WebJournalEventConflictException();
+        if (decrypted != event) {
+          throw WebJournalEventConflictException(event.eventId);
+        }
+        positions[event.eventId] = existing.position;
+      }
+      if (newEvents.isEmpty) {
+        return List<BigInt>.unmodifiable(
+          events.map((event) => positions[event.eventId]!),
+        );
       }
 
       final observedLast = await _readLastPosition();
-      if (observedLast >= _maximumPosition) {
+      if (BigInt.from(newEvents.length) > _maximumPosition - observedLast) {
         throw const WebJournalStorageException();
       }
-      final nextPosition = observedLast + BigInt.one;
-      final envelope = await _encrypt(nextPosition, event);
-      final result = await _tryCommit(
+      final envelopes = <WebEncryptedEventEnvelope>[];
+      for (var index = 0; index < newEvents.length; index += 1) {
+        envelopes.add(
+          await _encrypt(
+            observedLast + BigInt.from(index + 1),
+            newEvents[index],
+          ),
+        );
+      }
+      final result = await _tryCommitBatch(
         observedLast: observedLast,
-        envelope: envelope,
+        envelopes: envelopes,
       );
-      if (result == _CommitResult.committed) return nextPosition;
+      if (result == _CommitResult.committed) {
+        for (var index = 0; index < newEvents.length; index += 1) {
+          positions[newEvents[index].eventId] = envelopes[index].position;
+        }
+        return List<BigInt>.unmodifiable(
+          events.map((event) => positions[event.eventId]!),
+        );
+      }
     }
     throw const WebJournalStorageException();
   }
@@ -450,9 +498,9 @@ final class BrowserEncryptedJournalPrototype {
     web.window.localStorage.removeItem('$_markerPrefix$databaseName');
   }
 
-  Future<_CommitResult> _tryCommit({
+  Future<_CommitResult> _tryCommitBatch({
     required BigInt observedLast,
-    required WebEncryptedEventEnvelope envelope,
+    required List<WebEncryptedEventEnvelope> envelopes,
   }) async {
     final transaction = _database.transaction(
       <JSString>[
@@ -465,10 +513,12 @@ final class BrowserEncryptedJournalPrototype {
     final completed = _transactionCompleted(transaction);
     try {
       final eventIds = transaction.objectStore(_eventIdStore);
-      final existing = await _requestResult(
-        eventIds.get(envelope.eventId.toJS),
+      final existing = await Future.wait(
+        envelopes.map(
+          (envelope) => _requestResult(eventIds.get(envelope.eventId.toJS)),
+        ),
       );
-      if (existing != null) {
+      if (existing.any((value) => value != null)) {
         transaction.abort();
         await _ignoreAbort(completed);
         return _CommitResult.retry;
@@ -486,23 +536,30 @@ final class BrowserEncryptedJournalPrototype {
       }
 
       final entries = transaction.objectStore(_entryStore);
-      await Future.wait(<Future<JSAny?>>[
+      final writes = <Future<JSAny?>>[];
+      for (final envelope in envelopes) {
+        writes
+          ..add(
+            _requestResult(
+              entries.add(
+                envelope.toPersistedMap().jsify(),
+                envelope.positionKey.toJS,
+              ),
+            ),
+          )
+          ..add(
+            _requestResult(
+              eventIds.add(envelope.positionKey.toJS, envelope.eventId.toJS),
+            ),
+          );
+      }
+      final finalPosition = envelopes.last.position;
+      writes.add(
         _requestResult(
-          entries.add(
-            envelope.toPersistedMap().jsify(),
-            envelope.positionKey.toJS,
-          ),
+          metadata.put(finalPosition.toString().toJS, _lastPositionKey.toJS),
         ),
-        _requestResult(
-          eventIds.add(envelope.positionKey.toJS, envelope.eventId.toJS),
-        ),
-        _requestResult(
-          metadata.put(
-            envelope.position.toString().toJS,
-            _lastPositionKey.toJS,
-          ),
-        ),
-      ]);
+      );
+      await Future.wait(writes);
       await completed;
       return _CommitResult.committed;
     } on WebJournalStorageException {

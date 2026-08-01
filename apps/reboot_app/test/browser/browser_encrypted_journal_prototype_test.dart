@@ -75,6 +75,89 @@ void main() {
     expect(await journal.readAll(), <WebPrototypePlainEvent>[event]);
   });
 
+  test('atomically appends batches with consecutive positions', () async {
+    final databaseName = _databaseName('batch');
+    final journal = await BrowserEncryptedJournalPrototype.open(
+      databaseName: databaseName,
+    );
+    addTearDown(() async {
+      journal.close();
+      await BrowserEncryptedJournalPrototype.deleteDatabaseForTesting(
+        databaseName,
+      );
+      BrowserEncryptedJournalPrototype.removeMarkerForTesting(databaseName);
+    });
+    final first = _event(20, '{"value":1}');
+    final second = _event(21, '{"value":2}');
+
+    expect(
+      await journal.appendAll(<WebPrototypePlainEvent>[first, second, first]),
+      <BigInt>[BigInt.one, BigInt.two, BigInt.one],
+    );
+    expect(await journal.readAll(), <WebPrototypePlainEvent>[first, second]);
+  });
+
+  test('rejects an in-batch UUID conflict without writing siblings', () async {
+    final databaseName = _databaseName('batch-conflict');
+    final journal = await BrowserEncryptedJournalPrototype.open(
+      databaseName: databaseName,
+    );
+    addTearDown(() async {
+      journal.close();
+      await BrowserEncryptedJournalPrototype.deleteDatabaseForTesting(
+        databaseName,
+      );
+      BrowserEncryptedJournalPrototype.removeMarkerForTesting(databaseName);
+    });
+    final original = _event(22, '{"value":1}');
+    final conflicting = WebPrototypePlainEvent(
+      eventId: original.eventId,
+      eventType: original.eventType,
+      schemaVersion: original.schemaVersion,
+      payloadJson: '{"value":2}',
+    );
+
+    await expectLater(
+      journal.appendAll(<WebPrototypePlainEvent>[
+        _event(23, '{"sibling":true}'),
+        original,
+        conflicting,
+      ]),
+      throwsA(isA<WebJournalEventConflictException>()),
+    );
+    expect(await journal.readAll(), isEmpty);
+  });
+
+  test('rejects an existing UUID conflict without writing siblings', () async {
+    final databaseName = _databaseName('existing-batch-conflict');
+    final journal = await BrowserEncryptedJournalPrototype.open(
+      databaseName: databaseName,
+    );
+    addTearDown(() async {
+      journal.close();
+      await BrowserEncryptedJournalPrototype.deleteDatabaseForTesting(
+        databaseName,
+      );
+      BrowserEncryptedJournalPrototype.removeMarkerForTesting(databaseName);
+    });
+    final original = _event(24, '{"value":1}');
+    await journal.append(original);
+
+    await expectLater(
+      journal.appendAll(<WebPrototypePlainEvent>[
+        _event(25, '{"sibling":true}'),
+        WebPrototypePlainEvent(
+          eventId: original.eventId,
+          eventType: original.eventType,
+          schemaVersion: original.schemaVersion,
+          payloadJson: '{"value":2}',
+        ),
+      ]),
+      throwsA(isA<WebJournalEventConflictException>()),
+    );
+    expect(await journal.readAll(), <WebPrototypePlainEvent>[original]);
+  });
+
   test('serializes concurrent writers without duplicate positions', () async {
     final databaseName = _databaseName('concurrent');
     final firstJournal = await BrowserEncryptedJournalPrototype.open(
@@ -104,6 +187,49 @@ void main() {
       first,
       second,
     });
+  });
+
+  test('serializes concurrent batches without partial interleaving', () async {
+    final databaseName = _databaseName('concurrent-batches');
+    final firstJournal = await BrowserEncryptedJournalPrototype.open(
+      databaseName: databaseName,
+    );
+    final secondJournal = await BrowserEncryptedJournalPrototype.open(
+      databaseName: databaseName,
+    );
+    addTearDown(() async {
+      firstJournal.close();
+      secondJournal.close();
+      await BrowserEncryptedJournalPrototype.deleteDatabaseForTesting(
+        databaseName,
+      );
+      BrowserEncryptedJournalPrototype.removeMarkerForTesting(databaseName);
+    });
+    final firstBatch = <WebPrototypePlainEvent>[
+      _event(26, '{"writer":1,"item":1}'),
+      _event(27, '{"writer":1,"item":2}'),
+    ];
+    final secondBatch = <WebPrototypePlainEvent>[
+      _event(28, '{"writer":2,"item":1}'),
+      _event(29, '{"writer":2,"item":2}'),
+    ];
+
+    final positions = await Future.wait(<Future<List<BigInt>>>[
+      firstJournal.appendAll(firstBatch),
+      secondJournal.appendAll(secondBatch),
+    ]);
+
+    expect(
+      positions.map((batch) => batch.last - batch.first),
+      everyElement(BigInt.one),
+    );
+    expect(positions.expand((batch) => batch).toSet(), <BigInt>{
+      BigInt.one,
+      BigInt.two,
+      BigInt.from(3),
+      BigInt.from(4),
+    });
+    expect(await firstJournal.readAll(), hasLength(4));
   });
 
   test('rolls back sibling writes when an IndexedDB request fails', () async {

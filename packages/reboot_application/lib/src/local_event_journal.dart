@@ -22,3 +22,15 @@ extension LocalEventJournalOperations on LocalEventJournal {
     return (await appendAll([event])).single;
   }
 }
+
+/// Reuse of an event UUID with different immutable content.
+final class JournalEventConflictException implements Exception {
+  /// Creates a UUID collision error that contains no financial data.
+  const JournalEventConflictException(this.eventId);
+
+  /// Colliding event identity.
+  final EventId eventId;
+
+  @override
+  String toString() => 'JournalEventConflictException: $eventId';
+}

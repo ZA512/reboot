@@ -13,6 +13,7 @@ dependencies:
   path: 1.9.1
   reboot_application: ^0.1.0
   reboot_domain: ^0.1.0
+  reboot_serialization: ^0.1.0
   sqlite3: 3.5.0
 
 dev_dependencies:

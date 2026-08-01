@@ -50,15 +50,20 @@ Le premier prototype retient provisoirement IndexedDB direct :
   base.
 
 Les tests Chrome prouvent la réouverture, l’ordre, l’idempotence, le conflit
-d’UUID, l’attribution de positions uniques entre deux connexions concurrentes,
+d’UUID, les lots entièrement atomiques et l’attribution de positions uniques
+entre deux connexions concurrentes,
 le rollback intégral d’une transaction en échec, le refus d’export de clé, la
 détection d’une altération du ciphertext ou de l’en-tête, la perte de clé et
 l’effacement isolé d’IndexedDB. La lecture contrôle aussi, dans un même instantané
 transactionnel, la cohérence entre la position finale, toutes les enveloppes et
 l’index complet des UUID. La clé rechargée doit être une clé secrète AES-GCM de
 256 bits, non extractible, dont les seuls usages sont le chiffrement et le
-déchiffrement. Les valeurs de test sont exclusivement synthétiques. Le prototype
-n’implémente pas encore le port applicatif et le shell Web reste bloqué.
+déchiffrement. Un codec Dart pur sérialise désormais l’intégralité d’un
+`EventRecord` dans un JSON canonique sans perte numérique. Un adaptateur Web
+implémente réellement `LocalEventJournal`, y compris l’idempotence et le rejet
+atomique d’un lot contenant un UUID conflictuel. Il est couvert dans Chrome et
+compilé en JavaScript comme en WebAssembly. Le shell Web reste volontairement
+bloqué : cet adaptateur n’est pas encore sélectionné pour des données réelles.
 
 La politique de durabilité n’est plus implicite : le prototype interroge le
 quota de l’origine, vérifie sa cohérence et peut demander au navigateur le mode
@@ -76,7 +81,7 @@ toucher au journal. La migration v1 vers v2 conserve la clé et les événements
 Avec un snapshot synthétique de 262 228 octets à la position 299 900, la
 restauration et le rejeu authentifié des 100 événements suivants prennent 69 ms.
 Le mécanisme satisfait la cible desktop ; le vrai codec des projections REBOOT
-et son intégration à `LocalEventJournal` restent à implémenter avant activation.
+reste à implémenter avant activation.
 
 Drift/SQLite WebAssembly est différé : il ne supprimerait pas le besoin du
 chiffrement applicatif et ajouterait des pages, caches et migrations à auditer.
