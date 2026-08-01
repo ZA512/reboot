@@ -2794,6 +2794,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing you enter is stored in an unencrypted or temporary fallback. Use the Android application while this security proof is in progress.'**
   String get webPrototypeSafety;
+
+  /// Title and dashboard action for the data and privacy status screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Data and privacy'**
+  String get dataPrivacyTitle;
+
+  /// Title confirming encrypted Android local storage.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted local profile'**
+  String get encryptedLocalProfileTitle;
+
+  /// Summary of current Android local storage protection.
+  ///
+  /// In en, this message translates to:
+  /// **'Your financial journal is stored in an encrypted database in the application\'s private space. Its secret is protected by Android\'s secure key storage.'**
+  String get encryptedLocalProfileBody;
+
+  /// Heading for active privacy protections.
+  ///
+  /// In en, this message translates to:
+  /// **'Protection on this device'**
+  String get currentProtectionTitle;
+
+  /// Title for local-only data status.
+  ///
+  /// In en, this message translates to:
+  /// **'Data stays on this device'**
+  String get localOnlyDataTitle;
+
+  /// Explains the current absence of remote data flows.
+  ///
+  /// In en, this message translates to:
+  /// **'This version has no banking connection or remote data synchronization.'**
+  String get localOnlyDataBody;
+
+  /// Title for disabled Android application backups.
+  ///
+  /// In en, this message translates to:
+  /// **'Android system backup disabled'**
+  String get androidBackupDisabledTitle;
+
+  /// Reason Android backup is disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'The encrypted database and its key are excluded from Android backups to avoid creating an unusable or weakly protected copy.'**
+  String get androidBackupDisabledBody;
+
+  /// Title for current telemetry status.
+  ///
+  /// In en, this message translates to:
+  /// **'No telemetry'**
+  String get noTelemetryTitle;
+
+  /// Current absence of application telemetry.
+  ///
+  /// In en, this message translates to:
+  /// **'This version sends no analytics, financial amounts or transaction labels.'**
+  String get noTelemetryBody;
+
+  /// Heading for synchronization and recovery availability.
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronization and recovery'**
+  String get syncRecoveryTitle;
+
+  /// Title for unavailable encrypted synchronization.
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronization is not enabled yet'**
+  String get syncUnavailableTitle;
+
+  /// Honest status of future encrypted synchronization.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT currently works offline on this Android device only. Encrypted sharing and synchronization will be added only after their security model is validated.'**
+  String get syncUnavailableBody;
+
+  /// Warning title for unavailable profile recovery.
+  ///
+  /// In en, this message translates to:
+  /// **'No recovery is available yet'**
+  String get recoveryUnavailableTitle;
+
+  /// Explicit current local profile recovery limitation.
+  ///
+  /// In en, this message translates to:
+  /// **'If the application is uninstalled, its data is erased, or this device and its key are lost, this local profile cannot currently be restored. Encrypted export and recovery remain to be implemented.'**
+  String get recoveryUnavailableBody;
+
+  /// Heading for the status of active income and expense assumptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial assumptions'**
+  String get financialAssumptionsStatusTitle;
+
+  /// Number of active financial assumptions.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No active assumption} =1{1 active assumption} other{{count} active assumptions}}'**
+  String financialAssumptionsCount(int count);
+
+  /// Breakdown of fixed and variable assumptions.
+  ///
+  /// In en, this message translates to:
+  /// **'{fixedCount} fixed · {variableCount} variable'**
+  String financialAssumptionsKinds(int fixedCount, int variableCount);
+
+  /// Oldest confirmation date among active assumptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest confirmation: {date}'**
+  String oldestAssumptionConfirmation(String date);
+
+  /// Guarantee that financial assumptions remain user controlled.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT never changes a reference amount automatically. Imports and future synchronization may suggest a correction, but you will always decide.'**
+  String get assumptionsNeverChangedAutomatically;
+
+  /// Action opening financial assumption management.
+  ///
+  /// In en, this message translates to:
+  /// **'Review income and expenses'**
+  String get manageFinancialAssumptions;
 }
 
 class _AppLocalizationsDelegate

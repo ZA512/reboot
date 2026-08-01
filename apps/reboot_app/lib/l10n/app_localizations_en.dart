@@ -1707,4 +1707,87 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get webPrototypeSafety =>
       'Nothing you enter is stored in an unencrypted or temporary fallback. Use the Android application while this security proof is in progress.';
+
+  @override
+  String get dataPrivacyTitle => 'Data and privacy';
+
+  @override
+  String get encryptedLocalProfileTitle => 'Encrypted local profile';
+
+  @override
+  String get encryptedLocalProfileBody =>
+      'Your financial journal is stored in an encrypted database in the application\'s private space. Its secret is protected by Android\'s secure key storage.';
+
+  @override
+  String get currentProtectionTitle => 'Protection on this device';
+
+  @override
+  String get localOnlyDataTitle => 'Data stays on this device';
+
+  @override
+  String get localOnlyDataBody =>
+      'This version has no banking connection or remote data synchronization.';
+
+  @override
+  String get androidBackupDisabledTitle => 'Android system backup disabled';
+
+  @override
+  String get androidBackupDisabledBody =>
+      'The encrypted database and its key are excluded from Android backups to avoid creating an unusable or weakly protected copy.';
+
+  @override
+  String get noTelemetryTitle => 'No telemetry';
+
+  @override
+  String get noTelemetryBody =>
+      'This version sends no analytics, financial amounts or transaction labels.';
+
+  @override
+  String get syncRecoveryTitle => 'Synchronization and recovery';
+
+  @override
+  String get syncUnavailableTitle => 'Synchronization is not enabled yet';
+
+  @override
+  String get syncUnavailableBody =>
+      'REBOOT currently works offline on this Android device only. Encrypted sharing and synchronization will be added only after their security model is validated.';
+
+  @override
+  String get recoveryUnavailableTitle => 'No recovery is available yet';
+
+  @override
+  String get recoveryUnavailableBody =>
+      'If the application is uninstalled, its data is erased, or this device and its key are lost, this local profile cannot currently be restored. Encrypted export and recovery remain to be implemented.';
+
+  @override
+  String get financialAssumptionsStatusTitle => 'Financial assumptions';
+
+  @override
+  String financialAssumptionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count active assumptions',
+      one: '1 active assumption',
+      zero: 'No active assumption',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String financialAssumptionsKinds(int fixedCount, int variableCount) {
+    return '$fixedCount fixed · $variableCount variable';
+  }
+
+  @override
+  String oldestAssumptionConfirmation(String date) {
+    return 'Oldest confirmation: $date';
+  }
+
+  @override
+  String get assumptionsNeverChangedAutomatically =>
+      'REBOOT never changes a reference amount automatically. Imports and future synchronization may suggest a correction, but you will always decide.';
+
+  @override
+  String get manageFinancialAssumptions => 'Review income and expenses';
 }

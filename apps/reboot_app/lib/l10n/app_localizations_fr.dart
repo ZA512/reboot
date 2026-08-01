@@ -1714,4 +1714,89 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get webPrototypeSafety =>
       'Aucune saisie n’est enregistrée dans un stockage non chiffré ou temporaire. Utilisez l’application Android pendant cette preuve de sécurité.';
+
+  @override
+  String get dataPrivacyTitle => 'Données et confidentialité';
+
+  @override
+  String get encryptedLocalProfileTitle => 'Profil local chiffré';
+
+  @override
+  String get encryptedLocalProfileBody =>
+      'Votre journal financier est conservé dans une base chiffrée, dans l’espace privé de l’application. Son secret est protégé par le stockage sécurisé d’Android.';
+
+  @override
+  String get currentProtectionTitle => 'Protection sur cet appareil';
+
+  @override
+  String get localOnlyDataTitle => 'Les données restent sur cet appareil';
+
+  @override
+  String get localOnlyDataBody =>
+      'Cette version n’utilise ni connexion bancaire ni synchronisation distante des données.';
+
+  @override
+  String get androidBackupDisabledTitle =>
+      'Sauvegarde système Android désactivée';
+
+  @override
+  String get androidBackupDisabledBody =>
+      'La base chiffrée et sa clé sont exclues des sauvegardes Android afin d’éviter une copie inutilisable ou insuffisamment protégée.';
+
+  @override
+  String get noTelemetryTitle => 'Aucune télémétrie';
+
+  @override
+  String get noTelemetryBody =>
+      'Cette version n’envoie ni mesure d’usage, ni montant financier, ni libellé d’opération.';
+
+  @override
+  String get syncRecoveryTitle => 'Synchronisation et récupération';
+
+  @override
+  String get syncUnavailableTitle => 'Synchronisation pas encore activée';
+
+  @override
+  String get syncUnavailableBody =>
+      'REBOOT fonctionne actuellement hors ligne, uniquement sur cet appareil Android. Le partage et la synchronisation chiffrés ne seront ajoutés qu’après validation de leur modèle de sécurité.';
+
+  @override
+  String get recoveryUnavailableTitle =>
+      'Aucune récupération disponible pour le moment';
+
+  @override
+  String get recoveryUnavailableBody =>
+      'Si l’application est désinstallée, si ses données sont effacées ou si cet appareil et sa clé sont perdus, ce profil local ne peut pas encore être restauré. L’export et la récupération chiffrés restent à développer.';
+
+  @override
+  String get financialAssumptionsStatusTitle => 'Hypothèses financières';
+
+  @override
+  String financialAssumptionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hypothèses actives',
+      one: '1 hypothèse active',
+      zero: 'Aucune hypothèse active',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String financialAssumptionsKinds(int fixedCount, int variableCount) {
+    return '$fixedCount fixes · $variableCount variables';
+  }
+
+  @override
+  String oldestAssumptionConfirmation(String date) {
+    return 'Confirmation la plus ancienne : $date';
+  }
+
+  @override
+  String get assumptionsNeverChangedAutomatically =>
+      'REBOOT ne modifie jamais automatiquement un montant de référence. Un import ou une future synchronisation pourra proposer une correction, mais vous déciderez toujours.';
+
+  @override
+  String get manageFinancialAssumptions => 'Vérifier les revenus et charges';
 }

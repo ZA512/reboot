@@ -735,6 +735,62 @@ void main() {
     expect(find.text('Fixe'), findsOneWidget);
   });
 
+  testWidgets('states the real local protection and recovery limits', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    await tester.binding.setSurfaceSize(const Size(800, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final service = await _readyService(_MemoryJournal());
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 4, 5),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('open-data-privacy')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Données et confidentialité'), findsOneWidget);
+    expect(find.text('Profil local chiffré'), findsOneWidget);
+    expect(find.text('Sauvegarde système Android désactivée'), findsOneWidget);
+    expect(find.text('Aucune télémétrie'), findsOneWidget);
+    expect(
+      find.text('Aucune récupération disponible pour le moment'),
+      findsOneWidget,
+    );
+
+    final assumptions = find.text('2 hypothèses actives');
+    await tester.scrollUntilVisible(
+      assumptions,
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(assumptions, findsOneWidget);
+    expect(find.text('2 fixes · 0 variables'), findsOneWidget);
+    expect(
+      find.textContaining('Confirmation la plus ancienne : 1 avr. 2026'),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey('manage-financial-assumptions')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Revenus et charges'), findsOneWidget);
+  });
+
   testWidgets('schedules a new trajectory without changing the current week', (
     tester,
   ) async {

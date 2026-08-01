@@ -25,6 +25,7 @@ import '../refunds/refund_controller.dart';
 import '../refunds/refunds_screen.dart';
 import '../reserves/reserve_controller.dart';
 import '../reserves/reserves_screen.dart';
+import '../settings/data_privacy_screen.dart';
 import '../trajectory_setup/trajectory_management_screen.dart';
 import '../trends/trends_screen.dart';
 
@@ -57,6 +58,22 @@ final class _WeeklyDashboardScreenState
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
+          IconButton(
+            key: const ValueKey('open-data-privacy'),
+            tooltip: l10n.dataPrivacyTitle,
+            onPressed: switch (deviceContext) {
+              AsyncData(:final value) => () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => DataPrivacyScreen(
+                    service: widget.service,
+                    today: value.localDate,
+                  ),
+                ),
+              ),
+              _ => null,
+            },
+            icon: const Icon(Icons.shield_outlined),
+          ),
           IconButton(
             tooltip: l10n.refreshDashboard,
             onPressed: () => ref.invalidate(onboardingDeviceContextProvider),
