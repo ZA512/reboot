@@ -802,6 +802,61 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get cycleHistoryDetailTitle => 'Détail de la semaine';
+
+  @override
+  String cycleHistoryPeriod(String start, String end) {
+    return 'Semaine du $start au $end';
+  }
+
+  @override
+  String get cycleHistoryTransitionHelp =>
+      'Cette transition exceptionnelle reste consultable mais est exclue des moyennes de tendance normales.';
+
+  @override
+  String get cycleHistoryBudget => 'Budget semaine applicable';
+
+  @override
+  String get cycleHistoryAllocated => 'Dépenses affectées';
+
+  @override
+  String get cycleHistoryRefunds => 'Remboursements reçus';
+
+  @override
+  String get cycleHistoryBalance => 'Balance de la semaine';
+
+  @override
+  String get cycleHistoryExpensesTitle => 'Dépenses affectées à cette semaine';
+
+  @override
+  String get cycleHistoryNoExpense =>
+      'Aucune dépense active n’est affectée à cette semaine.';
+
+  @override
+  String cycleHistoryExpenseSource(String amount, String date) {
+    return 'Dépense réelle : $amount, payée le $date';
+  }
+
+  @override
+  String cycleHistoryInstallmentSource(
+    int index,
+    int count,
+    String amount,
+    String date,
+  ) {
+    return 'Part $index sur $count · dépense réelle : $amount, payée le $date';
+  }
+
+  @override
+  String get cycleHistoryRefundsTitle =>
+      'Remboursements reçus pendant cette semaine';
+
+  @override
+  String cycleHistoryRefundSource(String receivedDate, String purchaseDate) {
+    return 'Reçu le $receivedDate · achat d’origine du $purchaseDate';
+  }
+
+  @override
   String get reservesTitle => 'Réserves';
 
   @override

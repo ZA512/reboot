@@ -797,6 +797,60 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get cycleHistoryDetailTitle => 'Week details';
+
+  @override
+  String cycleHistoryPeriod(String start, String end) {
+    return 'Week from $start to $end';
+  }
+
+  @override
+  String get cycleHistoryTransitionHelp =>
+      'This exceptional transition remains auditable but is excluded from normal trend averages.';
+
+  @override
+  String get cycleHistoryBudget => 'Applicable weekly budget';
+
+  @override
+  String get cycleHistoryAllocated => 'Expenses allocated';
+
+  @override
+  String get cycleHistoryRefunds => 'Refunds received';
+
+  @override
+  String get cycleHistoryBalance => 'Week balance';
+
+  @override
+  String get cycleHistoryExpensesTitle => 'Expenses allocated to this week';
+
+  @override
+  String get cycleHistoryNoExpense =>
+      'No active expense is allocated to this week.';
+
+  @override
+  String cycleHistoryExpenseSource(String amount, String date) {
+    return 'Original expense: $amount, paid on $date';
+  }
+
+  @override
+  String cycleHistoryInstallmentSource(
+    int index,
+    int count,
+    String amount,
+    String date,
+  ) {
+    return 'Part $index of $count · original expense: $amount, paid on $date';
+  }
+
+  @override
+  String get cycleHistoryRefundsTitle => 'Refunds received during this week';
+
+  @override
+  String cycleHistoryRefundSource(String receivedDate, String purchaseDate) {
+    return 'Received on $receivedDate · original purchase on $purchaseDate';
+  }
+
+  @override
   String get reservesTitle => 'Reserves';
 
   @override

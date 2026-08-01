@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:reboot_app/bonuses/received_bonus_screen.dart';
 import 'package:reboot_app/health/health_screen.dart';
+import 'package:reboot_app/history/cycle_history_detail_screen.dart';
 import 'package:reboot_app/infrastructure/device_context_providers.dart';
 import 'package:reboot_app/infrastructure/profile_providers.dart';
 import 'package:reboot_app/l10n/app_localizations.dart';
@@ -1034,6 +1035,22 @@ void main() {
     );
     expect(find.text('À quoi le budget semaine a servi'), findsOneWidget);
     expect(find.text('Non qualifié'), findsOneWidget);
+
+    final completedCycle = find.byKey(
+      const ValueKey('cycle-history-2026-05-02'),
+    );
+    await tester.scrollUntilVisible(
+      completedCycle,
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(completedCycle);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Détail de la semaine'), findsOneWidget);
+    expect(find.text('Dépenses affectées à cette semaine'), findsOneWidget);
+    expect(find.text('Semaine exceptionnelle'), findsOneWidget);
+    expect(find.textContaining('Dépense réelle : 500'), findsOneWidget);
   });
 
   testWidgets('shows exact allocations already committed to future weeks', (
@@ -1094,6 +1111,54 @@ void main() {
     );
     expect(find.text('Réparation'), findsNWidgets(2));
     expect(find.textContaining('Dépense réelle : 150'), findsNWidgets(2));
+  });
+
+  testWidgets('shows late refunds inside their historical receipt week', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    final service = await _readyService(_MemoryJournal());
+    final purchase = await service.recordExpense(
+      RecordExpenseCommand(
+        amount: Money.fromMinorUnits(10000, Currency.eur),
+        label: 'Chaussures',
+        purchaseDate: LocalDate(2026, 4, 5),
+      ),
+    );
+    await service.recordExpenseRefund(
+      RecordExpenseRefundCommand(
+        expenseId: purchase.expenseId,
+        amount: Money.fromMinorUnits(4000, Currency.eur),
+        receivedDate: LocalDate(2026, 5, 3),
+      ),
+    );
+    final observation = service
+        .buildTrends(LocalDate(2026, 5, 9))
+        .observedCycles
+        .singleWhere((item) => item.cycle.start == LocalDate(2026, 5, 2));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: CycleHistoryDetailScreen(
+          service: service,
+          observation: observation,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Aucune dépense active n’est affectée à cette semaine.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Remboursements reçus pendant cette semaine'),
+      findsOneWidget,
+    );
+    expect(find.text('Chaussures'), findsOneWidget);
+    expect(find.textContaining('+40'), findsWidgets);
   });
 
   testWidgets('records a same-week refund from its original purchase', (

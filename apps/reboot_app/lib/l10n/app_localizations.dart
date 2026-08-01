@@ -1374,6 +1374,89 @@ abstract class AppLocalizations {
   /// **'You have a {amount} observed surplus. You could move it to a reserve or a project; the choice remains yours.'**
   String trendSurplusSuggestion(String amount);
 
+  /// Completed cycle detail screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Week details'**
+  String get cycleHistoryDetailTitle;
+
+  /// Inclusive historical cycle period.
+  ///
+  /// In en, this message translates to:
+  /// **'Week from {start} to {end}'**
+  String cycleHistoryPeriod(String start, String end);
+
+  /// Historical transition-cycle explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'This exceptional transition remains auditable but is excluded from normal trend averages.'**
+  String get cycleHistoryTransitionHelp;
+
+  /// Historical budget for one cycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Applicable weekly budget'**
+  String get cycleHistoryBudget;
+
+  /// Historical expense allocations total.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses allocated'**
+  String get cycleHistoryAllocated;
+
+  /// Historical active refund credits total.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds received'**
+  String get cycleHistoryRefunds;
+
+  /// Exact historical cycle balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Week balance'**
+  String get cycleHistoryBalance;
+
+  /// Historical allocation list title.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses allocated to this week'**
+  String get cycleHistoryExpensesTitle;
+
+  /// Empty historical allocation list.
+  ///
+  /// In en, this message translates to:
+  /// **'No active expense is allocated to this week.'**
+  String get cycleHistoryNoExpense;
+
+  /// Source transaction behind a single-cycle allocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Original expense: {amount}, paid on {date}'**
+  String cycleHistoryExpenseSource(String amount, String date);
+
+  /// Source transaction and part behind a multi-cycle allocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Part {index} of {count} · original expense: {amount}, paid on {date}'**
+  String cycleHistoryInstallmentSource(
+    int index,
+    int count,
+    String amount,
+    String date,
+  );
+
+  /// Historical refund list title.
+  ///
+  /// In en, this message translates to:
+  /// **'Refunds received during this week'**
+  String get cycleHistoryRefundsTitle;
+
+  /// Historical refund receipt and source purchase dates.
+  ///
+  /// In en, this message translates to:
+  /// **'Received on {receivedDate} · original purchase on {purchaseDate}'**
+  String cycleHistoryRefundSource(String receivedDate, String purchaseDate);
+
   /// Reserve management screen title.
   ///
   /// In en, this message translates to:

@@ -5,6 +5,7 @@ import 'package:reboot_domain/reboot_domain.dart';
 import 'package:reboot_projection/reboot_projection.dart';
 
 import '../formatting/exact_money_formatter.dart';
+import '../history/cycle_history_detail_screen.dart';
 import '../l10n/app_localizations.dart';
 
 /// Completed-cycle history and rolling REBOOT trends.
@@ -272,7 +273,10 @@ final class _TrendDetails extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             for (final transition in trends.excludedTransitionCycles.reversed)
-              _CycleTile(observation: transition),
+              _CycleTile(
+                observation: transition,
+                onTap: () => _openCycle(context, transition),
+              ),
           ],
           const SizedBox(height: 24),
           Text(
@@ -281,8 +285,22 @@ final class _TrendDetails extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           for (final observation in window.observedCycles.reversed)
-            _CycleTile(observation: observation),
+            _CycleTile(
+              observation: observation,
+              onTap: () => _openCycle(context, observation),
+            ),
         ],
+      ),
+    );
+  }
+
+  void _openCycle(BuildContext context, TrendCycleObservation observation) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => CycleHistoryDetailScreen(
+          service: service,
+          observation: observation,
+        ),
       ),
     );
   }
@@ -305,9 +323,10 @@ final class _WindowMetric extends StatelessWidget {
 }
 
 final class _CycleTile extends StatelessWidget {
-  const _CycleTile({required this.observation});
+  const _CycleTile({required this.observation, required this.onTap});
 
   final TrendCycleObservation observation;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -315,6 +334,7 @@ final class _CycleTile extends StatelessWidget {
     final balance = observation.balance;
     final colors = Theme.of(context).colorScheme;
     return ListTile(
+      key: ValueKey('cycle-history-${observation.cycle.start}'),
       contentPadding: EdgeInsets.zero,
       title: Text(
         l10n.trendCyclePeriod(
@@ -329,13 +349,21 @@ final class _CycleTile extends StatelessWidget {
         '${_formatMoney(context, observation.allocatedExpenses)}'
         '${observation.trajectoryCredits.isPositive ? ' · ${l10n.trendRefundCredits}: ${_formatMoney(context, observation.trajectoryCredits)}' : ''}',
       ),
-      trailing: Text(
-        _formatSignedMoney(context, balance),
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: balance.isNegative ? colors.error : colors.primary,
-          fontWeight: FontWeight.w600,
-        ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _formatSignedMoney(context, balance),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: balance.isNegative ? colors.error : colors.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Icon(Icons.chevron_right),
+        ],
       ),
+      onTap: onTap,
     );
   }
 }
