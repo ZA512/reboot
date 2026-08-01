@@ -68,6 +68,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Explication détaillée du budget semaine, de ses hypothèses et de ses arrondis
 - [x] Widget Android confidentiel du restant hebdomadaire
 - [x] Sauvegarde locale Android chiffrée et restauration sur une installation neuve
+- [x] Archive de récupération chiffrée portable entre Android et Web
 - [x] Stratégie de distribution Android et Web/PWA acceptée
 - [x] Shell Flutter Web compilable, sans persistance non validée
 - [x] Shell PWA versionné, redémarrage hors ligne et aide d’installation localisée

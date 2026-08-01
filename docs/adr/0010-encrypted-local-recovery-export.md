@@ -1,9 +1,13 @@
 # ADR-0010 — Export local chiffré et restauration
 
-- Statut : Accepted
+- Statut : Superseded
 - Date : 2026-08-01
 - Accepté le : 2026-08-01
 - Décideur : responsable de l’implémentation REBOOT
+- Remplacé le : 2026-08-02 par l’ADR-0011 pour les nouveaux exports
+
+> Les archives SQLite `RB1` décrites ici restent restaurables. REBOOT produit
+> désormais les archives portables `RBP1` définies par l’ADR-0011.
 
 ## Contexte
 

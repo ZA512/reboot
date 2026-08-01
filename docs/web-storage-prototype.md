@@ -88,9 +88,9 @@ reste à implémenter avant activation.
 Une archive de récupération indépendante de la clé locale est implémentée
 derrière une API Web non encore exposée dans l’interface. Elle
 chiffre l’intégralité du journal canonique avec une nouvelle clé AES-256-GCM et
-produit un code séparé `RBP1`. Le format est versionné comme portable afin que
-l’adaptateur Android puisse l’adopter ultérieurement ; la sauvegarde SQLite
-Android actuelle n’est pas encore compatible avec ce nouveau format.
+produit un code séparé `RBP1`. Le format versionné est désormais partagé avec
+Android. Les deux moteurs AES-GCM satisfont le même vecteur déterministe, tandis
+qu’Android conserve la restauration des anciennes sauvegardes SQLite `RB1`.
 
 Avant tout import, l’archive complète est authentifiée, tous les événements
 sont décodés, leurs UUID sont contrôlés puis les cinq projections métier sont
@@ -112,8 +112,8 @@ le Web ne permet pas de masquer les aperçus du presse-papiers comme Android :
 l’interface devra avertir clairement l’utilisateur ou privilégier l’affichage
 manuel du code.
 
-Il reste à exposer ce workflow dans l’interface PWA, à adopter ou convertir le
-format sur Android et à le valider dans Safari réel.
+Il reste à exposer ce workflow dans l’interface PWA et à le valider dans Safari
+réel.
 
 ## Étape 3 — Shell installable et hors ligne
 

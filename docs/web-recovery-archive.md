@@ -1,7 +1,8 @@
 # Archive de récupération portable — prototype RBP1
 
-- Statut : cœur et portail navigateur testés, interface utilisateur non activée
-- Date : 2026-08-01
+- Statut : format commun Android/Web et portail navigateur testés, interface
+  Web non activée
+- Date : 2026-08-02
 
 `RBP1` sépare volontairement la sauvegarde de la clé locale non extractible.
 Chaque export génère 256 bits aléatoires, affiche leur représentation sous
@@ -26,16 +27,20 @@ Une erreur ne transporte ni donnée financière ni clé. Les copies temporaires
 de la clé et du plaintext sont écrasées au mieux dans les limites du runtime
 JavaScript ; le code affiché reste naturellement un secret persistant.
 
-Le format est conçu pour devenir commun à Android et à la PWA, mais Android
-utilise encore son archive SQLite chiffrée `RB1`. La compatibilité croisée, le
-téléchargement et le sélecteur de fichier sont implémentés et testés dans
+Le format est désormais commun à Android et à la PWA. Un même vecteur
+déterministe est chiffré par AES-GCM natif côté Android et par Web Crypto dans
+Chrome ; les deux archives ont exactement la même empreinte SHA-256. Android
+continue aussi de restaurer les anciennes archives SQLite chiffrées `RB1`, mais
+n’en produit plus.
+
+Le téléchargement et le sélecteur de fichier sont implémentés et testés dans
 Chrome, avec une limite de 64 Mio et une seule opération à la fois. Ils ne sont
 pas encore exposés dans le shell Flutter. La préparation et le téléchargement
-sont volontairement deux étapes : le clic final reste ainsi un geste utilisateur
-direct, condition importante sur les navigateurs mobiles stricts.
+sont volontairement deux étapes : le clic final reste ainsi un geste
+utilisateur direct, condition importante sur les navigateurs mobiles stricts.
 
 L’API Clipboard Web exige un contexte sécurisé mais ne sait pas demander au
 système de masquer les aperçus, contrairement à l’intégration Android. Le futur
-écran devra l’expliquer et laisser le code affiché pour une copie manuelle. La
-compatibilité Android, l’ergonomie finale et les essais Safari iPhone restent à
-réaliser avant activation.
+écran devra l’expliquer et laisser le code affiché pour une copie manuelle.
+L’ergonomie Web finale et les essais Safari iPhone restent à réaliser avant
+activation.

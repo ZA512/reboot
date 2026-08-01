@@ -9,6 +9,7 @@ environment:
 resolution: workspace
 
 dependencies:
+  cryptography: 2.9.0
   flutter:
     sdk: flutter
   flutter_localizations:

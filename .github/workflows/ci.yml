@@ -36,6 +36,10 @@ jobs:
       - name: Validate workspace
         run: dart run tool/check.dart
 
+      - name: Build Android debug application
+        working-directory: apps/reboot_app
+        run: flutter build apk --debug
+
       - name: Verify domain exactness in JavaScript
         working-directory: packages/reboot_domain
         run: |

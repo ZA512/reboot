@@ -123,6 +123,7 @@ journal, les clés ou les données financières locales.
 - examiner le changelog, la maintenance, la licence et les avis de sécurité ;
 - tester Android après toute mise à niveau native et le Web après toute mise à
   niveau affectant Flutter Web, Wasm ou le service worker ;
+- construire un APK Android de débogage et le shell PWA versionné dans la CI ;
 - ne jamais fusionner automatiquement une mise à niveau majeure.
 
 Les versions mentionnées dans un ADR décrivent l’état étudié au moment de la

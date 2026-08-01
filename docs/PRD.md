@@ -471,8 +471,8 @@ Les décisions acceptées sont :
 4. rendre la composition compatible Web ;
 5. ajouter installation PWA et fonctionnement hors ligne ;
 6. valider Safari sur iPhone réel ;
-7. livrer l’export local — archive de récupération Android chiffrée livrée ;
-   export lisible de portabilité encore à définir.
+7. livrer l’export local — archive de récupération chiffrée portable Android/Web
+   livrée ; export lisible de portabilité encore à définir.
 
 ### Partage chiffré
 

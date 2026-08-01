@@ -4,6 +4,7 @@ library;
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:reboot_app/web_storage/browser_encrypted_journal_prototype.dart';
 import 'package:reboot_app/web_storage/browser_local_event_journal.dart';
 import 'package:reboot_app/web_storage/browser_recovery_archive.dart';
@@ -14,6 +15,24 @@ import 'package:test/test.dart';
 
 void main() {
   final codec = EventRecordJsonCodec();
+
+  test('matches the RBP1 AES-GCM cross-platform fixture', () async {
+    final source = await _profile('portable-fixture', <EventRecord>[
+      _householdEvent(),
+    ]);
+    addTearDown(source.delete);
+    final archives = BrowserRecoveryArchiveService(
+      randomBytes: (length) =>
+          Uint8List.fromList(List<int>.filled(length, length == 32 ? 77 : 78)),
+    );
+
+    final prepared = await archives.prepare(source.service);
+
+    expect(
+      sha256.convert(prepared.bytes).toString(),
+      'cf31524ea1a0fab1588a434b670d0f2cf518036a42f069c245e8887374aef30c',
+    );
+  });
 
   test(
     'exports opaque bytes and restores a complete validated journal',

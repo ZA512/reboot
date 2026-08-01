@@ -103,11 +103,12 @@ hébergement durci et tests de concurrence multi-onglets.
 Le cœur d’une récupération chiffrée est désormais prototypé : une archive
 AES-256-GCM indépendante de la clé locale, accompagnée d’un code séparé `RBP1`,
 est authentifiée et intégralement rejouée avant tout import atomique dans un
-profil vide. Son format vise la portabilité future avec Android. Le branchement
+profil vide. Son format est partagé avec Android. Le branchement
 au téléchargement et au sélecteur de fichier PWA est maintenant testé dans
-Chrome, mais son exposition dans le shell, l’adoption côté Android et la
-validation Safari restent requises. La copie Web du code ne peut pas demander
-au système de masquer les aperçus du presse-papiers.
+Chrome. Android produit désormais le même format `RBP1`, vérifié par un vecteur
+AES-GCM commun, et restaure encore les anciennes archives `RB1`. L’exposition
+dans le shell et la validation Safari restent requises. La copie Web du code
+ne peut pas demander au système de masquer les aperçus du presse-papiers.
 
 ## Preuves obtenues
 
@@ -173,7 +174,8 @@ protégerait pas mieux la clé contre un script hostile de même origine.
 - perte simultanée de la base et du marqueur indétectable sans preuve externe ;
 - projections reconstruites au démarrage tant qu’aucun cache chiffré n’existe ;
 - compatibilité et quota dépendants du navigateur ;
-- récupération et partage encore non implémentés.
+- récupération implémentée mais non exposée dans le shell Web ; partage encore
+  non implémenté.
 
 ## Liens
 
