@@ -9,6 +9,8 @@ tests de sécurité.
 - [Modèle de menaces initial](threat-model.md)
 - [ADR-0005 — SQLite chiffrée, Drift et migrations](../adr/0005-encrypted-sqlite-and-migrations.md)
 - [ADR-0006 — Cycle de vie des clés, révocation et récupération](../adr/0006-key-lifecycle-revocation-and-recovery.md)
+- [ADR-0009 — Journal Web chiffré et garde locale de clé](../adr/0009-browser-encrypted-journal.md)
+- [Benchmark du journal Web chiffré](../web-storage-benchmark.md)
 
 ## Invariants initiaux
 

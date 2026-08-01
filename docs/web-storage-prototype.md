@@ -66,6 +66,12 @@ persistant. Un refus reste un résultat valide mais classé `best effort`; il de
 être annoncé à l’utilisateur et interdit de présenter la copie locale comme une
 sauvegarde. Une API absente ou incohérente échoue fermée.
 
+Le [benchmark sur 300 000 événements](web-storage-benchmark.md) valide une
+écriture p95 à 4,4 ms et la capacité du journal direct. Le rejeu authentifié
+complet prend toutefois 19,5 secondes sur la machine de référence. La PWA ne
+sera donc pas activée avant l’ajout d’un snapshot ou cache de projection chiffré
+et versionné ; le journal restera l’unique source de vérité.
+
 Drift/SQLite WebAssembly est différé : il ne supprimerait pas le besoin du
 chiffrement applicatif et ajouterait des pages, caches et migrations à auditer.
 Il pourra être réévalué seulement si le benchmark montre que le journal direct
@@ -95,7 +101,8 @@ La proposition complète et ses limites sont consignées dans
   silencieuse ;
 - scénario de récupération documenté et testé ;
 - comportement du stockage détecté et annoncé, sans repli mémoire silencieux ;
-- benchmark sur 300 000 événements ;
+- benchmark sur 300 000 événements effectué sur ordinateur, puis confirmé sur
+  Safari iPhone réel ;
 - validation Safari sur un iPhone réel.
 
 ## Sources techniques

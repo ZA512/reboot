@@ -32,6 +32,7 @@ Future<void> main() async {
 }
 
 const List<String> _sourceRoots = [
+  'apps/reboot_app/benchmark',
   'apps/reboot_app/lib',
   'apps/reboot_app/test',
   'apps/reboot_app/tool',

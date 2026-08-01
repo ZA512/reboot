@@ -74,10 +74,12 @@ contenu est idempotent ; avec un contenu différent, il est refusé.
 ### Activation
 
 Le prototype reste déconnecté de `LocalEventJournal` et le shell Web reste sans
-saisie. Passer cet ADR à `Accepted` et activer les données réelles exigera au
-minimum : récupération chiffrée, benchmark de 300 000 événements, validation
-Safari iPhone réelle, politique de persistance navigateur, CSP et hébergement
-durci, tests de concurrence multi-onglets et stratégie de migration.
+saisie. Le benchmark de 300 000 événements sur Chrome desktop valide le débit
+d’une saisie, mais mesure 19,5 secondes pour un rejeu intégral. Passer cet ADR à
+`Accepted` et activer les données réelles exigera donc au minimum : récupération
+chiffrée, snapshot ou cache de projection chiffré, validation Safari iPhone
+réelle, politique de persistance navigateur, CSP et hébergement durci, tests de
+concurrence multi-onglets et stratégie de migration.
 
 ## Preuves obtenues
 
@@ -95,7 +97,9 @@ Les tests Chrome exécutent réellement Web Crypto et IndexedDB et vérifient :
   l’index UUID complet ;
 - algorithme, taille, non-extractibilité et usages exacts de la clé rechargée ;
 - détection explicite du mode persistant ou `best effort` et cohérence du quota
-  annoncé par le navigateur.
+  annoncé par le navigateur ;
+- benchmark reproductible de 300 000 enveloppes sur Chrome desktop, incluant
+  écriture, fermeture, réouverture et rejeu authentifié complet.
 
 ## Options étudiées
 
@@ -138,5 +142,6 @@ protégerait pas mieux la clé contre un script hostile de même origine.
 
 - ADR liés : ADR-0001, ADR-0003, ADR-0006 et ADR-0008.
 - Prototype : `docs/web-storage-prototype.md`.
+- Benchmark : `docs/web-storage-benchmark.md`.
 - [Web Cryptography Level 2](https://www.w3.org/TR/WebCryptoAPI/)
 - [Package Dart `web`](https://pub.dev/packages/web)
