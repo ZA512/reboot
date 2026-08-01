@@ -4,6 +4,7 @@ import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 import 'package:reboot_projection/reboot_projection.dart';
 
+import '../formatting/exact_money_formatter.dart';
 import '../l10n/app_localizations.dart';
 
 /// Completed-cycle history and rolling REBOOT trends.
@@ -386,12 +387,10 @@ String _globalMessage(BuildContext context, TrendProjection trends) {
   );
 }
 
-String _formatMoney(BuildContext context, Money money) =>
-    NumberFormat.simpleCurrency(
-      locale: Localizations.localeOf(context).toLanguageTag(),
-      name: money.currency.code,
-      decimalDigits: 2,
-    ).format(money.minorUnits / money.currency.minorUnitsPerMajorUnit);
+String _formatMoney(BuildContext context, Money money) => formatMoneyExact(
+  money,
+  locale: Localizations.localeOf(context).toLanguageTag(),
+);
 
 String _formatSignedMoney(BuildContext context, Money money) {
   final formatted = _formatMoney(context, money.isNegative ? -money : money);

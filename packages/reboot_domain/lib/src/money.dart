@@ -38,71 +38,87 @@ enum Currency {
 /// Formatting and exchange-rate conversion deliberately do not belong here.
 /// All arithmetic is checked against the signed 64-bit storage range.
 final class Money implements Comparable<Money> {
-  const Money._(this.minorUnits, this.currency);
+  Money._(this.exactMinorUnits, this.currency);
 
   /// Smallest value supported by the persisted signed 64-bit representation.
-  static const int minMinorUnits = -9223372036854775807 - 1;
+  static final BigInt minMinorUnits = BigInt.parse('-9223372036854775808');
 
   /// Largest value supported by the persisted signed 64-bit representation.
-  static const int maxMinorUnits = 9223372036854775807;
-
-  static final BigInt _minMinorUnits = BigInt.from(minMinorUnits);
-  static final BigInt _maxMinorUnits = BigInt.from(maxMinorUnits);
+  static final BigInt maxMinorUnits = BigInt.parse('9223372036854775807');
 
   /// Creates an exact value from [minorUnits].
   factory Money.fromMinorUnits(int minorUnits, Currency currency) {
     return Money._checked(BigInt.from(minorUnits), currency);
   }
 
+  /// Creates an exact value from a platform-independent integer.
+  factory Money.fromMinorUnitsBigInt(BigInt minorUnits, Currency currency) {
+    return Money._checked(minorUnits, currency);
+  }
+
+  /// Parses the canonical decimal representation used by portable journals.
+  factory Money.fromMinorUnitsDecimal(String minorUnits, Currency currency) {
+    final parsed = BigInt.tryParse(minorUnits);
+    if (parsed == null || parsed.toString() != minorUnits) {
+      throw FormatException(
+        'Minor units must use a canonical decimal integer representation.',
+      );
+    }
+    return Money._checked(parsed, currency);
+  }
+
   /// Creates a zero value in [currency].
-  const factory Money.zero(Currency currency) = Money._zero;
+  factory Money.zero(Currency currency) => Money._(BigInt.zero, currency);
 
-  const Money._zero(Currency currency) : this._(0, currency);
+  /// The exact signed amount in the currency's minor unit on every platform.
+  final BigInt exactMinorUnits;
 
-  /// The exact signed amount in the currency's minor unit.
-  final int minorUnits;
+  /// Compatibility view for native storage and ordinary UI values.
+  ///
+  /// JavaScript cannot represent every signed 64-bit integer as an [int]. Code
+  /// that persists, authenticates, or performs domain arithmetic must use
+  /// [exactMinorUnits]. This getter fails instead of returning a rounded value.
+  int get minorUnits {
+    if (!exactMinorUnits.isValidInt) {
+      throw StateError(
+        'This exact monetary value cannot be represented as a platform int.',
+      );
+    }
+    return exactMinorUnits.toInt();
+  }
 
   /// The currency that labels this value.
   final Currency currency;
 
   /// Whether this amount is below zero.
-  bool get isNegative => minorUnits < 0;
+  bool get isNegative => exactMinorUnits.isNegative;
 
   /// Whether this amount equals zero.
-  bool get isZero => minorUnits == 0;
+  bool get isZero => exactMinorUnits == BigInt.zero;
 
   /// Whether this amount is above zero.
-  bool get isPositive => minorUnits > 0;
+  bool get isPositive => exactMinorUnits > BigInt.zero;
 
   /// Adds two values bearing the same currency.
   Money operator +(Money other) {
     _requireSameCurrency(other);
-    return Money._checked(
-      BigInt.from(minorUnits) + BigInt.from(other.minorUnits),
-      currency,
-    );
+    return Money._checked(exactMinorUnits + other.exactMinorUnits, currency);
   }
 
   /// Subtracts two values bearing the same currency.
   Money operator -(Money other) {
     _requireSameCurrency(other);
-    return Money._checked(
-      BigInt.from(minorUnits) - BigInt.from(other.minorUnits),
-      currency,
-    );
+    return Money._checked(exactMinorUnits - other.exactMinorUnits, currency);
   }
 
   /// Returns the additive inverse of this value.
   Money operator -() {
-    return Money._checked(-BigInt.from(minorUnits), currency);
+    return Money._checked(-exactMinorUnits, currency);
   }
 
   /// Multiplies this value by an integer [factor].
   Money operator *(int factor) {
-    return Money._checked(
-      BigInt.from(minorUnits) * BigInt.from(factor),
-      currency,
-    );
+    return Money._checked(exactMinorUnits * BigInt.from(factor), currency);
   }
 
   /// Splits a non-negative amount into [partCount] exact installments.
@@ -118,17 +134,15 @@ final class Money implements Comparable<Money> {
       throw StateError('A negative amount cannot be split into installments.');
     }
 
-    final quotient = minorUnits ~/ partCount;
-    final lastPart =
-        BigInt.from(minorUnits) -
-        (BigInt.from(quotient) * BigInt.from(partCount - 1));
+    final quotient = exactMinorUnits ~/ BigInt.from(partCount);
+    final lastPart = exactMinorUnits - (quotient * BigInt.from(partCount - 1));
 
     return List<Money>.unmodifiable(
       List<Money>.generate(
         partCount,
         (index) => index == partCount - 1
             ? Money._checked(lastPart, currency)
-            : Money.fromMinorUnits(quotient, currency),
+            : Money.fromMinorUnitsBigInt(quotient, currency),
       ),
     );
   }
@@ -142,14 +156,17 @@ final class Money implements Comparable<Money> {
       throw StateError('A negative capacity must not be rounded as a budget.');
     }
 
-    final scale = currency.minorUnitsPerMajorUnit;
-    return Money.fromMinorUnits((minorUnits ~/ scale) * scale, currency);
+    final scale = BigInt.from(currency.minorUnitsPerMajorUnit);
+    return Money.fromMinorUnitsBigInt(
+      (exactMinorUnits ~/ scale) * scale,
+      currency,
+    );
   }
 
   @override
   int compareTo(Money other) {
     _requireSameCurrency(other);
-    return minorUnits.compareTo(other.minorUnits);
+    return exactMinorUnits.compareTo(other.exactMinorUnits);
   }
 
   void _requireSameCurrency(Money other) {
@@ -159,25 +176,25 @@ final class Money implements Comparable<Money> {
   }
 
   factory Money._checked(BigInt minorUnits, Currency currency) {
-    if (minorUnits < _minMinorUnits || minorUnits > _maxMinorUnits) {
+    if (minorUnits < minMinorUnits || minorUnits > maxMinorUnits) {
       throw MoneyOverflowException(minorUnits);
     }
 
-    return Money._(minorUnits.toInt(), currency);
+    return Money._(minorUnits, currency);
   }
 
   @override
   bool operator ==(Object other) {
     return other is Money &&
-        minorUnits == other.minorUnits &&
+        exactMinorUnits == other.exactMinorUnits &&
         currency == other.currency;
   }
 
   @override
-  int get hashCode => Object.hash(minorUnits, currency);
+  int get hashCode => Object.hash(exactMinorUnits, currency);
 
   @override
-  String toString() => 'Money($minorUnits ${currency.code} minor units)';
+  String toString() => 'Money($exactMinorUnits ${currency.code} minor units)';
 }
 
 /// Indicates that an operation mixed monetary values in different currencies.

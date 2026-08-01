@@ -65,18 +65,47 @@ void main() {
   group('Money int64 boundaries', () {
     test('accepts both signed 64-bit boundaries', () {
       expect(
-        Money.fromMinorUnits(Money.minMinorUnits, Currency.eur).minorUnits,
+        Money.fromMinorUnitsBigInt(
+          Money.minMinorUnits,
+          Currency.eur,
+        ).exactMinorUnits,
         Money.minMinorUnits,
       );
       expect(
-        Money.fromMinorUnits(Money.maxMinorUnits, Currency.eur).minorUnits,
+        Money.fromMinorUnitsBigInt(
+          Money.maxMinorUnits,
+          Currency.eur,
+        ).exactMinorUnits,
         Money.maxMinorUnits,
       );
     });
 
+    test('round-trips canonical portable decimal values', () {
+      final value = Money.fromMinorUnitsDecimal(
+        '9007199254740993',
+        Currency.eur,
+      );
+
+      expect(value.exactMinorUnits.toString(), '9007199254740993');
+      expect(
+        () => Money.fromMinorUnitsDecimal('09007199254740993', Currency.eur),
+        throwsFormatException,
+      );
+      expect(
+        () => Money.fromMinorUnitsDecimal('+1', Currency.eur),
+        throwsFormatException,
+      );
+    });
+
     test('detects addition and subtraction overflow', () {
-      final maximum = Money.fromMinorUnits(Money.maxMinorUnits, Currency.eur);
-      final minimum = Money.fromMinorUnits(Money.minMinorUnits, Currency.eur);
+      final maximum = Money.fromMinorUnitsBigInt(
+        Money.maxMinorUnits,
+        Currency.eur,
+      );
+      final minimum = Money.fromMinorUnitsBigInt(
+        Money.minMinorUnits,
+        Currency.eur,
+      );
       final one = Money.fromMinorUnits(1, Currency.eur);
 
       expect(() => maximum + one, throwsA(isA<MoneyOverflowException>()));
@@ -84,8 +113,14 @@ void main() {
     });
 
     test('detects multiplication and negation overflow', () {
-      final maximum = Money.fromMinorUnits(Money.maxMinorUnits, Currency.eur);
-      final minimum = Money.fromMinorUnits(Money.minMinorUnits, Currency.eur);
+      final maximum = Money.fromMinorUnitsBigInt(
+        Money.maxMinorUnits,
+        Currency.eur,
+      );
+      final minimum = Money.fromMinorUnitsBigInt(
+        Money.minMinorUnits,
+        Currency.eur,
+      );
 
       expect(() => maximum * 2, throwsA(isA<MoneyOverflowException>()));
       expect(() => -minimum, throwsA(isA<MoneyOverflowException>()));

@@ -42,6 +42,76 @@ void main() {
         throwsA(isA<UnsupportedStoredEventException>()),
       );
     });
+
+    test('stores exact money as a canonical decimal string', () {
+      final codec = EventPayloadJsonCodec();
+      final payload = ExpenseRecordedPayload(
+        amount: Money.fromMinorUnitsDecimal('9007199254740993', Currency.eur),
+        label: 'Test de précision',
+        cycleAssignment: ExpenseCycleAssignment(
+          cycleStart: LocalDate(2026, 4, 4),
+          policyVersion: 1,
+          timeZone: IanaTimeZoneId('Europe/Paris'),
+        ),
+      );
+
+      final encoded = codec.encode(payload);
+      expect(encoded, contains('"minorUnits":"9007199254740993"'));
+
+      final decoded =
+          codec.decode(
+                eventType: payload.eventType,
+                schemaVersion: payload.schemaVersion,
+                json: encoded,
+              )
+              as ExpenseRecordedPayload;
+      expect(decoded.amount, payload.amount);
+    });
+
+    test('continues to decode legacy numeric money fields', () {
+      final codec = EventPayloadJsonCodec();
+      final decoded =
+          codec.decode(
+                eventType: 'expense.recorded',
+                schemaVersion: 1,
+                json: '''
+{"amount":{"minorUnits":4250,"currency":"EUR"},"label":"Courses","cycleAssignment":{"cycleStart":"2026-04-04","policyVersion":1,"timeZone":"Europe/Paris"}}
+''',
+              )
+              as ExpenseRecordedPayload;
+
+      expect(decoded.amount, Money.fromMinorUnits(4250, Currency.eur));
+    });
+
+    test('rejects unsafe legacy JSON numbers instead of rounding them', () {
+      final codec = EventPayloadJsonCodec();
+
+      expect(
+        () => codec.decode(
+          eventType: 'expense.recorded',
+          schemaVersion: 1,
+          json: '''
+{"amount":{"minorUnits":9007199254740993,"currency":"EUR"},"label":"Courses","cycleAssignment":{"cycleStart":"2026-04-04","policyVersion":1,"timeZone":"Europe/Paris"}}
+''',
+        ),
+        throwsFormatException,
+      );
+    });
+
+    test('rejects non-canonical portable integer strings', () {
+      final codec = EventPayloadJsonCodec();
+
+      expect(
+        () => codec.decode(
+          eventType: 'expense.recorded',
+          schemaVersion: 1,
+          json: '''
+{"amount":{"minorUnits":"004250","currency":"EUR"},"label":"Courses","cycleAssignment":{"cycleStart":"2026-04-04","policyVersion":1,"timeZone":"Europe/Paris"}}
+''',
+        ),
+        throwsFormatException,
+      );
+    });
   });
 }
 

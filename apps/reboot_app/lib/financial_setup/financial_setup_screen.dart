@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 
+import '../formatting/exact_money_formatter.dart';
 import '../infrastructure/device_context_providers.dart';
 import '../l10n/app_localizations.dart';
 import 'cash_flow_editor_screen.dart';
@@ -273,11 +273,10 @@ String _definitionSummary(BuildContext context, CashFlowDefinition definition) {
   final amount = definition.variableStrategy == VariableEstimateStrategy.custom
       ? definition.customAmountPerOccurrence!
       : definition.referenceAmountPerOccurrence;
-  final formatted = NumberFormat.simpleCurrency(
+  final formatted = formatMoneyExact(
+    amount,
     locale: Localizations.localeOf(context).toLanguageTag(),
-    name: 'EUR',
-    decimalDigits: 2,
-  ).format(amount.minorUnits / 100);
+  );
   final frequency =
       switch ((definition.schedule as RecurringSchedule).frequency) {
         RecurrenceFrequency.weekly => l10n.frequencyWeekly,

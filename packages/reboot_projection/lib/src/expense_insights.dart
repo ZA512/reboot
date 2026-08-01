@@ -70,8 +70,8 @@ final class ExpenseNatureBreakdown {
   ExpenseNatureShare _share(ExpenseNature? nature, Money amount) {
     final basisPoints = total.isZero
         ? 0
-        : ((BigInt.from(amount.minorUnits) * BigInt.from(10000)) ~/
-                  BigInt.from(total.minorUnits))
+        : ((amount.exactMinorUnits * BigInt.from(10000)) ~/
+                  total.exactMinorUnits)
               .toInt();
     return ExpenseNatureShare(
       nature: nature,

@@ -16,7 +16,7 @@ enum TrendAlertSeverity {
 final class TrendRatio {
   /// Creates a ratio with a strictly positive denominator.
   TrendRatio({required this.numerator, required this.denominator}) {
-    if (numerator.isNegative || denominator.minorUnits <= 0) {
+    if (numerator.isNegative || !denominator.isPositive) {
       throw ArgumentError('A trend ratio requires non-negative / positive.');
     }
     if (numerator.currency != denominator.currency) {
@@ -32,15 +32,15 @@ final class TrendRatio {
 
   /// Percentage rounded down to two decimal places, expressed in basis points.
   int get basisPoints {
-    return ((BigInt.from(numerator.minorUnits) * BigInt.from(10000)) ~/
-            BigInt.from(denominator.minorUnits))
+    return ((numerator.exactMinorUnits * BigInt.from(10000)) ~/
+            denominator.exactMinorUnits)
         .toInt();
   }
 
   /// Exact severity without floating-point or display rounding.
   TrendAlertSeverity get severity {
-    final scaled = BigInt.from(numerator.minorUnits) * BigInt.from(100);
-    final base = BigInt.from(denominator.minorUnits);
+    final scaled = numerator.exactMinorUnits * BigInt.from(100);
+    final base = denominator.exactMinorUnits;
     if (scaled >= base * BigInt.from(15)) {
       return TrendAlertSeverity.strong;
     }

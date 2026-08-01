@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 import 'package:reboot_projection/reboot_projection.dart';
@@ -14,6 +13,7 @@ import '../cycle_settings/cycle_settings_screen.dart';
 import '../expenses/quick_expense_controller.dart';
 import '../expenses/quick_expense_screen.dart';
 import '../financial_setup/cash_flow_management_screen.dart';
+import '../formatting/exact_money_formatter.dart';
 import '../health/health_controller.dart';
 import '../health/health_screen.dart';
 import '../infrastructure/android_weekly_widget.dart';
@@ -102,10 +102,10 @@ final class _WeeklyDashboardScreenState
         .cycles
         .first;
     final locale = Localizations.localeOf(context).toLanguageTag();
-    final displayAmount = NumberFormat.decimalPatternDigits(
+    final displayAmount = formatMoneyNumberExact(
+      current.remaining,
       locale: locale,
-      decimalDigits: 2,
-    ).format(current.remaining.minorUnits / 100);
+    );
     final validBeforeDate = current.cycle.endExclusive.toString();
     final state = '$displayAmount|$validBeforeDate';
     if (_lastPublishedWidgetState != state) {
@@ -180,8 +180,8 @@ final class _DashboardBody extends ConsumerWidget {
       1,
       today.daysUntil(current.cycle.endExclusive),
     );
-    final daily = Money.fromMinorUnits(
-      current.remaining.minorUnits ~/ daysRemaining,
+    final daily = Money.fromMinorUnitsBigInt(
+      current.remaining.exactMinorUnits ~/ BigInt.from(daysRemaining),
       current.remaining.currency,
     );
     final colors = Theme.of(context).colorScheme;
@@ -745,12 +745,10 @@ final class _DashboardDateError extends StatelessWidget {
   }
 }
 
-String _formatMoney(BuildContext context, Money money) =>
-    NumberFormat.simpleCurrency(
-      locale: Localizations.localeOf(context).toLanguageTag(),
-      name: money.currency.code,
-      decimalDigits: 2,
-    ).format(money.minorUnits / money.currency.minorUnitsPerMajorUnit);
+String _formatMoney(BuildContext context, Money money) => formatMoneyExact(
+  money,
+  locale: Localizations.localeOf(context).toLanguageTag(),
+);
 
 String _formatSignedMoney(BuildContext context, Money money) {
   final formatted = _formatMoney(context, money.isNegative ? -money : money);

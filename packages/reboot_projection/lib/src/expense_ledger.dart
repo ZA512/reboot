@@ -196,8 +196,8 @@ final class ProjectedExpense {
       );
     }
     final refund = ProjectedExpenseRefund._fromEvent(event);
-    if (refundedAmount.minorUnits + refund.amount.minorUnits >
-        amount.minorUnits) {
+    if (refundedAmount.exactMinorUnits + refund.amount.exactMinorUnits >
+        amount.exactMinorUnits) {
       throw ProjectionConflictException(
         'Expense $id refunds exceed its original amount.',
       );

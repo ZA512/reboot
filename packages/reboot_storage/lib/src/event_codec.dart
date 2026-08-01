@@ -448,16 +448,36 @@ OccurrenceSchedule _decodeSchedule(Map<String, Object?> map) {
 
 Map<String, Object?> _encodeMoney(Money money) {
   return <String, Object?>{
-    'minorUnits': money.minorUnits,
+    'minorUnits': money.exactMinorUnits.toString(),
     'currency': money.currency.code,
   };
 }
 
 Money _decodeMoney(Map<String, Object?> map) {
-  return Money.fromMinorUnits(
-    _asInt(map['minorUnits'], 'minorUnits'),
+  return Money.fromMinorUnitsBigInt(
+    _decodePortableInteger(map['minorUnits'], 'minorUnits'),
     Currency.parse(_asString(map['currency'], 'currency')),
   );
+}
+
+BigInt _decodePortableInteger(Object? value, String name) {
+  if (value is int) {
+    final parsed = BigInt.from(value);
+    final maximumSafeLegacyInteger = BigInt.parse('9007199254740991');
+    if (parsed.abs() <= maximumSafeLegacyInteger) {
+      return parsed;
+    }
+    throw FormatException(
+      '$name uses an unsafe legacy JSON number; migrate it to a string.',
+    );
+  }
+  if (value is String) {
+    final parsed = BigInt.tryParse(value);
+    if (parsed != null && parsed.toString() == value) {
+      return parsed;
+    }
+  }
+  throw FormatException('$name must be a canonical decimal integer string.');
 }
 
 ExpenseRecordedPayload _decodeExpenseRecorded(Map<String, Object?> map) {

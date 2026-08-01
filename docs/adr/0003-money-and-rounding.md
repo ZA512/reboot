@@ -3,7 +3,7 @@
 - Statut : Accepted
 - Date : 2026-07-29
 - Accepté le : 2026-07-30
-- Amendements : 2026-07-30, 2026-07-31
+- Amendements : 2026-07-30, 2026-07-31, 2026-08-01
 - Décideur : porteur du projet REBOOT
 
 ## Contexte
@@ -18,8 +18,18 @@ Une simple division arrondie à chaque cycle peut perdre des centimes. Exemple :
 
 Le domaine utilise un type valeur `Money` composé de :
 
-- `minorUnits` : entier signé 64 bits ;
+- `exactMinorUnits` : entier exact borné à l’intervalle signé 64 bits ;
 - `currency` : code ISO 4217 validé.
+
+La valeur exacte repose sur `BigInt` afin de conserver les 64 bits sur la VM
+Dart, en JavaScript et en WebAssembly. Dans le journal portable, les unités
+mineures sont sérialisées sous forme de chaînes décimales canoniques. Le
+lecteur accepte aussi les anciens nombres JSON, uniquement pour préserver les
+journaux créés avant cet amendement lorsque leur valeur appartient à
+l’intervalle exact commun à JSON/JavaScript (`±(2^53 - 1)`). Un ancien nombre
+hors de cet intervalle est refusé et doit être migré nativement vers une chaîne,
+jamais arrondi. Aucun calcul métier, stockage ou affichage ne convertit une
+valeur monétaire en `double`.
 
 Les opérations arithmétiques entre devises différentes échouent explicitement. Le type ne suppose pas que toutes les devises possèdent deux décimales : leur nombre d’unités mineures dépend de la devise.
 
@@ -63,6 +73,7 @@ La dernière échéance absorbe ainsi tous les centimes résiduels. Aucun centim
 
 - toute addition, soustraction ou multiplication vérifie les dépassements ;
 - le formatage est séparé du calcul ;
+- le formatage localisé travaille directement depuis l’entier exact ;
 - les comparaisons exigent la même devise.
 
 ## Options étudiées
@@ -103,6 +114,8 @@ Recommandée : modèle simple, exact et facile à tester par propriétés.
 - capacité négative ;
 - zéro ;
 - limites de l’entier 64 bits ;
+- compilation et exécution JavaScript au-delà de `2^53` ;
+- sérialisation décimale canonique et lecture de l’ancien format JSON entier ;
 - addition de devises différentes refusée ;
 - données non libellées en EUR refusées dans un foyer MVP ;
 - remboursement partiel et total ;

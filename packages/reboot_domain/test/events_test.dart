@@ -193,8 +193,16 @@ void main() {
 
       expect(first.compareTo(second), lessThan(0));
       expect(
-        LocalJournalPosition(LocalJournalPosition.maxValue).value,
+        LocalJournalPosition.fromBigInt(
+          LocalJournalPosition.maxValue,
+        ).exactValue,
         LocalJournalPosition.maxValue,
+      );
+      expect(
+        LocalJournalPosition.fromBigInt(
+          BigInt.parse('9007199254740993'),
+        ).exactValue.toString(),
+        '9007199254740993',
       );
       expect(() => LocalJournalPosition(0), throwsRangeError);
     });

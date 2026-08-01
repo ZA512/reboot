@@ -34,10 +34,12 @@ Future<void> main() async {
 const List<String> _sourceRoots = [
   'apps/reboot_app/lib',
   'apps/reboot_app/test',
+  'apps/reboot_app/tool',
   'packages/reboot_application/lib',
   'packages/reboot_application/test',
   'packages/reboot_domain/lib',
   'packages/reboot_domain/test',
+  'packages/reboot_domain/tool',
   'packages/reboot_projection/lib',
   'packages/reboot_projection/test',
   'packages/reboot_storage/lib',

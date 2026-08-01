@@ -27,4 +27,10 @@ void main() {
   test('rejects values outside signed 64-bit minor units', () {
     expect(parsePositiveEuroAmount('92233720368547758,08'), isNull);
   });
+
+  test('keeps exact cents above the JavaScript safe-integer range', () {
+    final value = parsePositiveEuroAmount('90071992547409,93');
+
+    expect(value!.exactMinorUnits.toString(), '9007199254740993');
+  });
 }

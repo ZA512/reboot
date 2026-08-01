@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 import 'package:reboot_projection/reboot_projection.dart';
 
 import '../financial_setup/euro_amount_parser.dart';
+import '../formatting/exact_money_formatter.dart';
 import '../l10n/app_localizations.dart';
 import '../reserves/reserve_controller.dart';
 import 'quick_expense_controller.dart';
@@ -76,7 +76,7 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
         _funding == _ExpenseFunding.reserve &&
         amount != null &&
         selectedReserve != null &&
-        amount.minorUnits > selectedReserve.balance.minorUnits;
+        amount.compareTo(selectedReserve.balance) > 0;
     final busy = mutation.isLoading || reserveMutation.isLoading;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.quickExpenseTitle)),
@@ -374,7 +374,7 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
     final amount = parsePositiveEuroAmount(_amountController.text)!;
     if (_funding == _ExpenseFunding.reserve) {
       final reserve = widget.service.reserves.reserves[_reserveId];
-      if (reserve == null || amount.minorUnits > reserve.balance.minorUnits) {
+      if (reserve == null || amount.compareTo(reserve.balance) > 0) {
         return;
       }
       if (reserve.kind == ReserveKind.real &&
@@ -464,8 +464,8 @@ final class _QuickExpenseScreenState extends ConsumerState<QuickExpenseScreen> {
       final cycle = projection.cycles[index];
       final proposed = index == count - 1 ? last : regular;
       final committedMinorUnits =
-          cycle.allocatedExpenses.minorUnits + proposed.minorUnits;
-      if (committedMinorUnits * 2 > cycle.budget.minorUnits) {
+          cycle.allocatedExpenses.exactMinorUnits + proposed.exactMinorUnits;
+      if (committedMinorUnits * BigInt.two > cycle.budget.exactMinorUnits) {
         return true;
       }
     }
@@ -481,23 +481,23 @@ String _natureLabel(AppLocalizations l10n, ExpenseNature nature) =>
       ExpenseNature.unexpected => l10n.expenseNatureUnexpected,
     };
 
-Money _regularPart(Money amount, int count) =>
-    Money.fromMinorUnits(amount.minorUnits ~/ count, amount.currency);
+Money _regularPart(Money amount, int count) => Money.fromMinorUnitsBigInt(
+  amount.exactMinorUnits ~/ BigInt.from(count),
+  amount.currency,
+);
 
 Money _lastPart(Money amount, int count) {
-  final regular = amount.minorUnits ~/ count;
-  return Money.fromMinorUnits(
-    amount.minorUnits - regular * (count - 1),
+  final regular = amount.exactMinorUnits ~/ BigInt.from(count);
+  return Money.fromMinorUnitsBigInt(
+    amount.exactMinorUnits - regular * BigInt.from(count - 1),
     amount.currency,
   );
 }
 
-String _formatMoney(BuildContext context, Money money) =>
-    NumberFormat.simpleCurrency(
-      locale: Localizations.localeOf(context).toLanguageTag(),
-      name: money.currency.code,
-      decimalDigits: 2,
-    ).format(money.minorUnits / money.currency.minorUnitsPerMajorUnit);
+String _formatMoney(BuildContext context, Money money) => formatMoneyExact(
+  money,
+  locale: Localizations.localeOf(context).toLanguageTag(),
+);
 
 String _formatDate(BuildContext context, LocalDate date) =>
     MaterialLocalizations.of(

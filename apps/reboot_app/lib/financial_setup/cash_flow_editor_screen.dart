@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 
+import '../formatting/exact_money_formatter.dart';
 import '../l10n/app_localizations.dart';
 import 'euro_amount_parser.dart';
 
@@ -327,9 +328,7 @@ final class _CashFlowEditorScreenState extends State<CashFlowEditorScreen> {
 }
 
 String _editableEuro(Money amount) {
-  final whole = amount.minorUnits ~/ 100;
-  final cents = amount.minorUnits % 100;
-  return cents == 0 ? '$whole' : '$whole.${cents.toString().padLeft(2, '0')}';
+  return formatMoneyInputExact(amount);
 }
 
 String _formatDate(BuildContext context, LocalDate date) {

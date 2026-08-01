@@ -36,6 +36,18 @@ jobs:
       - name: Validate workspace
         run: dart run tool/check.dart
 
+      - name: Verify domain exactness in JavaScript
+        working-directory: packages/reboot_domain
+        run: |
+          dart compile js tool/web_exactness_probe.dart -O2 --output=build/web_exactness_probe.js
+          node build/web_exactness_probe.js
+
+      - name: Verify exact money formatting in JavaScript
+        working-directory: apps/reboot_app
+        run: |
+          dart compile js tool/web_money_format_probe.dart -O2 --output=build/web_money_format_probe.js
+          node build/web_money_format_probe.js
+
       - name: Build blocked Web safety shell
         working-directory: apps/reboot_app
         run: flutter build web --release

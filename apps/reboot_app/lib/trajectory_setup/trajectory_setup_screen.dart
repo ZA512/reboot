@@ -4,6 +4,7 @@ import 'package:reboot_domain/reboot_domain.dart';
 import 'package:reboot_projection/reboot_projection.dart';
 
 import '../financial_setup/euro_amount_parser.dart';
+import '../formatting/exact_money_formatter.dart';
 import '../infrastructure/device_context_providers.dart';
 import '../l10n/app_localizations.dart';
 import 'trajectory_setup_controller.dart';
@@ -343,9 +344,7 @@ final class _TrajectorySetupScreenState
 
 String _editableEuro(Money? amount) {
   if (amount == null) return '0';
-  final whole = amount.minorUnits ~/ 100;
-  final cents = amount.minorUnits % 100;
-  return cents == 0 ? '$whole' : '$whole.${cents.toString().padLeft(2, '0')}';
+  return formatMoneyInputExact(amount);
 }
 
 final class _MoneyField extends StatelessWidget {

@@ -16,15 +16,19 @@ encore en validation.
 
 Le premier build JavaScript a révélé un prérequis de domaine : `int` est signé
 64 bits sur la VM Dart, mais ne conserve que 53 bits de précision entière dans
-la représentation JavaScript. Les bornes `Money` et `LocalJournalPosition`
-signées 64 bits ne peuvent donc pas être compilées exactement pour Safari
-iPhone.
+la représentation JavaScript. REBOOT ne réduit pas silencieusement sa plage
+monétaire et ne réserve pas son exactitude au seul WebAssembly : Flutter doit
+conserver une sortie JavaScript pour Safari iPhone.
 
-REBOOT ne réduira pas silencieusement sa plage monétaire et ne réservera pas
-son exactitude au seul WebAssembly : Flutter doit conserver une sortie
-JavaScript pour Safari iPhone. Avant de brancher le domaine réel au Web, les
-valeurs persistées concernées devront employer une représentation exacte
-portable, fondée sur `BigInt` et sérialisée en chaînes décimales canoniques.
+Ce prérequis est maintenant levé dans le cœur métier. `Money` et
+`LocalJournalPosition` conservent leur valeur exacte dans un `BigInt`, avec les
+mêmes bornes signées 64 bits sur Android et sur le Web. Les montants des
+événements sont écrits sous forme de chaînes décimales canoniques ; le lecteur
+accepte aussi les anciens nombres JSON dans leur intervalle exact commun. Un
+ancien nombre hors de l’intervalle sûr JavaScript est refusé et doit être migré
+nativement, sans arrondi. Un exécutable de contrôle est compilé en JavaScript
+puis exécuté en CI au-delà de la limite de précision de `Number` et aux bornes
+signées 64 bits.
 
 ## Hypothèses à éprouver ensuite
 

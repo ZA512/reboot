@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
 import 'package:reboot_projection/reboot_projection.dart';
 
 import '../financial_setup/euro_amount_parser.dart';
+import '../formatting/exact_money_formatter.dart';
 import '../l10n/app_localizations.dart';
 import 'received_bonus_controller.dart';
 
@@ -298,8 +298,10 @@ final class _ReceivedBonusDialogState extends State<_ReceivedBonusDialog> {
     _amount = TextEditingController(
       text: widget.initial == null
           ? ''
-          : (widget.initial!.remainingForDailyLife.minorUnits / 100)
-                .toStringAsFixed(2),
+          : formatMoneyInputExact(
+              widget.initial!.remainingForDailyLife,
+              alwaysShowFraction: true,
+            ),
     );
     _nextPaymentDate =
         widget.initial?.nextPaymentDate ?? widget.effectiveCycle.addDays(364);
@@ -430,10 +432,10 @@ ReceivedBonusPool _displayPool(
 }
 
 String _formatMoney(BuildContext context, Money amount) {
-  return NumberFormat.simpleCurrency(
+  return formatMoneyExact(
+    amount,
     locale: Localizations.localeOf(context).toLanguageTag(),
-    name: amount.currency.code,
-  ).format(amount.minorUnits / 100);
+  );
 }
 
 String _formatDate(BuildContext context, LocalDate date) {

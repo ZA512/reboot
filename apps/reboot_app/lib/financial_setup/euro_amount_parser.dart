@@ -24,8 +24,8 @@ Money? parseNonNegativeEuroAmount(String source) {
     _ => BigInt.parse(fractionSource),
   };
   final minorUnits = whole * BigInt.from(100) + fraction;
-  if (minorUnits > BigInt.from(Money.maxMinorUnits)) {
+  if (minorUnits > Money.maxMinorUnits) {
     return null;
   }
-  return Money.fromMinorUnits(minorUnits.toInt(), Currency.eur);
+  return Money.fromMinorUnitsBigInt(minorUnits, Currency.eur);
 }

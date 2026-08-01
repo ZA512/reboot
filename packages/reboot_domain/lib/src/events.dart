@@ -412,34 +412,50 @@ final class EventRecord {
 /// Positive, monotone position assigned only by one local journal.
 final class LocalJournalPosition implements Comparable<LocalJournalPosition> {
   /// Largest value supported by the persisted signed 64-bit representation.
-  static const int maxValue = 9223372036854775807;
+  static final BigInt maxValue = BigInt.parse('9223372036854775807');
 
   /// Creates a validated signed 64-bit local position.
   factory LocalJournalPosition(int value) {
-    if (value < 1 || value > maxValue) {
-      throw RangeError.range(value, 1, maxValue, 'value');
+    return LocalJournalPosition.fromBigInt(BigInt.from(value));
+  }
+
+  /// Creates an exact position from a platform-independent integer.
+  factory LocalJournalPosition.fromBigInt(BigInt value) {
+    if (value < BigInt.one || value > maxValue) {
+      throw RangeError('value must be inside the positive signed-64-bit range');
     }
     return LocalJournalPosition._(value);
   }
 
-  const LocalJournalPosition._(this.value);
+  LocalJournalPosition._(this.exactValue);
 
-  /// Monotone local sequence number.
-  final int value;
+  /// Exact monotone local sequence number on every platform.
+  final BigInt exactValue;
 
-  @override
-  int compareTo(LocalJournalPosition other) => value.compareTo(other.value);
-
-  @override
-  bool operator ==(Object other) {
-    return other is LocalJournalPosition && value == other.value;
+  /// Compatibility view for native SQLite and ordinary journal sizes.
+  int get value {
+    if (!exactValue.isValidInt) {
+      throw StateError(
+        'This journal position cannot be represented as a platform int.',
+      );
+    }
+    return exactValue.toInt();
   }
 
   @override
-  int get hashCode => value.hashCode;
+  int compareTo(LocalJournalPosition other) =>
+      exactValue.compareTo(other.exactValue);
 
   @override
-  String toString() => value.toString();
+  bool operator ==(Object other) {
+    return other is LocalJournalPosition && exactValue == other.exactValue;
+  }
+
+  @override
+  int get hashCode => exactValue.hashCode;
+
+  @override
+  String toString() => exactValue.toString();
 }
 
 /// One local journal row, distinct from future synchronization metadata.

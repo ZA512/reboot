@@ -287,8 +287,8 @@ abstract final class AnnualizationEngine {
       );
     }
 
-    final baseGross = Money.fromMinorUnits(
-      capacity.minorUnits ~/ _cycleCount,
+    final baseGross = Money.fromMinorUnitsBigInt(
+      capacity.exactMinorUnits ~/ BigInt.from(_cycleCount),
       capacity.currency,
     );
     final recovery = overdraftExitGoal == null
@@ -337,11 +337,11 @@ abstract final class AnnualizationEngine {
     final cycleCount = cycles
         .where((cycle) => cycle.start.isBefore(goal.targetDate))
         .length;
-    final total = BigInt.from(goal.totalToRecover.minorUnits);
+    final total = goal.totalToRecover.exactMinorUnits;
     final divisor = BigInt.from(cycleCount);
     final requiredMinorUnits = (total + divisor - BigInt.one) ~/ divisor;
-    final required = Money.fromMinorUnits(
-      requiredMinorUnits.toInt(),
+    final required = Money.fromMinorUnitsBigInt(
+      requiredMinorUnits,
       goal.totalToRecover.currency,
     );
     final shortfall = required.compareTo(availablePerCycle) > 0
@@ -377,7 +377,7 @@ abstract final class AnnualizationEngine {
       _ => definition.referenceAmountPerOccurrence,
     };
     var exactMinorUnits =
-        BigInt.from(reference.minorUnits) * BigInt.from(occurrences.length);
+        reference.exactMinorUnits * BigInt.from(occurrences.length);
 
     if (definition.variableStrategy == VariableEstimateStrategy.prudent) {
       exactMinorUnits = switch (definition.direction) {
@@ -393,7 +393,7 @@ abstract final class AnnualizationEngine {
     return CashFlowAnnualization(
       definition: definition,
       occurrences: occurrences,
-      total: Money.fromMinorUnits(exactMinorUnits.toInt(), currency),
+      total: Money.fromMinorUnitsBigInt(exactMinorUnits, currency),
     );
   }
 

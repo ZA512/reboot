@@ -165,7 +165,7 @@ final class ProjectedReserve {
       );
     }
     if (movement.kind == ReserveMovementKind.funding &&
-        balance.minorUnits < movement.amount.minorUnits) {
+        balance.compareTo(movement.amount) < 0) {
       throw InsufficientReserveBalanceException(
         reserveId: id,
         available: balance,
@@ -252,7 +252,7 @@ final class ReserveLedger {
           );
         case ReserveExpenseRecordedPayload(:final amount, :final label):
           final reserve = _requireReserve(next, reserveId);
-          if (reserve.balance.minorUnits < amount.minorUnits) {
+          if (reserve.balance.compareTo(amount) < 0) {
             throw InsufficientReserveBalanceException(
               reserveId: reserveId,
               available: reserve.balance,
