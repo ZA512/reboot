@@ -55,6 +55,8 @@ jobs:
           test/browser/browser_encrypted_journal_prototype_test.dart
           test/browser/browser_local_event_journal_test.dart
           test/browser/browser_recovery_archive_test.dart
+          test/browser/browser_recovery_document_portal_test.dart
+          test/browser/browser_recovery_workflow_test.dart
           test/browser/browser_storage_durability_test.dart
 
       - name: Compile browser storage for JavaScript and WebAssembly

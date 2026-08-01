@@ -85,8 +85,8 @@ reste à implémenter avant activation.
 
 ## Étape 2 — Cœur de récupération portable
 
-Une première archive de récupération indépendante de la clé locale est
-implémentée derrière une API Web non encore exposée dans l’interface. Elle
+Une archive de récupération indépendante de la clé locale est implémentée
+derrière une API Web non encore exposée dans l’interface. Elle
 chiffre l’intégralité du journal canonique avec une nouvelle clé AES-256-GCM et
 produit un code séparé `RBP1`. Le format est versionné comme portable afin que
 l’adaptateur Android puisse l’adopter ultérieurement ; la sauvegarde SQLite
@@ -97,9 +97,23 @@ sont décodés, leurs UUID sont contrôlés puis les cinq projections métier so
 rejouées dans un journal éphémère en lecture seule. Le profil de destination
 n’est modifié qu’après cette validation et seulement s’il est vide. Les tests
 Chrome couvrent l’opacité, le mauvais code, la corruption authentifiée et le
-refus d’une fusion. Il reste à brancher le téléchargement et le sélecteur de
-fichier PWA, à adopter ou convertir ce format sur Android et à le valider dans
-Safari réel.
+refus d’une fusion.
+
+Le portail document PWA crée un téléchargement Blob avec un nom strictement
+borné, ouvre un sélecteur limité à un fichier, refuse les fichiers vides ou de
+plus de 64 Mio et copie les octets dans une mémoire possédée par REBOOT. Il
+traite l’annulation comme un résultat normal et sérialise les opérations. Le
+workflow complet export-téléchargement-sélection-restauration est testé dans
+Chrome. La préparation cryptographique et le téléchargement sont deux actions
+distinctes afin que le bouton « Télécharger » conserve l’activation utilisateur
+exigée par les navigateurs mobiles stricts. La copie du code utilise l’API
+Clipboard d’un contexte sécurisé, mais
+le Web ne permet pas de masquer les aperçus du presse-papiers comme Android :
+l’interface devra avertir clairement l’utilisateur ou privilégier l’affichage
+manuel du code.
+
+Il reste à exposer ce workflow dans l’interface PWA, à adopter ou convertir le
+format sur Android et à le valider dans Safari réel.
 
 Drift/SQLite WebAssembly est différé : il ne supprimerait pas le besoin du
 chiffrement applicatif et ajouterait des pages, caches et migrations à auditer.
@@ -128,8 +142,8 @@ La proposition complète et ses limites sont consignées dans
 - corruption, duplication, ordre et reprise transactionnelle testés ;
 - perte de clé et effacement isolé du stockage détectés sans réinitialisation
   silencieuse ;
-- cœur cryptographique de récupération testé ; téléchargement, import de
-  fichier et validation Safari encore requis ;
+- récupération et portail document testés ; branchement UI et validation
+  Safari encore requis ;
 - codec versionné des projections métier branché sur le snapshot chiffré ;
 - comportement du stockage détecté et annoncé, sans repli mémoire silencieux ;
 - benchmark sur 300 000 événements effectué sur ordinateur, puis confirmé sur

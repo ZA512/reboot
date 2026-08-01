@@ -1,6 +1,7 @@
 import 'package:reboot_app/web_storage/browser_encrypted_journal_prototype.dart';
 import 'package:reboot_app/web_storage/browser_local_event_journal.dart';
 import 'package:reboot_app/web_storage/browser_recovery_archive.dart';
+import 'package:reboot_app/web_storage/browser_recovery_document_portal.dart';
 import 'package:reboot_app/web_storage/browser_storage_durability.dart';
 import 'package:reboot_app/web_storage/encrypted_projection_snapshot.dart';
 import 'package:reboot_application/reboot_application.dart';
@@ -32,6 +33,15 @@ Future<void> main(List<String> arguments) async {
   final recovery = await BrowserRecoveryArchiveService().prepare(service);
   if (recovery.bytes.isEmpty || recovery.recoveryCode.isEmpty) {
     throw StateError('The recovery compile probe produced no archive.');
+  }
+  if (arguments.length > 2) {
+    final documents = BrowserRecoveryDocumentPortal();
+    await documents.save(
+      bytes: recovery.bytes,
+      suggestedName: 'reboot-compile-probe.reboot-backup',
+    );
+    await documents.copySensitive(recovery.recoveryCode);
+    await documents.pick();
   }
   await service.close();
 

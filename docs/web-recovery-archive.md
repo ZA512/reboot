@@ -1,6 +1,6 @@
 # Archive de récupération portable — prototype RBP1
 
-- Statut : cœur cryptographique testé, interface fichier non branchée
+- Statut : cœur et portail navigateur testés, interface utilisateur non activée
 - Date : 2026-08-01
 
 `RBP1` sépare volontairement la sauvegarde de la clé locale non extractible.
@@ -28,5 +28,14 @@ JavaScript ; le code affiché reste naturellement un secret persistant.
 
 Le format est conçu pour devenir commun à Android et à la PWA, mais Android
 utilise encore son archive SQLite chiffrée `RB1`. La compatibilité croisée, le
-téléchargement, le sélecteur de fichier, l’ergonomie de conservation du code et
-les essais Safari iPhone restent à réaliser avant activation.
+téléchargement et le sélecteur de fichier sont implémentés et testés dans
+Chrome, avec une limite de 64 Mio et une seule opération à la fois. Ils ne sont
+pas encore exposés dans le shell Flutter. La préparation et le téléchargement
+sont volontairement deux étapes : le clic final reste ainsi un geste utilisateur
+direct, condition importante sur les navigateurs mobiles stricts.
+
+L’API Clipboard Web exige un contexte sécurisé mais ne sait pas demander au
+système de masquer les aperçus, contrairement à l’intégration Android. Le futur
+écran devra l’expliquer et laisser le code affiché pour une copie manuelle. La
+compatibilité Android, l’ergonomie finale et les essais Safari iPhone restent à
+réaliser avant activation.

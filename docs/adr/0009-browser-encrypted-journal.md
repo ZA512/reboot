@@ -104,7 +104,10 @@ Le cœur d’une récupération chiffrée est désormais prototypé : une archiv
 AES-256-GCM indépendante de la clé locale, accompagnée d’un code séparé `RBP1`,
 est authentifiée et intégralement rejouée avant tout import atomique dans un
 profil vide. Son format vise la portabilité future avec Android. Le branchement
-aux fichiers PWA, l’adoption côté Android et la validation Safari restent requis.
+au téléchargement et au sélecteur de fichier PWA est maintenant testé dans
+Chrome, mais son exposition dans le shell, l’adoption côté Android et la
+validation Safari restent requises. La copie Web du code ne peut pas demander
+au système de masquer les aperçus du presse-papiers.
 
 ## Preuves obtenues
 
@@ -131,7 +134,9 @@ Les tests Chrome exécutent réellement Web Crypto et IndexedDB et vérifient :
 - snapshot opaque, suffixe authentifié, corruption supprimable et migration de
   schéma v1 vers v2 sans perte de clé ni d’événement ;
 - archive de récupération opaque, mauvais code et corruption refusés avant
-  toute écriture, projections métier intégralement validées avant restauration.
+  toute écriture, projections métier intégralement validées avant restauration ;
+- téléchargement Blob, sélection bornée, annulation et workflow complet de
+  restauration couverts dans Chrome.
 
 ## Options étudiées
 
