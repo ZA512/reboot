@@ -2610,6 +2610,90 @@ abstract class AppLocalizations {
   /// **'Tune assumptions only when real income, expenses or habits change.'**
   String get methodStepTune;
 
+  /// Dashboard action opening future expense allocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Future commitments'**
+  String get futureCommitmentsDashboardTitle;
+
+  /// Dashboard summary when no future allocation exists.
+  ///
+  /// In en, this message translates to:
+  /// **'No expense is reducing a future weekly budget.'**
+  String get futureCommitmentsDashboardEmpty;
+
+  /// Dashboard summary of future allocated expenses.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} already allocated across {count, plural, =1{1 future week} other{{count} future weeks}}'**
+  String futureCommitmentsDashboardSummary(String amount, int count);
+
+  /// Future expense allocations screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Future commitments'**
+  String get futureCommitmentsTitle;
+
+  /// Explains the virtual nature of future allocations.
+  ///
+  /// In en, this message translates to:
+  /// **'These amounts come from expenses already paid and spread over several REBOOT weeks. They reduce the projected available amount without creating another bank transaction.'**
+  String get futureCommitmentsIntro;
+
+  /// Total future allocated amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total still committed'**
+  String get futureCommitmentsTotal;
+
+  /// Number of future cycles with allocations.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week is affected} other{{count} weeks are affected}}'**
+  String futureCommitmentsCycleCount(int count);
+
+  /// Empty state for future commitments.
+  ///
+  /// In en, this message translates to:
+  /// **'No expense is currently committed against a future weekly budget.'**
+  String get noFutureCommitments;
+
+  /// Inclusive period of a future cycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Week from {start} to {end}'**
+  String futureCommitmentPeriod(String start, String end);
+
+  /// Budget applicable to one future cycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Usual weekly budget'**
+  String get futureCycleBudget;
+
+  /// Expense allocations already assigned to one future cycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Already committed'**
+  String get futureCycleCommitted;
+
+  /// Future budget after known allocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected available'**
+  String get futureCycleAvailable;
+
+  /// Strong warning above the accepted 50 percent commitment threshold.
+  ///
+  /// In en, this message translates to:
+  /// **'More than half of this weekly budget is already committed. Review the remaining amount before taking on another spread expense.'**
+  String get futureCommitmentStrongWarning;
+
+  /// Real source transaction behind one virtual allocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Original expense: {amount}, paid on {date}'**
+  String futureCommitmentSource(String amount, String date);
+
   /// Web pre-prototype blocking screen title.
   ///
   /// In en, this message translates to:

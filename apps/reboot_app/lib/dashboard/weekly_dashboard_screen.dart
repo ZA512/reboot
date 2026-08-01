@@ -8,6 +8,7 @@ import 'package:reboot_projection/reboot_projection.dart';
 
 import '../bonuses/received_bonus_controller.dart';
 import '../bonuses/received_bonus_screen.dart';
+import '../commitments/future_commitments_screen.dart';
 import '../cycle_settings/cycle_settings_controller.dart';
 import '../cycle_settings/cycle_settings_screen.dart';
 import '../expenses/quick_expense_controller.dart';
@@ -332,6 +333,22 @@ final class _DashboardBody extends ConsumerWidget {
           const SizedBox(height: 12),
           Card(
             child: ListTile(
+              key: const ValueKey('open-future-commitments'),
+              leading: const Icon(Icons.event_note_outlined),
+              title: Text(l10n.futureCommitmentsDashboardTitle),
+              subtitle: Text(_futureCommitmentSummary(l10n, projection, today)),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      FutureCommitmentsScreen(service: service, today: today),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
               key: const ValueKey('open-trajectory'),
               leading: const Icon(Icons.route_outlined),
               title: Text(l10n.trajectoryDashboardTitle),
@@ -544,6 +561,32 @@ String _receivedBonusSummary(
       ? l10n.receivedBonusesDashboardCount(active.length)
       : l10n.receivedBonusesDashboardDue(active.length, due);
 }
+
+String _futureCommitmentSummary(
+  AppLocalizations l10n,
+  Rolling52Projection projection,
+  LocalDate today,
+) {
+  final cycles = projection.cycles
+      .where(
+        (cycle) =>
+            cycle.cycle.start.isAfter(today) &&
+            cycle.allocatedExpenses.isPositive,
+      )
+      .toList(growable: false);
+  if (cycles.isEmpty) return l10n.futureCommitmentsDashboardEmpty;
+  final total = cycles.fold(
+    Money.zero(Currency.eur),
+    (sum, cycle) => sum + cycle.allocatedExpenses,
+  );
+  return l10n.futureCommitmentsDashboardSummary(
+    _formatMoneyFromLocale(l10n, total),
+    cycles.length,
+  );
+}
+
+String _formatMoneyFromLocale(AppLocalizations l10n, Money money) =>
+    formatMoneyExact(money, locale: l10n.localeName);
 
 final class _TrendSummaryCard extends StatelessWidget {
   const _TrendSummaryCard({required this.trends, required this.onOpen});

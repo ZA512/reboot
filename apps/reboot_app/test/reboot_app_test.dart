@@ -841,6 +841,8 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -160));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('open-cycle-settings')));
     await tester.pumpAndSettle();
 
@@ -1032,6 +1034,66 @@ void main() {
     );
     expect(find.text('À quoi le budget semaine a servi'), findsOneWidget);
     expect(find.text('Non qualifié'), findsOneWidget);
+  });
+
+  testWidgets('shows exact allocations already committed to future weeks', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    await tester.binding.setSurfaceSize(const Size(800, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final service = await _readyService(_MemoryJournal());
+    await service.recordExpense(
+      RecordExpenseCommand(
+        amount: Money.fromMinorUnits(15000, Currency.eur),
+        label: 'Réparation',
+        purchaseDate: LocalDate(2026, 4, 5),
+        allocationCycleCount: 3,
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localRebootServiceProvider.overrideWith((ref) async => service),
+          onboardingDeviceContextProvider.overrideWith(
+            (ref) async => OnboardingDeviceContext(
+              localDate: LocalDate(2026, 4, 5),
+              timeZone: IanaTimeZoneId('Europe/Paris'),
+            ),
+          ),
+        ],
+        child: const RebootApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final open = find.byKey(const ValueKey('open-future-commitments'));
+    await tester.scrollUntilVisible(
+      open,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(open);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Engagements futurs'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('future-commitments-total')))
+          .data,
+      contains('100'),
+    );
+    expect(
+      find.byKey(const ValueKey('future-cycle-2026-04-11')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('future-cycle-2026-04-18')),
+      findsOneWidget,
+    );
+    expect(find.text('Réparation'), findsNWidgets(2));
+    expect(find.textContaining('Dépense réelle : 150'), findsNWidgets(2));
   });
 
   testWidgets('records a same-week refund from its original purchase', (

@@ -1583,6 +1583,72 @@ class AppLocalizationsFr extends AppLocalizations {
       'Réajuster les hypothèses uniquement quand les revenus, dépenses ou habitudes changent.';
 
   @override
+  String get futureCommitmentsDashboardTitle => 'Engagements futurs';
+
+  @override
+  String get futureCommitmentsDashboardEmpty =>
+      'Aucune dépense ne réduit un futur budget semaine.';
+
+  @override
+  String futureCommitmentsDashboardSummary(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count futures semaines',
+      one: '1 future semaine',
+    );
+    return '$amount déjà répartis sur $_temp0';
+  }
+
+  @override
+  String get futureCommitmentsTitle => 'Engagements futurs';
+
+  @override
+  String get futureCommitmentsIntro =>
+      'Ces montants proviennent de dépenses déjà payées et réparties sur plusieurs semaines REBOOT. Ils réduisent le disponible prévisionnel sans créer une nouvelle opération bancaire.';
+
+  @override
+  String get futureCommitmentsTotal => 'Total restant engagé';
+
+  @override
+  String futureCommitmentsCycleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count semaines sont concernées',
+      one: '1 semaine est concernée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noFutureCommitments =>
+      'Aucune dépense n’est actuellement engagée sur un futur budget semaine.';
+
+  @override
+  String futureCommitmentPeriod(String start, String end) {
+    return 'Semaine du $start au $end';
+  }
+
+  @override
+  String get futureCycleBudget => 'Budget semaine habituel';
+
+  @override
+  String get futureCycleCommitted => 'Déjà engagé';
+
+  @override
+  String get futureCycleAvailable => 'Disponible prévisionnel';
+
+  @override
+  String get futureCommitmentStrongWarning =>
+      'Plus de la moitié de ce budget semaine est déjà engagée. Vérifiez le restant avant d’accepter un nouvel étalement.';
+
+  @override
+  String futureCommitmentSource(String amount, String date) {
+    return 'Dépense réelle : $amount, payée le $date';
+  }
+
+  @override
   String get webPrototypeTitle =>
       'Le stockage Web sécurisé est en cours de validation';
 

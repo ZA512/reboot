@@ -1578,6 +1578,72 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tune assumptions only when real income, expenses or habits change.';
 
   @override
+  String get futureCommitmentsDashboardTitle => 'Future commitments';
+
+  @override
+  String get futureCommitmentsDashboardEmpty =>
+      'No expense is reducing a future weekly budget.';
+
+  @override
+  String futureCommitmentsDashboardSummary(String amount, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count future weeks',
+      one: '1 future week',
+    );
+    return '$amount already allocated across $_temp0';
+  }
+
+  @override
+  String get futureCommitmentsTitle => 'Future commitments';
+
+  @override
+  String get futureCommitmentsIntro =>
+      'These amounts come from expenses already paid and spread over several REBOOT weeks. They reduce the projected available amount without creating another bank transaction.';
+
+  @override
+  String get futureCommitmentsTotal => 'Total still committed';
+
+  @override
+  String futureCommitmentsCycleCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks are affected',
+      one: '1 week is affected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noFutureCommitments =>
+      'No expense is currently committed against a future weekly budget.';
+
+  @override
+  String futureCommitmentPeriod(String start, String end) {
+    return 'Week from $start to $end';
+  }
+
+  @override
+  String get futureCycleBudget => 'Usual weekly budget';
+
+  @override
+  String get futureCycleCommitted => 'Already committed';
+
+  @override
+  String get futureCycleAvailable => 'Projected available';
+
+  @override
+  String get futureCommitmentStrongWarning =>
+      'More than half of this weekly budget is already committed. Review the remaining amount before taking on another spread expense.';
+
+  @override
+  String futureCommitmentSource(String amount, String date) {
+    return 'Original expense: $amount, paid on $date';
+  }
+
+  @override
   String get webPrototypeTitle => 'Secure Web storage is being validated';
 
   @override
