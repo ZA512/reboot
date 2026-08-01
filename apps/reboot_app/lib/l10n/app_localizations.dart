@@ -2477,6 +2477,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open your home-screen widget menu and add the REBOOT widget.'**
   String get weeklyWidgetManualInstall;
+
+  /// Dashboard action opening the weekly budget explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand my budget'**
+  String get budgetExplanationDashboardTitle;
+
+  /// Dashboard summary of the weekly budget explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'See every assumption, deduction and rounding behind the weekly amount.'**
+  String get budgetExplanationDashboardHelp;
+
+  /// Weekly budget explanation screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'How this budget is calculated'**
+  String get budgetExplanationTitle;
+
+  /// Introduction to the transparent weekly budget calculation.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT rebuilds this amount from the income and expenses accepted for the next 52 cycles. It never hides a compensation based on a previous week.'**
+  String get budgetExplanationIntro;
+
+  /// Inclusive rolling calculation horizon.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation from {start} through {end}, inclusive'**
+  String calculationHorizon(String start, String end);
+
+  /// Weekly amount resulting from the annual projection.
+  ///
+  /// In en, this message translates to:
+  /// **'Base weekly budget'**
+  String get baseWeeklyBudget;
+
+  /// Weekly addition from an available, confirmed received bonus.
+  ///
+  /// In en, this message translates to:
+  /// **'Received bonus available this week'**
+  String get receivedBonusWeeklyAddition;
+
+  /// Title for the breakdown from exact to recommended weekly capacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly composition'**
+  String get weeklyBudgetComposition;
+
+  /// Unrounded weekly capacity from the projection.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact capacity before rounding'**
+  String get exactWeeklyCapacity;
+
+  /// Annual amount not allocated to weekly spending.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual capacity kept outside the weekly budget'**
+  String get unallocatedAnnualMarginLabel;
+
+  /// Explanation of the unallocated annual capacity.
+  ///
+  /// In en, this message translates to:
+  /// **'This margin comes from rounding down to the euro and, when configured, the effort reserved for leaving an overdraft. It remains on the account; REBOOT does not spend it silently.'**
+  String get unallocatedAnnualMarginHelp;
+
+  /// Number of cash-flow occurrences in the rolling projection.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No occurrence} =1{1 occurrence} other{{count} occurrences}}'**
+  String cashFlowOccurrences(int count);
+
+  /// Source amount used for one cash-flow occurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount per occurrence'**
+  String get cashFlowReferenceAmount;
+
+  /// Estimation strategy applied to a variable cash flow.
+  ///
+  /// In en, this message translates to:
+  /// **'Variable amount estimate'**
+  String get cashFlowEstimation;
+
+  /// Title for the concise REBOOT method reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'The REBOOT method'**
+  String get rebootMethodTitle;
+
+  /// Introduction to the concise REBOOT method steps.
+  ///
+  /// In en, this message translates to:
+  /// **'The setup does the hard work once; everyday use stays deliberately simple:'**
+  String get rebootMethodIntro;
+
+  /// First REBOOT method step.
+  ///
+  /// In en, this message translates to:
+  /// **'Record every recurring income and unavoidable expense.'**
+  String get methodStepRecord;
+
+  /// Second REBOOT method step.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate variable amounts prudently over a full year.'**
+  String get methodStepEstimate;
+
+  /// Third REBOOT method step.
+  ///
+  /// In en, this message translates to:
+  /// **'Block reserves, projects and a safety margin before daily spending.'**
+  String get methodStepBlock;
+
+  /// Fourth REBOOT method step.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize the remaining capacity into equal weekly budgets.'**
+  String get methodStepOrganize;
+
+  /// Fifth REBOOT method step.
+  ///
+  /// In en, this message translates to:
+  /// **'Observe the remaining amount before spending, not the bank balance.'**
+  String get methodStepObserve;
+
+  /// Sixth REBOOT method step.
+  ///
+  /// In en, this message translates to:
+  /// **'Tune assumptions only when real income, expenses or habits change.'**
+  String get methodStepTune;
 }
 
 class _AppLocalizationsDelegate

@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:reboot_app/bonuses/received_bonus_screen.dart';
 import 'package:reboot_app/health/health_screen.dart';
 import 'package:reboot_app/infrastructure/device_context_providers.dart';
 import 'package:reboot_app/infrastructure/profile_providers.dart';
 import 'package:reboot_app/l10n/app_localizations.dart';
+import 'package:reboot_app/method/budget_explanation_screen.dart';
 import 'package:reboot_app/refunds/refunds_screen.dart';
 import 'package:reboot_app/src/reboot_app.dart';
 import 'package:reboot_application/reboot_application.dart';
@@ -655,6 +657,81 @@ void main() {
     expect(fuel.definitionForCycleStarting(currentCycle), isNull);
     expect(fuel.latestRevision.effectiveFromCycleStart, nextCycle);
     expect(find.text('Essence'), findsOneWidget);
+  });
+
+  testWidgets('explains every accepted input behind the weekly budget', (
+    tester,
+  ) async {
+    _useLocale(tester, const Locale('fr'));
+    await tester.binding.setSurfaceSize(const Size(800, 1000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final service = await _readyService(_MemoryJournal());
+    final cycleStart = LocalDate(2026, 4, 4);
+    final projection = service.buildAnnualBudget(cycleStart);
+    final moneyFormat = NumberFormat.simpleCurrency(
+      locale: 'fr',
+      name: 'EUR',
+      decimalDigits: 2,
+    );
+    String format(Money money) => moneyFormat.format(money.minorUnits / 100);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: BudgetExplanationScreen(
+          service: service,
+          today: LocalDate(2026, 4, 6),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Comment ce budget est calculé'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('explained-weekly-budget')))
+          .data,
+      format(projection.recommendedWeeklyBudget),
+    );
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(const ValueKey('budget-explanation-income-total')),
+          )
+          .data,
+      format(projection.totalIncome),
+    );
+    final outflowTotal = find.byKey(
+      const ValueKey('budget-explanation-outflow-total'),
+    );
+    await tester.scrollUntilVisible(
+      outflowTotal,
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      tester.widget<Text>(outflowTotal).data,
+      format(projection.totalOutflows),
+    );
+    expect(projection.totalIncome.minorUnits, 3600000);
+    expect(projection.totalOutflows.minorUnits, 1440000);
+
+    final salary = find.byKey(const ValueKey('explained-cash-flow-Salaire 1'));
+    await tester.scrollUntilVisible(
+      salary,
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(salary);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(of: salary, matching: find.text('12 occurrences')),
+      findsOneWidget,
+    );
+    expect(find.text('Montant par occurrence'), findsOneWidget);
+    expect(find.text('Fixe'), findsOneWidget);
   });
 
   testWidgets('schedules a new trajectory without changing the current week', (

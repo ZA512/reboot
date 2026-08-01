@@ -10,8 +10,10 @@ packages, never to widgets.
 The Android flow currently covers onboarding, recurring assumptions,
 trajectory, weekly spending, reserves, refunds, optional health tracking,
 cycle settings, and received bonus pools that require confirmation at their
-next payment date. Its Android home-screen widget stores only an encrypted,
-already-formatted remaining amount, masks it by default, and reveals it for two
-seconds on demand.
+next payment date. A dedicated explanation screen traces the current weekly
+amount back to every accepted annual assumption, deduction and prudent
+rounding. Its Android home-screen widget stores only an encrypted,
+already-formatted remaining amount, masks it by default, and reveals it for
+two seconds on demand.
 
 REBOOT weekly remaining-to-live budget application.

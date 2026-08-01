@@ -1487,4 +1487,93 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get weeklyWidgetManualInstall =>
       'Open your home-screen widget menu and add the REBOOT widget.';
+
+  @override
+  String get budgetExplanationDashboardTitle => 'Understand my budget';
+
+  @override
+  String get budgetExplanationDashboardHelp =>
+      'See every assumption, deduction and rounding behind the weekly amount.';
+
+  @override
+  String get budgetExplanationTitle => 'How this budget is calculated';
+
+  @override
+  String get budgetExplanationIntro =>
+      'REBOOT rebuilds this amount from the income and expenses accepted for the next 52 cycles. It never hides a compensation based on a previous week.';
+
+  @override
+  String calculationHorizon(String start, String end) {
+    return 'Calculation from $start through $end, inclusive';
+  }
+
+  @override
+  String get baseWeeklyBudget => 'Base weekly budget';
+
+  @override
+  String get receivedBonusWeeklyAddition =>
+      'Received bonus available this week';
+
+  @override
+  String get weeklyBudgetComposition => 'Weekly composition';
+
+  @override
+  String get exactWeeklyCapacity => 'Exact capacity before rounding';
+
+  @override
+  String get unallocatedAnnualMarginLabel =>
+      'Annual capacity kept outside the weekly budget';
+
+  @override
+  String get unallocatedAnnualMarginHelp =>
+      'This margin comes from rounding down to the euro and, when configured, the effort reserved for leaving an overdraft. It remains on the account; REBOOT does not spend it silently.';
+
+  @override
+  String cashFlowOccurrences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count occurrences',
+      one: '1 occurrence',
+      zero: 'No occurrence',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cashFlowReferenceAmount => 'Amount per occurrence';
+
+  @override
+  String get cashFlowEstimation => 'Variable amount estimate';
+
+  @override
+  String get rebootMethodTitle => 'The REBOOT method';
+
+  @override
+  String get rebootMethodIntro =>
+      'The setup does the hard work once; everyday use stays deliberately simple:';
+
+  @override
+  String get methodStepRecord =>
+      'Record every recurring income and unavoidable expense.';
+
+  @override
+  String get methodStepEstimate =>
+      'Estimate variable amounts prudently over a full year.';
+
+  @override
+  String get methodStepBlock =>
+      'Block reserves, projects and a safety margin before daily spending.';
+
+  @override
+  String get methodStepOrganize =>
+      'Organize the remaining capacity into equal weekly budgets.';
+
+  @override
+  String get methodStepObserve =>
+      'Observe the remaining amount before spending, not the bank balance.';
+
+  @override
+  String get methodStepTune =>
+      'Tune assumptions only when real income, expenses or habits change.';
 }

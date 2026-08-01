@@ -19,6 +19,7 @@ import '../health/health_screen.dart';
 import '../infrastructure/android_weekly_widget.dart';
 import '../infrastructure/device_context_providers.dart';
 import '../l10n/app_localizations.dart';
+import '../method/budget_explanation_screen.dart';
 import '../refunds/refund_controller.dart';
 import '../refunds/refunds_screen.dart';
 import '../reserves/reserve_controller.dart';
@@ -308,6 +309,22 @@ final class _DashboardBody extends ConsumerWidget {
                 MaterialPageRoute<void>(
                   builder: (_) =>
                       CashFlowManagementScreen(service: service, today: today),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              key: const ValueKey('open-budget-explanation'),
+              leading: const Icon(Icons.calculate_outlined),
+              title: Text(l10n.budgetExplanationDashboardTitle),
+              subtitle: Text(l10n.budgetExplanationDashboardHelp),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      BudgetExplanationScreen(service: service, today: today),
                 ),
               ),
             ),

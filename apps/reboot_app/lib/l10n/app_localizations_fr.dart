@@ -1492,4 +1492,93 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get weeklyWidgetManualInstall =>
       'Ouvrez le menu des widgets de l’écran d’accueil et ajoutez le widget REBOOT.';
+
+  @override
+  String get budgetExplanationDashboardTitle => 'Comprendre mon budget';
+
+  @override
+  String get budgetExplanationDashboardHelp =>
+      'Consultez chaque hypothèse, protection et arrondi derrière le montant semaine.';
+
+  @override
+  String get budgetExplanationTitle => 'Comment ce budget est calculé';
+
+  @override
+  String get budgetExplanationIntro =>
+      'REBOOT reconstruit ce montant à partir des entrées et dépenses validées pour les 52 prochains cycles. Aucune compensation d’une semaine passée n’est cachée dans le calcul.';
+
+  @override
+  String calculationHorizon(String start, String end) {
+    return 'Calcul du $start au $end inclus';
+  }
+
+  @override
+  String get baseWeeklyBudget => 'Budget semaine de base';
+
+  @override
+  String get receivedBonusWeeklyAddition =>
+      'Prime reçue disponible cette semaine';
+
+  @override
+  String get weeklyBudgetComposition => 'Composition hebdomadaire';
+
+  @override
+  String get exactWeeklyCapacity => 'Capacité exacte avant arrondi';
+
+  @override
+  String get unallocatedAnnualMarginLabel =>
+      'Capacité annuelle laissée hors budget semaine';
+
+  @override
+  String get unallocatedAnnualMarginHelp =>
+      'Cette marge provient de l’arrondi à l’euro inférieur et, si elle est configurée, de la part réservée à la sortie de découvert. Elle reste sur le compte : REBOOT ne la dépense pas en douce.';
+
+  @override
+  String cashFlowOccurrences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count occurrences',
+      one: '1 occurrence',
+      zero: 'Aucune occurrence',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cashFlowReferenceAmount => 'Montant par occurrence';
+
+  @override
+  String get cashFlowEstimation => 'Estimation du montant variable';
+
+  @override
+  String get rebootMethodTitle => 'La méthode REBOOT';
+
+  @override
+  String get rebootMethodIntro =>
+      'Le paramétrage fait le travail difficile une fois ; le quotidien reste volontairement simple :';
+
+  @override
+  String get methodStepRecord =>
+      'Recenser toutes les entrées régulières et les dépenses incontournables.';
+
+  @override
+  String get methodStepEstimate =>
+      'Estimer prudemment les montants variables sur une année entière.';
+
+  @override
+  String get methodStepBlock =>
+      'Bloquer les réserves, projets et une marge de sécurité avant le quotidien.';
+
+  @override
+  String get methodStepOrganize =>
+      'Organiser la capacité restante en budgets semaine identiques.';
+
+  @override
+  String get methodStepObserve =>
+      'Observer le restant avant de dépenser, pas le solde bancaire.';
+
+  @override
+  String get methodStepTune =>
+      'Réajuster les hypothèses uniquement quand les revenus, dépenses ou habitudes changent.';
 }

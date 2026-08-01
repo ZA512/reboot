@@ -65,6 +65,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Révision future de la trajectoire, des objectifs et du coussin annuel
 - [x] Changement futur du jour REBOOT avec cycle de transition explicite
 - [x] Primes déjà reçues lissées jusqu’à leur prochaine confirmation
+- [x] Explication détaillée du budget semaine, de ses hypothèses et de ses arrondis
 - [x] Widget Android confidentiel du restant hebdomadaire
 - [x] Stratégie de distribution Android et Web/PWA acceptée
 - [ ] Prototype de stockage Web chiffré et garde des clés
