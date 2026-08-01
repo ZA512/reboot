@@ -65,6 +65,13 @@ jobs:
           dart compile js tool/web_storage_compile_probe.dart -O2 --output=build/web_storage_compile_probe.js
           dart compile wasm tool/web_storage_compile_probe.dart --output=build/web_storage_compile_probe.wasm
 
-      - name: Build blocked Web safety shell
+      - name: Build versioned offline Web shell
         working-directory: apps/reboot_app
-        run: flutter build web --release
+        run: dart run tool/build_web_release.dart
+
+      - name: Validate generated service worker
+        working-directory: apps/reboot_app
+        run: |
+          node --check build/web/reboot_service_worker.js
+          test ! -e build/web/flutter_service_worker.js
+          grep -q "reboot-shell-" build/web/reboot_service_worker.js

@@ -98,12 +98,19 @@ flutter build apk --debug
 ```
 
 La sortie JavaScript compatible Safari iPhone doit également continuer à
-compiler, même si le shell interdit encore les saisies :
+compiler, même si le shell interdit encore les saisies. La commande dédiée
+construit les ressources sans CDN, calcule la version du shell hors ligne et
+génère le service worker REBOOT :
 
 ```shell
 cd apps/reboot_app
-flutter build web --release
+dart run tool/build_web_release.dart
 ```
+
+Ne pas publier directement la sortie d'un simple `flutter build web` : elle ne
+contient pas le manifeste exact et atomique du shell hors ligne. Le cache PWA
+ne contient que les ressources statiques listées par cette commande, jamais le
+journal, les clés ou les données financières locales.
 
 ## Politique de dépendances
 
