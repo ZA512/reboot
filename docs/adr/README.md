@@ -40,7 +40,8 @@ Statuts autorisés :
 
 ## Prochaines décisions à traiter
 
-1. codec de projection, récupération et validation Safari requis avant
+1. achever le snapshot agrégé avec les codecs de configuration, réserves,
+   santé et espèces, puis récupération UI et validation Safari requises avant
    acceptation du stockage Web proposé par l’ADR-0009 ;
 2. modèle de synchronisation et résolution des conflits ;
 3. format lisible d’export et portabilité au-delà de l’archive de récupération ;

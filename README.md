@@ -73,6 +73,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Shell Flutter Web compilable, sans persistance non validée
 - [x] Shell PWA versionné, redémarrage hors ligne et aide d’installation localisée
 - [x] Contrat d’hébergement PWA et en-têtes de sécurité versionnés
+- [x] Codec versionné et reprise chiffrée de la projection des dépenses
 - [ ] Prototype de stockage Web chiffré et garde des clés
 - [ ] PWA installable et utilisable hors ligne sur iPhone
 

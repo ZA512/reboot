@@ -22,8 +22,9 @@ de déploiement et la CSP.
 ### Stockage du journal
 
 Utiliser IndexedDB directement par le package officiel `web` 1.1.1 pour le
-journal PWA initial. Ne pas persister un fichier SQLite ou des projections :
-les projections sont reconstruites en mémoire depuis le journal déchiffré.
+journal PWA initial. Ne pas persister un fichier SQLite ni une projection en
+clair. Une projection éventuellement conservée est un cache chiffré jetable ;
+elle reste reconstructible depuis le journal déchiffré.
 
 Chaque événement est chiffré avant l’appel à IndexedDB dans une enveloppe
 versionnée :
@@ -90,16 +91,21 @@ l’object store sans remplacer la clé non extractible ni les événements exis
 
 Le journal dispose désormais d’un adaptateur `LocalEventJournal` couvert avec
 de vrais `EventRecord`, mais cet adaptateur reste déconnecté de la composition
-du shell Web, qui demeure sans saisie. Le codec complet est partagé dans un
-package Dart pur avec le stockage Android. Le benchmark de 300 000 événements
-sur Chrome desktop valide le débit
+du shell Web, qui demeure sans saisie. Le codec complet des événements est
+partagé dans un package Dart pur avec le stockage Android. Le benchmark de
+300 000 événements sur Chrome desktop valide le débit
 d’une saisie et mesure 69 ms pour restaurer un snapshot synthétique puis rejouer
 100 événements, contre 34,0 secondes pour un rejeu intégral lors du même passage.
-Passer cet ADR à `Accepted` et activer les données réelles exigera donc encore au
-minimum : codec versionné des projections métier, récupération chiffrée,
-validation Safari iPhone réelle, politique de persistance navigateur, codec
-des projections et tests de concurrence multi-onglets. La CSP et le contrat
-d’hébergement sont désormais fixés par l’ADR-0012.
+
+Un premier codec de projection réel couvre maintenant l’état complet des
+dépenses. Il est canonique, borné, portable entre JavaScript et les plateformes
+natives, restaure les invariants du domaine et sa reprise avec le suffixe
+chiffré est vérifiée dans Chrome. Passer cet ADR à `Accepted` et activer les
+données réelles exigera donc encore au minimum : les quatre autres projections
+et leur conteneur agrégé, récupération chiffrée exposée dans l’interface,
+validation Safari iPhone réelle, politique de persistance navigateur et tests
+de concurrence multi-onglets. La CSP et le contrat d’hébergement sont désormais
+fixés par l’ADR-0012.
 
 Le cœur d’une récupération chiffrée est désormais prototypé : une archive
 AES-256-GCM indépendante de la clé locale, accompagnée d’un code séparé `RBP1`,
@@ -135,6 +141,8 @@ Les tests Chrome exécutent réellement Web Crypto et IndexedDB et vérifient :
   écriture, fermeture, réouverture et rejeu authentifié complet ;
 - snapshot opaque, suffixe authentifié, corruption supprimable et migration de
   schéma v1 vers v2 sans perte de clé ni d’événement ;
+- codec canonique de la projection des dépenses, bornes int64 exactes,
+  invariants invalides refusés et reprise du suffixe identique au rejeu complet ;
 - archive de récupération opaque, mauvais code et corruption refusés avant
   toute écriture, projections métier intégralement validées avant restauration ;
 - téléchargement Blob, sélection bornée, annulation et workflow complet de

@@ -80,8 +80,18 @@ toucher au journal. La migration v1 vers v2 conserve la clé et les événements
 
 Avec un snapshot synthétique de 262 228 octets à la position 299 900, la
 restauration et le rejeu authentifié des 100 événements suivants prennent 69 ms.
-Le mécanisme satisfait la cible desktop ; le vrai codec des projections REBOOT
-reste à implémenter avant activation.
+Le premier codec métier réel couvre désormais la projection complète des
+dépenses : montants exacts, affectation historique au cycle, qualification,
+étalement, remboursements, corrections et tombstones. Son JSON canonique est
+borné à 8 Mio, encode les entiers exacts sous forme décimale et rejette tout état
+qui enfreint les invariants métier. Un test Chrome chiffre ce snapshot, ajoute
+un événement au journal puis vérifie que la reprise du suffixe produit le même
+état qu’un rejeu intégral.
+
+Cette étape ne suffit pas à activer les saisies Web. Il reste à fournir les
+quatre codecs de projection (configuration, réserves, santé et espèces), leur
+conteneur agrégé et la stratégie de repli automatique vers le rejeu complet en
+cas de version inconnue ou d’état invalide.
 
 ## Étape 2 — Cœur de récupération portable
 
@@ -176,7 +186,8 @@ La proposition complète et ses limites sont consignées dans
   silencieuse ;
 - récupération et portail document testés ; branchement UI et validation
   Safari encore requis ;
-- codec versionné des projections métier branché sur le snapshot chiffré ;
+- codec versionné agrégé des cinq projections métier branché sur le snapshot
+  chiffré ; la projection des dépenses et sa reprise du suffixe sont couvertes ;
 - comportement du stockage détecté et annoncé, sans repli mémoire silencieux ;
 - CSP et contrat d’hébergement versionnés ; validation de l’origine de
   production encore requise ;

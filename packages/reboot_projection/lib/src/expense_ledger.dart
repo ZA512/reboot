@@ -24,6 +24,35 @@ final class ProjectedExpenseRefund {
     );
   }
 
+  /// Restores one validated derived refund from a projection checkpoint.
+  factory ProjectedExpenseRefund.fromCheckpoint({
+    required EventId eventId,
+    required Money amount,
+    required LocalDate receivedDate,
+    required LocalDate receiptCycleStart,
+    required DateTime recordedAtUtc,
+    EventId? reversalEventId,
+  }) {
+    ExpenseRefundedPayload(
+      amount: amount,
+      receiptCycleStart: receiptCycleStart,
+    );
+    _requireUtc(recordedAtUtc, 'refund recordedAtUtc');
+    if (eventId == reversalEventId) {
+      throw const FormatException(
+        'A refund cannot be reversed by its own event.',
+      );
+    }
+    return ProjectedExpenseRefund._(
+      eventId: eventId,
+      amount: amount,
+      receivedDate: receivedDate,
+      receiptCycleStart: receiptCycleStart,
+      recordedAtUtc: recordedAtUtc,
+      reversalEventId: reversalEventId,
+    );
+  }
+
   final EventId eventId;
   final Money amount;
   final LocalDate receivedDate;
@@ -42,6 +71,27 @@ final class ProjectedExpenseRefund {
         recordedAtUtc: recordedAtUtc,
         reversalEventId: event.id,
       );
+
+  @override
+  bool operator ==(Object other) {
+    return other is ProjectedExpenseRefund &&
+        eventId == other.eventId &&
+        amount == other.amount &&
+        receivedDate == other.receivedDate &&
+        receiptCycleStart == other.receiptCycleStart &&
+        recordedAtUtc == other.recordedAtUtc &&
+        reversalEventId == other.reversalEventId;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    eventId,
+    amount,
+    receivedDate,
+    receiptCycleStart,
+    recordedAtUtc,
+    reversalEventId,
+  );
 }
 
 /// Observable expense reconstructed solely from immutable journal events.
@@ -74,6 +124,96 @@ final class ProjectedExpense {
       recordedAtUtc: event.recordedAtUtc,
       recordingEventId: event.id,
       refunds: const [],
+    );
+  }
+
+  /// Restores one validated derived expense from a projection checkpoint.
+  ///
+  /// Checkpoints are disposable caches. The immutable journal remains the
+  /// source of truth if any invariant below is rejected.
+  factory ProjectedExpense.fromCheckpoint({
+    required EntityId id,
+    required Money amount,
+    required String label,
+    required LocalDate purchaseDate,
+    required ExpenseCycleAssignment cycleAssignment,
+    required DateTime recordedAtUtc,
+    required EventId recordingEventId,
+    required List<ProjectedExpenseRefund> refunds,
+    ExpenseNature? nature,
+    EventId? natureEventId,
+    List<ExpenseAllocation>? allocations,
+    EventId? allocationEventId,
+    DateTime? deletedAtUtc,
+    EventId? deletionEventId,
+  }) {
+    ExpenseRecordedPayload(
+      amount: amount,
+      label: label,
+      cycleAssignment: cycleAssignment,
+    );
+    _requireUtc(recordedAtUtc, 'expense recordedAtUtc');
+    _requirePair(nature, natureEventId, 'expense nature');
+    _requirePair(allocations, allocationEventId, 'expense allocations');
+    _requirePair(deletedAtUtc, deletionEventId, 'expense deletion');
+    if (deletedAtUtc != null) {
+      _requireUtc(deletedAtUtc, 'expense deletedAtUtc');
+      if (deletedAtUtc.isBefore(recordedAtUtc)) {
+        throw const FormatException(
+          'An expense cannot be deleted before it was recorded.',
+        );
+      }
+    }
+
+    final immutableAllocations = allocations == null
+        ? null
+        : List<ExpenseAllocation>.unmodifiable(allocations);
+    if (immutableAllocations != null) {
+      final payload = ExpenseAllocationsPlannedPayload(
+        allocations: immutableAllocations,
+      );
+      if (payload.total != amount) {
+        throw const FormatException(
+          'Checkpoint allocations must total the expense amount.',
+        );
+      }
+    }
+
+    final immutableRefunds = List<ProjectedExpenseRefund>.unmodifiable(refunds);
+    var refunded = Money.zero(Currency.eur);
+    final refundIds = <EventId>{};
+    for (final refund in immutableRefunds) {
+      if (refund.recordedAtUtc.isBefore(recordedAtUtc)) {
+        throw const FormatException(
+          'A refund cannot precede its expense recording.',
+        );
+      }
+      if (!refundIds.add(refund.eventId)) {
+        throw FormatException('Duplicate refund event ${refund.eventId}.');
+      }
+      if (!refund.isReversed) refunded += refund.amount;
+    }
+    if (refunded.compareTo(amount) > 0) {
+      throw const FormatException(
+        'Active checkpoint refunds exceed the expense amount.',
+      );
+    }
+
+    return ProjectedExpense._(
+      id: id,
+      amount: amount,
+      label: label,
+      purchaseDate: purchaseDate,
+      cycleAssignment: cycleAssignment,
+      recordedAtUtc: recordedAtUtc,
+      recordingEventId: recordingEventId,
+      refunds: immutableRefunds,
+      nature: nature,
+      natureEventId: natureEventId,
+      allocations: immutableAllocations,
+      allocationEventId: allocationEventId,
+      deletedAtUtc: deletedAtUtc,
+      deletionEventId: deletionEventId,
     );
   }
 
@@ -345,6 +485,39 @@ final class ExpenseLedger {
     );
   }
 
+  /// Restores a validated derived checkpoint at one exact journal position.
+  ///
+  /// Event UUID uniqueness is still enforced by the journal. Only event IDs
+  /// retained by the current expense state are needed for local idempotence.
+  factory ExpenseLedger.fromCheckpoint({
+    required Iterable<ProjectedExpense> expenses,
+    required LocalJournalPosition lastPosition,
+  }) {
+    final byId = <EntityId, ProjectedExpense>{};
+    final appliedEventIds = <EventId>{};
+    for (final expense in expenses) {
+      if (byId.containsKey(expense.id)) {
+        throw FormatException('Duplicate expense entity ${expense.id}.');
+      }
+      byId[expense.id] = expense;
+      for (final eventId in _retainedEventIds(expense)) {
+        if (!appliedEventIds.add(eventId)) {
+          throw FormatException('Duplicate retained expense event $eventId.');
+        }
+      }
+    }
+    if (lastPosition.exactValue < BigInt.from(appliedEventIds.length)) {
+      throw const FormatException(
+        'The checkpoint position precedes its retained expense events.',
+      );
+    }
+    return ExpenseLedger._(
+      expenses: byId,
+      appliedEventIds: appliedEventIds,
+      lastPosition: lastPosition,
+    );
+  }
+
   /// All known expenses, including deleted tombstones.
   final Map<EntityId, ProjectedExpense> expenses;
 
@@ -450,6 +623,29 @@ final class ExpenseLedger {
       appliedEventIds: {..._appliedEventIds, entry.event.id},
       lastPosition: entry.position,
     );
+  }
+}
+
+Iterable<EventId> _retainedEventIds(ProjectedExpense expense) sync* {
+  yield expense.recordingEventId;
+  if (expense.natureEventId case final eventId?) yield eventId;
+  if (expense.allocationEventId case final eventId?) yield eventId;
+  if (expense.deletionEventId case final eventId?) yield eventId;
+  for (final refund in expense.refunds) {
+    yield refund.eventId;
+    if (refund.reversalEventId case final eventId?) yield eventId;
+  }
+}
+
+void _requireUtc(DateTime value, String field) {
+  if (!value.isUtc) {
+    throw FormatException('$field must be expressed in UTC.');
+  }
+}
+
+void _requirePair(Object? value, Object? eventId, String field) {
+  if ((value == null) != (eventId == null)) {
+    throw FormatException('$field value and event ID must appear together.');
   }
 }
 

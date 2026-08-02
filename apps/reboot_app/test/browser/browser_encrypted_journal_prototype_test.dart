@@ -6,6 +6,9 @@ import 'dart:convert';
 import 'package:reboot_app/web_storage/browser_encrypted_journal_prototype.dart';
 import 'package:reboot_app/web_storage/encrypted_event_envelope.dart';
 import 'package:reboot_app/web_storage/encrypted_projection_snapshot.dart';
+import 'package:reboot_domain/reboot_domain.dart';
+import 'package:reboot_projection/reboot_projection.dart';
+import 'package:reboot_serialization/reboot_serialization.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -443,6 +446,80 @@ void main() {
     expect(await journal.readAll(), <WebPrototypePlainEvent>[first, second]);
   });
 
+  test(
+    'resumes a real expense projection from an encrypted snapshot',
+    () async {
+      final databaseName = _databaseName('expense-projection-snapshot');
+      final journal = await BrowserEncryptedJournalPrototype.open(
+        databaseName: databaseName,
+      );
+      addTearDown(() async {
+        journal.close();
+        await BrowserEncryptedJournalPrototype.deleteDatabaseForTesting(
+          databaseName,
+        );
+        BrowserEncryptedJournalPrototype.removeMarkerForTesting(databaseName);
+      });
+      final recordCodec = EventRecordJsonCodec();
+      final snapshotCodec = ExpenseLedgerSnapshotCodec();
+      final recorded = _domainExpenseEvent(
+        31,
+        ExpenseRecordedPayload(
+          amount: Money.fromMinorUnits(15000, Currency.eur),
+          label: 'courses-confidentielles',
+          cycleAssignment: ExpenseCycleAssignment(
+            cycleStart: LocalDate(2026, 8, 1),
+            policyVersion: 1,
+            timeZone: IanaTimeZoneId('Europe/Paris'),
+          ),
+        ),
+      );
+      final nature = _domainExpenseEvent(
+        32,
+        const ExpenseNatureSetPayload(nature: ExpenseNature.necessary),
+      );
+      await journal.append(_plainDomainEvent(recorded, recordCodec));
+      final prefix = ExpenseLedger.replay([
+        LocalJournalEntry(position: LocalJournalPosition(1), event: recorded),
+      ]);
+      final projectionJson = snapshotCodec.encode(prefix);
+      await journal.writeProjectionSnapshot(
+        WebPrototypeProjectionSnapshot(
+          journalPosition: BigInt.one,
+          schemaVersion: ExpenseLedgerSnapshotCodec.schemaVersion,
+          projectionJson: projectionJson,
+        ),
+      );
+
+      await journal.append(_plainDomainEvent(nature, recordCodec));
+      final persisted = jsonEncode(
+        await journal.inspectEncryptedSnapshotForTesting(),
+      );
+      expect(persisted, isNot(contains('courses-confidentielles')));
+      final snapshot = await journal.readProjectionSnapshot();
+      expect(snapshot, isNotNull);
+      var resumed = snapshotCodec.decode(snapshot!.projectionJson);
+      final suffix = await journal.readAfter(snapshot.journalPosition);
+      for (var index = 0; index < suffix.length; index++) {
+        resumed = resumed.apply(
+          LocalJournalEntry(
+            position: LocalJournalPosition.fromBigInt(
+              snapshot.journalPosition + BigInt.from(index + 1),
+            ),
+            event: recordCodec.decode(suffix[index].payloadJson),
+          ),
+        );
+      }
+      final fullReplay = ExpenseLedger.replay([
+        LocalJournalEntry(position: LocalJournalPosition(1), event: recorded),
+        LocalJournalEntry(position: LocalJournalPosition(2), event: nature),
+      ]);
+
+      expect(snapshotCodec.encode(resumed), snapshotCodec.encode(fullReplay));
+      expect(resumed.activeExpenses.single.nature, ExpenseNature.necessary);
+    },
+  );
+
   test('discards a corrupt snapshot without touching the journal', () async {
     final databaseName = _databaseName('snapshot-corruption');
     final journal = await BrowserEncryptedJournalPrototype.open(
@@ -536,6 +613,33 @@ WebPrototypePlainEvent _event(int sequence, String payloadJson) {
     eventType: 'prototype.synthetic',
     schemaVersion: 1,
     payloadJson: payloadJson,
+  );
+}
+
+EventRecord _domainExpenseEvent(int sequence, EventPayload payload) {
+  return EventRecord(
+    id: EventId(
+      '018f1f3a-7b1c-7a2d-8e3f-${sequence.toString().padLeft(12, '0')}',
+    ),
+    recordedAtUtc: DateTime.utc(2026, 8, 1, 10, 0, sequence),
+    businessDate: LocalDate(2026, 8, 1),
+    target: EntityReference(
+      kind: EntityKind.expense,
+      id: EntityId('018f2b8a-7d3c-7a1b-8c4d-000000000001'),
+    ),
+    payload: payload,
+  );
+}
+
+WebPrototypePlainEvent _plainDomainEvent(
+  EventRecord event,
+  EventRecordJsonCodec codec,
+) {
+  return WebPrototypePlainEvent(
+    eventId: event.id.value,
+    eventType: event.eventType,
+    schemaVersion: event.schemaVersion,
+    payloadJson: codec.encode(event),
   );
 }
 

@@ -6,6 +6,8 @@ import 'package:reboot_app/web_storage/browser_storage_durability.dart';
 import 'package:reboot_app/web_storage/encrypted_projection_snapshot.dart';
 import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
+import 'package:reboot_projection/reboot_projection.dart';
+import 'package:reboot_serialization/reboot_serialization.dart';
 
 Future<void> main(List<String> arguments) async {
   // Runtime arguments deliberately keep every browser-only path reachable for
@@ -50,14 +52,26 @@ Future<void> main(List<String> arguments) async {
   );
   try {
     final position = entries.single.position.exactValue;
+    final expenseSnapshotCodec = ExpenseLedgerSnapshotCodec();
+    final projectionJson = expenseSnapshotCodec.encode(
+      ExpenseLedger.fromCheckpoint(
+        expenses: const [],
+        lastPosition: entries.single.position,
+      ),
+    );
     await journal.writeProjectionSnapshot(
       WebPrototypeProjectionSnapshot(
         journalPosition: position,
-        schemaVersion: 1,
-        projectionJson: '{"synthetic":true}',
+        schemaVersion: ExpenseLedgerSnapshotCodec.schemaVersion,
+        projectionJson: projectionJson,
       ),
     );
-    await journal.readProjectionSnapshot();
+    final restored = await journal.readProjectionSnapshot();
+    if (restored == null ||
+        expenseSnapshotCodec.decode(restored.projectionJson).lastPosition !=
+            entries.single.position) {
+      throw StateError('The expense projection checkpoint did not survive.');
+    }
     await journal.readAfter(position);
   } finally {
     journal.close();
