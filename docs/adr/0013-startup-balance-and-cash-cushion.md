@@ -90,6 +90,22 @@ actuel. Une dérogation reste possible conformément à la liberté laissée à
 l’utilisateur, mais elle exige une acceptation explicite et n’est jamais
 étiquetée sûre ou recommandée.
 
+### Sortie de la phase de lancement
+
+La date de fin calculée est une estimation, pas une transition automatique. Le
+budget de lancement reste actif tant qu’une vérification réalisée au début
+d’un cycle REBOOT n’a pas confirmé, avec un nouvel instantané de liquidité,
+que le coussin est réellement constitué et que la projection quotidienne sur
+52 semaines respecte encore le plancher au budget durable. Les opérations en
+attente doivent être connues, aucune grosse dépense proche ne doit rester sans
+financement et l’utilisateur doit confirmer que le budget reste humainement
+viable.
+
+Le journal distingue le démarrage du plan, chaque réévaluation sûre ou non, et
+son achèvement. Une réévaluation refusée conserve le budget temporaire ; seul
+un événement d’achèvement consécutif à une réévaluation sûre autorise le budget
+durable.
+
 ## Conséquences
 
 ### Positives
@@ -100,6 +116,9 @@ l’utilisateur, mais elle exige une acceptation explicite et n’est jamais
 - le même moteur couvre coussin propre, découvert et financement mixte ;
 - REBOOT peut expliquer pourquoi « revenir à zéro » et « ne plus passer sous
   zéro » ne demandent pas toujours le même effort.
+- une date estimée dépassée ne peut jamais provoquer seule une hausse du
+  budget hebdomadaire ;
+- la décision de sortie reste auditable et reproductible depuis le journal.
 
 ### Négatives
 

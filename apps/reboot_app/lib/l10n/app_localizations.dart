@@ -3794,12 +3794,132 @@ abstract class AppLocalizations {
   /// Dashboard launch phase summary.
   ///
   /// In en, this message translates to:
-  /// **'{launchBudget} per week until {date}, then {sustainableBudget} after a fresh check.'**
+  /// **'{launchBudget} per week at least until {date}. A fresh check is required before moving to {sustainableBudget}.'**
   String launchPhaseDashboardBody(
     String launchBudget,
     String date,
     String sustainableBudget,
   );
+
+  /// Launch completion review due title.
+  ///
+  /// In en, this message translates to:
+  /// **'A fresh check is required'**
+  String get launchReviewDueTitle;
+
+  /// Explains why launch budget is held.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT keeps the safer {launchBudget} launch budget until the current account position confirms that the sustainable budget is safe.'**
+  String launchReviewDueBody(String launchBudget);
+
+  /// Next boundary eligible for review.
+  ///
+  /// In en, this message translates to:
+  /// **'Review on the next REBOOT: {date}'**
+  String launchReviewNextReboot(String date);
+
+  /// Launch review screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the launch position'**
+  String get launchReviewTitle;
+
+  /// Launch review safety explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Before increasing the weekly budget, confirm the money truly available today. If the check is not safe, the lower launch budget remains unchanged.'**
+  String get launchReviewIntro;
+
+  /// Large expense completeness confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'No known large expense is waiting without funding'**
+  String get noUnfundedLargeExpense;
+
+  /// Human viability reconfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Could your household sustainably follow the ordinary weekly budget now?'**
+  String get launchReviewViability;
+
+  /// Launch review primary action.
+  ///
+  /// In en, this message translates to:
+  /// **'Recalculate safely'**
+  String get launchReviewAction;
+
+  /// Current and candidate weekly amounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Current launch budget: {launchBudget}\nSustainable budget to verify: {sustainableBudget}'**
+  String launchReviewCurrentPlan(String launchBudget, String sustainableBudget);
+
+  /// Review cushion target.
+  ///
+  /// In en, this message translates to:
+  /// **'Target timing cushion: {amount}'**
+  String launchReviewTargetCushion(String amount);
+
+  /// Successful launch completion message.
+  ///
+  /// In en, this message translates to:
+  /// **'The fresh check is safe. The sustainable weekly budget starts with this REBOOT.'**
+  String get launchReviewCompleted;
+
+  /// Fresh projection and cash divergence.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated projected low: {lowPoint}. Difference from the expected completion balance: {divergence}.'**
+  String launchReviewProjection(String lowPoint, String divergence);
+
+  /// Unsafe review message.
+  ///
+  /// In en, this message translates to:
+  /// **'Some operations already made are still unknown. The launch budget remains active.'**
+  String get launchReviewPendingUnknown;
+
+  /// Unsafe review message.
+  ///
+  /// In en, this message translates to:
+  /// **'A known large expense is not funded yet. The launch budget remains active.'**
+  String get launchReviewExpenseUnfunded;
+
+  /// Unsafe review message.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the account today before changing the weekly budget.'**
+  String get launchReviewDataNotFresh;
+
+  /// Unsafe review message.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected operating level has not been reached yet. Keep the launch budget for now.'**
+  String get launchReviewCushionNotReached;
+
+  /// Unsafe review message.
+  ///
+  /// In en, this message translates to:
+  /// **'The fresh 52-week projection still crosses the accepted low point. Keep the launch budget and review the assumptions.'**
+  String get launchReviewFloorBreached;
+
+  /// Unsafe review message.
+  ///
+  /// In en, this message translates to:
+  /// **'The newly calculated sustainable budget is below the household minimum. Review income, charges, or objectives.'**
+  String get launchReviewStructurallyTight;
+
+  /// Unsafe review message.
+  ///
+  /// In en, this message translates to:
+  /// **'The sustainable amount was not confirmed as workable for the household.'**
+  String get launchReviewHumanNotConfirmed;
+
+  /// Atomic launch review failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The review could not be recorded. The launch budget was not changed.'**
+  String get launchReviewSaveError;
 
   /// Severe launch compression warning.
   ///

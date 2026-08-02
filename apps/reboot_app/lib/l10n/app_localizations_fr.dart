@@ -2342,8 +2342,93 @@ class AppLocalizationsFr extends AppLocalizations {
     String date,
     String sustainableBudget,
   ) {
-    return '$launchBudget par semaine jusqu’au $date, puis $sustainableBudget après une nouvelle vérification.';
+    return '$launchBudget par semaine au moins jusqu’au $date. Une nouvelle vérification est obligatoire avant de passer à $sustainableBudget.';
   }
+
+  @override
+  String get launchReviewDueTitle => 'Une nouvelle vérification est nécessaire';
+
+  @override
+  String launchReviewDueBody(String launchBudget) {
+    return 'REBOOT conserve le budget de lancement plus prudent de $launchBudget tant que la situation réelle du compte ne confirme pas que le budget durable est sûr.';
+  }
+
+  @override
+  String launchReviewNextReboot(String date) {
+    return 'Vérifier au prochain REBOOT : $date';
+  }
+
+  @override
+  String get launchReviewTitle => 'Vérifier la phase de lancement';
+
+  @override
+  String get launchReviewIntro =>
+      'Avant d’augmenter le budget semaine, confirmez l’argent réellement disponible aujourd’hui. Si le contrôle n’est pas sûr, le budget de lancement plus faible reste inchangé.';
+
+  @override
+  String get noUnfundedLargeExpense =>
+      'Aucune grosse dépense connue n’attend sans financement';
+
+  @override
+  String get launchReviewViability =>
+      'Votre foyer peut-il maintenant suivre durablement le budget semaine normal ?';
+
+  @override
+  String get launchReviewAction => 'Recalculer en sécurité';
+
+  @override
+  String launchReviewCurrentPlan(
+    String launchBudget,
+    String sustainableBudget,
+  ) {
+    return 'Budget de lancement actuel : $launchBudget\nBudget durable à vérifier : $sustainableBudget';
+  }
+
+  @override
+  String launchReviewTargetCushion(String amount) {
+    return 'Coussin de calendrier cible : $amount';
+  }
+
+  @override
+  String get launchReviewCompleted =>
+      'Le nouveau contrôle est sûr. Le budget semaine durable commence avec ce REBOOT.';
+
+  @override
+  String launchReviewProjection(String lowPoint, String divergence) {
+    return 'Nouveau point bas projeté : $lowPoint. Écart avec le solde attendu à la fin du lancement : $divergence.';
+  }
+
+  @override
+  String get launchReviewPendingUnknown =>
+      'Certaines opérations déjà réalisées sont encore inconnues. Le budget de lancement reste actif.';
+
+  @override
+  String get launchReviewExpenseUnfunded =>
+      'Une grosse dépense connue n’est pas encore financée. Le budget de lancement reste actif.';
+
+  @override
+  String get launchReviewDataNotFresh =>
+      'Consultez le compte aujourd’hui avant de changer le budget semaine.';
+
+  @override
+  String get launchReviewCushionNotReached =>
+      'Le niveau de fonctionnement choisi n’est pas encore atteint. Conservez le budget de lancement pour le moment.';
+
+  @override
+  String get launchReviewFloorBreached =>
+      'La nouvelle projection sur 52 semaines franchit encore le point bas accepté. Conservez le budget de lancement et vérifiez les hypothèses.';
+
+  @override
+  String get launchReviewStructurallyTight =>
+      'Le nouveau budget durable est inférieur au minimum du foyer. Vérifiez les revenus, les charges ou les objectifs.';
+
+  @override
+  String get launchReviewHumanNotConfirmed =>
+      'Le montant durable n’a pas été confirmé comme réellement tenable par le foyer.';
+
+  @override
+  String get launchReviewSaveError =>
+      'La vérification n’a pas pu être enregistrée. Le budget de lancement n’a pas changé.';
 
   @override
   String startupSevereEffort(String percent) {

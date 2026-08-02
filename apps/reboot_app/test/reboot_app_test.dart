@@ -449,7 +449,77 @@ void main() {
         find.byKey(const ValueKey('startup-launch-progress')),
         findsOneWidget,
       );
-      expect(journal.entries, hasLength(9));
+      expect(journal.entries, hasLength(10));
+
+      final completionDate =
+          service.startup.acceptedPlan!.estimatedCompletionDate;
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localRebootServiceProvider.overrideWith((ref) async => service),
+            onboardingDeviceContextProvider.overrideWith(
+              (ref) async => OnboardingDeviceContext(
+                localDate: completionDate,
+                timeZone: IanaTimeZoneId('Europe/Paris'),
+              ),
+            ),
+            currentInstantProvider.overrideWith(
+              (ref) => DateTime.utc(
+                completionDate.year,
+                completionDate.month,
+                completionDate.day,
+                8,
+              ),
+            ),
+          ],
+          child: const RebootApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final openReview = find.byKey(const ValueKey('open-launch-review'));
+      await tester.scrollUntilVisible(
+        openReview,
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      tester.widget<OutlinedButton>(openReview).onPressed!();
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.descendant(
+          of: find.byKey(const ValueKey('launch-review-booked')),
+          matching: find.byType(TextField),
+        ),
+        '100000',
+      );
+      final viabilityGroup = find.byKey(
+        const ValueKey('launch-review-viability-group'),
+      );
+      await tester.scrollUntilVisible(
+        viabilityGroup,
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      tester
+          .widget<RadioGroup<StartupViabilityAnswer>>(viabilityGroup)
+          .onChanged(StartupViabilityAnswer.comfortable);
+      await tester.pump();
+      final submitReview = find.byKey(const ValueKey('launch-review-submit'));
+      await tester.scrollUntilVisible(
+        submitReview,
+        400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      tester.widget<FilledButton>(submitReview).onPressed!();
+      await tester.pumpAndSettle();
+
+      expect(service.startup.isLaunchCompleted, isTrue);
+      expect(
+        find.byKey(const ValueKey('startup-launch-progress')),
+        findsNothing,
+      );
+      expect(journal.entries, hasLength(12));
     },
   );
 

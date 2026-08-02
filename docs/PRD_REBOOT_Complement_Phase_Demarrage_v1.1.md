@@ -914,11 +914,27 @@ Conditions :
 - données à jour ;
 - validation utilisateur.
 
-Événement :
+La date estimée de passage n’est pas une échéance automatique. Tant que ces
+conditions n’ont pas été revérifiées au début d’un cycle REBOOT, le budget de
+lancement reste applicable, y compris après la date estimée. Une réévaluation
+non concluante est historisée et ne modifie pas le budget du cycle suivant.
+
+La réévaluation utilise un nouvel instantané de liquidité saisi ou synchronisé
+le jour même et une nouvelle projection quotidienne sur 52 semaines au budget
+durable courant. Elle compare aussi le solde réellement disponible au solde
+attendu à la fin du plan lorsqu’une référence de lancement est disponible.
+
+Événements :
 
 ```text
+LAUNCH_PLAN_STARTED
+LAUNCH_PLAN_REASSESSED
 LAUNCH_PLAN_COMPLETED
 ```
+
+`LAUNCH_PLAN_COMPLETED` ne peut suivre que la dernière réévaluation sûre et
+prend effet au cycle REBOOT contrôlé. Une restauration du journal doit donc
+retrouver sans ambiguïté le budget temporaire ou durable applicable.
 
 ---
 

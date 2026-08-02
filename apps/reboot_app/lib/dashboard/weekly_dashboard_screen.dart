@@ -28,6 +28,8 @@ import '../refunds/refunds_screen.dart';
 import '../reserves/reserve_controller.dart';
 import '../reserves/reserves_screen.dart';
 import '../settings/data_privacy_screen.dart';
+import '../startup_setup/startup_review_controller.dart';
+import '../startup_setup/startup_review_screen.dart';
 import '../trajectory_setup/trajectory_management_screen.dart';
 import '../trends/trends_screen.dart';
 
@@ -57,6 +59,7 @@ final class _WeeklyDashboardScreenState
     ref.watch(cycleSettingsControllerProvider);
     ref.watch(receivedBonusControllerProvider);
     ref.watch(cashControllerProvider);
+    ref.watch(startupReviewControllerProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appTitle),
@@ -210,7 +213,11 @@ final class _DashboardBody extends ConsumerWidget {
     final launchIsActive =
         launchPlan != null &&
         launchPlan.durationCycles > 0 &&
-        current.cycle.start.isBefore(launchPlan.estimatedCompletionDate);
+        !service.startup.isLaunchCompleted &&
+        !current.cycle.start.isBefore(launchPlan.startDate);
+    final launchReviewDue =
+        launchPlan != null && service.startup.requiresCompletionReview(today);
+    final canReviewLaunch = launchIsActive && today == current.cycle.start;
 
     return SafeArea(
       child: ListView(
@@ -312,17 +319,73 @@ final class _DashboardBody extends ConsumerWidget {
             const SizedBox(height: 12),
             Card(
               color: colors.secondaryContainer,
-              child: ListTile(
-                key: const ValueKey('startup-launch-progress'),
-                leading: const Icon(Icons.trending_up),
-                title: Text(l10n.launchPhaseDashboardTitle),
-                subtitle: Text(
-                  l10n.launchPhaseDashboardBody(
-                    _formatMoney(context, launchPlan.launchWeeklyBudget),
-                    _formatDate(context, launchPlan.estimatedCompletionDate),
-                    _formatMoney(context, launchPlan.sustainableWeeklyBudget),
+              child: Column(
+                children: [
+                  ListTile(
+                    key: const ValueKey('startup-launch-progress'),
+                    leading: Icon(
+                      launchReviewDue ? Icons.update : Icons.trending_up,
+                    ),
+                    title: Text(
+                      launchReviewDue
+                          ? l10n.launchReviewDueTitle
+                          : l10n.launchPhaseDashboardTitle,
+                    ),
+                    subtitle: Text(
+                      launchReviewDue
+                          ? l10n.launchReviewDueBody(
+                              _formatMoney(
+                                context,
+                                launchPlan.launchWeeklyBudget,
+                              ),
+                            )
+                          : l10n.launchPhaseDashboardBody(
+                              _formatMoney(
+                                context,
+                                launchPlan.launchWeeklyBudget,
+                              ),
+                              _formatDate(
+                                context,
+                                launchPlan.estimatedCompletionDate,
+                              ),
+                              _formatMoney(
+                                context,
+                                launchPlan.sustainableWeeklyBudget,
+                              ),
+                            ),
+                    ),
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        key: const ValueKey('open-launch-review'),
+                        onPressed: canReviewLaunch
+                            ? () => Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => StartupReviewScreen(
+                                    service: service,
+                                    today: today,
+                                  ),
+                                ),
+                              )
+                            : null,
+                        icon: const Icon(Icons.refresh),
+                        label: Text(
+                          canReviewLaunch
+                              ? l10n.launchReviewAction
+                              : l10n.launchReviewNextReboot(
+                                  _formatDate(
+                                    context,
+                                    current.cycle.endExclusive,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

@@ -2330,8 +2330,93 @@ class AppLocalizationsEn extends AppLocalizations {
     String date,
     String sustainableBudget,
   ) {
-    return '$launchBudget per week until $date, then $sustainableBudget after a fresh check.';
+    return '$launchBudget per week at least until $date. A fresh check is required before moving to $sustainableBudget.';
   }
+
+  @override
+  String get launchReviewDueTitle => 'A fresh check is required';
+
+  @override
+  String launchReviewDueBody(String launchBudget) {
+    return 'REBOOT keeps the safer $launchBudget launch budget until the current account position confirms that the sustainable budget is safe.';
+  }
+
+  @override
+  String launchReviewNextReboot(String date) {
+    return 'Review on the next REBOOT: $date';
+  }
+
+  @override
+  String get launchReviewTitle => 'Check the launch position';
+
+  @override
+  String get launchReviewIntro =>
+      'Before increasing the weekly budget, confirm the money truly available today. If the check is not safe, the lower launch budget remains unchanged.';
+
+  @override
+  String get noUnfundedLargeExpense =>
+      'No known large expense is waiting without funding';
+
+  @override
+  String get launchReviewViability =>
+      'Could your household sustainably follow the ordinary weekly budget now?';
+
+  @override
+  String get launchReviewAction => 'Recalculate safely';
+
+  @override
+  String launchReviewCurrentPlan(
+    String launchBudget,
+    String sustainableBudget,
+  ) {
+    return 'Current launch budget: $launchBudget\nSustainable budget to verify: $sustainableBudget';
+  }
+
+  @override
+  String launchReviewTargetCushion(String amount) {
+    return 'Target timing cushion: $amount';
+  }
+
+  @override
+  String get launchReviewCompleted =>
+      'The fresh check is safe. The sustainable weekly budget starts with this REBOOT.';
+
+  @override
+  String launchReviewProjection(String lowPoint, String divergence) {
+    return 'Updated projected low: $lowPoint. Difference from the expected completion balance: $divergence.';
+  }
+
+  @override
+  String get launchReviewPendingUnknown =>
+      'Some operations already made are still unknown. The launch budget remains active.';
+
+  @override
+  String get launchReviewExpenseUnfunded =>
+      'A known large expense is not funded yet. The launch budget remains active.';
+
+  @override
+  String get launchReviewDataNotFresh =>
+      'Check the account today before changing the weekly budget.';
+
+  @override
+  String get launchReviewCushionNotReached =>
+      'The selected operating level has not been reached yet. Keep the launch budget for now.';
+
+  @override
+  String get launchReviewFloorBreached =>
+      'The fresh 52-week projection still crosses the accepted low point. Keep the launch budget and review the assumptions.';
+
+  @override
+  String get launchReviewStructurallyTight =>
+      'The newly calculated sustainable budget is below the household minimum. Review income, charges, or objectives.';
+
+  @override
+  String get launchReviewHumanNotConfirmed =>
+      'The sustainable amount was not confirmed as workable for the household.';
+
+  @override
+  String get launchReviewSaveError =>
+      'The review could not be recorded. The launch budget was not changed.';
 
   @override
   String startupSevereEffort(String percent) {

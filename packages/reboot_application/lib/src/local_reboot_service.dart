@@ -302,6 +302,34 @@ final class AcceptStartupPlanCommand {
           .weeklyBudgetCommitment;
 }
 
+/// Fresh facts and explicit confirmation used to leave a launch budget.
+final class ReviewStartupLaunchCommand {
+  const ReviewStartupLaunchCommand({
+    required this.liquidity,
+    required this.allPendingOperationsKnown,
+    required this.noUnfundedLargeExpense,
+    required this.viabilityAnswer,
+    required this.businessDate,
+  });
+
+  final LiquiditySnapshot liquidity;
+  final bool allPendingOperationsKnown;
+  final bool noUnfundedLargeExpense;
+  final StartupViabilityAnswer viabilityAnswer;
+  final LocalDate businessDate;
+}
+
+/// Auditable review result; an unsafe result keeps the lower launch budget.
+final class StartupLaunchReviewResult {
+  const StartupLaunchReviewResult({
+    required this.review,
+    required this.completed,
+  });
+
+  final LaunchPlanReassessedPayload review;
+  final bool completed;
+}
+
 /// Schedules a new day or time zone without rewriting historical cycles.
 final class ChangeCyclePolicyCommand {
   /// Creates the command.
@@ -961,8 +989,133 @@ final class LocalRebootService {
           ),
         ),
         event(accepted),
+        if (selected != null)
+          event(
+            LaunchPlanStartedPayload(
+              startedOn: command.startDate,
+              expectedCompletionBalance: selected.completionBalance,
+            ),
+          ),
       ]);
       return _startup.acceptedPlan!;
+    });
+  }
+
+  /// Rechecks a temporary launch plan at a REBOOT boundary.
+  ///
+  /// Unsafe results are recorded but never increase the weekly budget. A safe
+  /// result and explicit human confirmation atomically complete the plan.
+  Future<StartupLaunchReviewResult> reviewStartupLaunch(
+    ReviewStartupLaunchCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      final household = _configuration.household;
+      final accepted = _startup.acceptedPlan;
+      final cushion = _startup.cushionPolicy;
+      final needs = _startup.householdNeeds;
+      if (household == null ||
+          accepted == null ||
+          cushion == null ||
+          needs == null) {
+        throw const IncompleteConfigurationException(
+          'A complete startup plan is required before launch review.',
+        );
+      }
+      if (accepted.durationCycles == 0 || _startup.completedPlan != null) {
+        throw StateError('No active temporary launch plan requires review.');
+      }
+      final cycle = household.cycleContaining(command.businessDate);
+      if (cycle.start != command.businessDate) {
+        throw ArgumentError(
+          'A launch review must be confirmed on a REBOOT cycle boundary.',
+        );
+      }
+      final annual = buildAnnualBudget(cycle.start);
+      final projection = StartupCashProjectionEngine.project(
+        cycles: annual.cycles,
+        initialUsableCash: command.liquidity.usableCash,
+        movements: StartupCashProjectionEngine.movementsFromAnnualBudget(
+          annual,
+        ),
+        weeklyBudgetsByCycleStart: {
+          for (final projectedCycle in annual.cycles)
+            projectedCycle.start: annual.recommendedWeeklyBudget,
+        },
+      );
+      final operatingBalance = cushion.targetBalance + cushion.ownedCash;
+      final lowestAllowedBalance =
+          cushion.targetBalance - cushion.overdraftFundedCash;
+      final ownCoverage = command.liquidity.usableCash - cushion.targetBalance;
+      final nonNegativeOwnCoverage = ownCoverage.isNegative
+          ? Money.zero(Currency.eur)
+          : ownCoverage;
+      final currentCoverage =
+          nonNegativeOwnCoverage + cushion.overdraftFundedCash;
+      final expectedCompletion =
+          _startup.startedPlan?.expectedCompletionBalance;
+      final divergence =
+          expectedCompletion == null ||
+              command.businessDate.isBefore(accepted.estimatedCompletionDate)
+          ? Money.zero(Currency.eur)
+          : command.liquidity.usableCash - expectedCompletion;
+
+      final outcome = !command.allPendingOperationsKnown
+          ? LaunchReviewOutcome.pendingOperationsUnknown
+          : !command.noUnfundedLargeExpense
+          ? LaunchReviewOutcome.upcomingExpenseUnfunded
+          : command.liquidity.confidence != StartupDataConfidence.high
+          ? LaunchReviewOutcome.dataNotFresh
+          : !annual.recommendedWeeklyBudget.isPositive ||
+                annual.recommendedWeeklyBudget.compareTo(
+                      needs.minimumViableWeeklyBudget,
+                    ) <
+                    0
+          ? LaunchReviewOutcome.structurallyTooTight
+          : command.viabilityAnswer != StartupViabilityAnswer.comfortable &&
+                command.viabilityAnswer != StartupViabilityAnswer.tight
+          ? LaunchReviewOutcome.humanViabilityNotConfirmed
+          : command.liquidity.usableCash.compareTo(operatingBalance) < 0
+          ? LaunchReviewOutcome.cushionNotReached
+          : projection.projectedLowPoint.compareTo(lowestAllowedBalance) < 0
+          ? LaunchReviewOutcome.projectedFloorBreached
+          : LaunchReviewOutcome.safeToComplete;
+
+      final review = LaunchPlanReassessedPayload(
+        snapshot: command.liquidity,
+        reviewCycleStart: cycle.start,
+        sustainableWeeklyBudget: annual.recommendedWeeklyBudget,
+        projectedLowPoint: projection.projectedLowPoint,
+        projectedLowPointDate: projection.projectedLowPointDate,
+        targetCashCushion: cushion.targetCashCushion,
+        currentCushionCoverage: currentCoverage,
+        cashDivergence: divergence,
+        outcome: outcome,
+      );
+      final target = EntityReference(
+        kind: EntityKind.startupPlan,
+        id: _startup.planId!,
+      );
+      EventRecord event(EventPayload payload) => EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: target,
+        payload: payload,
+      );
+      final completed = outcome == LaunchReviewOutcome.safeToComplete;
+      await _appendValidated([
+        event(review),
+        if (completed)
+          event(
+            LaunchPlanCompletedPayload(
+              completedOn: command.businessDate,
+              effectiveFromCycleStart: cycle.start,
+              sustainableWeeklyBudget: annual.recommendedWeeklyBudget,
+            ),
+          ),
+      ]);
+      return StartupLaunchReviewResult(review: review, completed: completed);
     });
   }
 
@@ -1048,11 +1201,13 @@ final class LocalRebootService {
       );
     }
     final launch = _startup.acceptedPlan;
+    final launchCompletion = _startup.completedPlan;
     final usesLaunchBudget =
         launch != null &&
         launch.durationCycles > 0 &&
         !cycleStart.isBefore(launch.startDate) &&
-        cycleStart.isBefore(launch.estimatedCompletionDate);
+        (launchCompletion == null ||
+            cycleStart.isBefore(launchCompletion.effectiveFromCycleStart));
     final base = usesLaunchBudget
         ? launch.launchWeeklyBudget
         : _configuration

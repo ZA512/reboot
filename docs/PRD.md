@@ -240,6 +240,8 @@ L’objectif de solde et le coussin ne sont jamais additionnés sous un intitul�
 
 Le wizard collecte aussi les opérations déjà engagées, les grosses dépenses proches, la composition économique du foyer, le périmètre du budget semaine et son minimum viable déclaré. Il refuse tout plan inférieur à ce minimum ou franchissant le plancher accepté. Si le budget durable immédiat est dangereux, il recherche un budget de lancement temporaire sur 4, 8, 13, 26 ou 52 cycles et simule chaque candidat sur l’horizon complet.
 
+La date de fin affichée pour un budget de lancement reste une estimation, jamais une hausse programmée. Le budget temporaire demeure inchangé jusqu’à une réévaluation explicite au début d’un cycle REBOOT. Cette réévaluation repart d’un solde et d’opérations en attente vérifiés le jour même, recalcule les 52 semaines au budget durable, contrôle le coussin, le plancher, les grosses dépenses non financées et la viabilité humaine. Si une condition échoue, le résultat est conservé dans le journal et le budget temporaire continue sans compensation automatique. Le passage au budget durable est lui aussi enregistré explicitement et reste reproductible après restauration.
+
 La formule normative, les cas limites et les exigences de suivi figurent dans le complément démarrage et dans l’[ADR-0013](adr/0013-startup-balance-and-cash-cushion.md).
 
 ## 9. Cycles hebdomadaires

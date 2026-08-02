@@ -97,6 +97,32 @@ final class EventPayloadJsonCodec {
         'viabilityAnswer': payload.viabilityAnswer.name,
         'acceptedBankFundingRisk': payload.acceptedBankFundingRisk,
       },
+      LaunchPlanStartedPayload() => <String, Object?>{
+        'startedOn': payload.startedOn.toString(),
+        'expectedCompletionBalance': _encodeMoney(
+          payload.expectedCompletionBalance,
+        ),
+      },
+      LaunchPlanReassessedPayload() => <String, Object?>{
+        'snapshot': _encodeLiquiditySnapshot(payload.snapshot),
+        'reviewCycleStart': payload.reviewCycleStart.toString(),
+        'sustainableWeeklyBudget': _encodeMoney(
+          payload.sustainableWeeklyBudget,
+        ),
+        'projectedLowPoint': _encodeMoney(payload.projectedLowPoint),
+        'projectedLowPointDate': payload.projectedLowPointDate.toString(),
+        'targetCashCushion': _encodeMoney(payload.targetCashCushion),
+        'currentCushionCoverage': _encodeMoney(payload.currentCushionCoverage),
+        'cashDivergence': _encodeMoney(payload.cashDivergence),
+        'outcome': payload.outcome.name,
+      },
+      LaunchPlanCompletedPayload() => <String, Object?>{
+        'completedOn': payload.completedOn.toString(),
+        'effectiveFromCycleStart': payload.effectiveFromCycleStart.toString(),
+        'sustainableWeeklyBudget': _encodeMoney(
+          payload.sustainableWeeklyBudget,
+        ),
+      },
       ExpenseRecordedPayload() => <String, Object?>{
         'amount': _encodeMoney(payload.amount),
         'label': payload.label,
@@ -357,6 +383,52 @@ final class EventPayloadJsonCodec {
         acceptedBankFundingRisk: _asBool(
           map['acceptedBankFundingRisk'],
           'acceptedBankFundingRisk',
+        ),
+      ),
+      'startup.launch-plan.started' => LaunchPlanStartedPayload(
+        startedOn: _decodeDate(map['startedOn'], 'startedOn'),
+        expectedCompletionBalance: _decodeMoney(
+          _asMap(map['expectedCompletionBalance'], 'expectedCompletionBalance'),
+        ),
+      ),
+      'startup.launch-plan.reassessed' => LaunchPlanReassessedPayload(
+        snapshot: _decodeLiquiditySnapshot(_asMap(map['snapshot'], 'snapshot')),
+        reviewCycleStart: _decodeDate(
+          map['reviewCycleStart'],
+          'reviewCycleStart',
+        ),
+        sustainableWeeklyBudget: _decodeMoney(
+          _asMap(map['sustainableWeeklyBudget'], 'sustainableWeeklyBudget'),
+        ),
+        projectedLowPoint: _decodeMoney(
+          _asMap(map['projectedLowPoint'], 'projectedLowPoint'),
+        ),
+        projectedLowPointDate: _decodeDate(
+          map['projectedLowPointDate'],
+          'projectedLowPointDate',
+        ),
+        targetCashCushion: _decodeMoney(
+          _asMap(map['targetCashCushion'], 'targetCashCushion'),
+        ),
+        currentCushionCoverage: _decodeMoney(
+          _asMap(map['currentCushionCoverage'], 'currentCushionCoverage'),
+        ),
+        cashDivergence: _decodeMoney(
+          _asMap(map['cashDivergence'], 'cashDivergence'),
+        ),
+        outcome: _enumByName(
+          LaunchReviewOutcome.values,
+          _asString(map['outcome'], 'outcome'),
+        ),
+      ),
+      'startup.launch-plan.completed' => LaunchPlanCompletedPayload(
+        completedOn: _decodeDate(map['completedOn'], 'completedOn'),
+        effectiveFromCycleStart: _decodeDate(
+          map['effectiveFromCycleStart'],
+          'effectiveFromCycleStart',
+        ),
+        sustainableWeeklyBudget: _decodeMoney(
+          _asMap(map['sustainableWeeklyBudget'], 'sustainableWeeklyBudget'),
         ),
       ),
       'expense.recorded' => _decodeExpenseRecorded(map),

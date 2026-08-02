@@ -262,6 +262,31 @@ List<EventPayload> _allPayloads() {
       viabilityAnswer: StartupViabilityAnswer.tight,
       acceptedBankFundingRisk: true,
     ),
+    LaunchPlanStartedPayload(
+      startedOn: LocalDate(2026, 4, 4),
+      expectedCompletionBalance: _eur(30000),
+    ),
+    LaunchPlanReassessedPayload(
+      snapshot: LiquiditySnapshot(
+        capturedAtUtc: DateTime.utc(2026, 10, 3, 8),
+        bookedBalance: _eur(40000),
+        source: LiquiditySnapshotSource.manual,
+        confidence: StartupDataConfidence.high,
+      ),
+      reviewCycleStart: LocalDate(2026, 10, 3),
+      sustainableWeeklyBudget: _eur(12000),
+      projectedLowPoint: _eur(-10000),
+      projectedLowPointDate: LocalDate(2026, 11, 7),
+      targetCashCushion: _eur(50000),
+      currentCushionCoverage: _eur(60000),
+      cashDivergence: _eur(10000),
+      outcome: LaunchReviewOutcome.safeToComplete,
+    ),
+    LaunchPlanCompletedPayload(
+      completedOn: LocalDate(2026, 10, 3),
+      effectiveFromCycleStart: LocalDate(2026, 10, 3),
+      sustainableWeeklyBudget: _eur(12000),
+    ),
     ExpenseRecordedPayload(
       amount: _eur(4250),
       label: 'Courses',

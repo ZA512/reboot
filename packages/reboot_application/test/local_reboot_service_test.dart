@@ -1238,6 +1238,59 @@ void main() {
         );
         expect(
           harness.service.weeklyBudgetForCycleStarting(selected.completionDate),
+          selected.launchWeeklyBudget,
+        );
+
+        final unsafe = await harness.service.reviewStartupLaunch(
+          ReviewStartupLaunchCommand(
+            liquidity: LiquiditySnapshot(
+              capturedAtUtc: DateTime.utc(2027, 4, 3, 8),
+              bookedBalance: _eur(-100000),
+              source: LiquiditySnapshotSource.manual,
+              confidence: StartupDataConfidence.high,
+            ),
+            allPendingOperationsKnown: true,
+            noUnfundedLargeExpense: true,
+            viabilityAnswer: StartupViabilityAnswer.comfortable,
+            businessDate: selected.completionDate,
+          ),
+        );
+        expect(unsafe.completed, isFalse);
+        expect(unsafe.review.outcome, LaunchReviewOutcome.cushionNotReached);
+        expect(
+          harness.service.weeklyBudgetForCycleStarting(selected.completionDate),
+          selected.launchWeeklyBudget,
+        );
+
+        final safe = await harness.service.reviewStartupLaunch(
+          ReviewStartupLaunchCommand(
+            liquidity: LiquiditySnapshot(
+              capturedAtUtc: DateTime.utc(2027, 4, 3, 9),
+              bookedBalance: _eur(100000),
+              source: LiquiditySnapshotSource.manual,
+              confidence: StartupDataConfidence.high,
+            ),
+            allPendingOperationsKnown: true,
+            noUnfundedLargeExpense: true,
+            viabilityAnswer: StartupViabilityAnswer.comfortable,
+            businessDate: selected.completionDate,
+          ),
+        );
+        expect(safe.completed, isTrue);
+        expect(safe.review.outcome, LaunchReviewOutcome.safeToComplete);
+        expect(
+          harness.service.weeklyBudgetForCycleStarting(selected.completionDate),
+          annual.recommendedWeeklyBudget,
+        );
+
+        final restored = await LocalRebootService.restore(
+          journal: harness.journal,
+          clock: const _FixedClock(),
+          identities: _SequentialIdentities(500),
+        );
+        expect(restored.startup.isLaunchCompleted, isTrue);
+        expect(
+          restored.weeklyBudgetForCycleStarting(selected.completionDate),
           annual.recommendedWeeklyBudget,
         );
       },

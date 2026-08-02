@@ -11,6 +11,9 @@ final class StartupLedger {
     required this.cushionPolicy,
     required this.assessment,
     required this.acceptedPlan,
+    required this.startedPlan,
+    required this.latestReview,
+    required this.completedPlan,
     required Set<EventId> appliedEventIds,
     required this.lastPosition,
   }) : _appliedEventIds = Set<EventId>.unmodifiable(appliedEventIds);
@@ -22,6 +25,9 @@ final class StartupLedger {
     cushionPolicy: null,
     assessment: null,
     acceptedPlan: null,
+    startedPlan: null,
+    latestReview: null,
+    completedPlan: null,
     appliedEventIds: const {},
     lastPosition: null,
   );
@@ -35,10 +41,23 @@ final class StartupLedger {
   final CashCushionPolicyCreatedPayload? cushionPolicy;
   final LaunchAssessmentCreatedPayload? assessment;
   final LaunchPlanAcceptedPayload? acceptedPlan;
+  final LaunchPlanStartedPayload? startedPlan;
+  final LaunchPlanReassessedPayload? latestReview;
+  final LaunchPlanCompletedPayload? completedPlan;
   final Set<EventId> _appliedEventIds;
   final LocalJournalPosition? lastPosition;
 
   bool get isReady => acceptedPlan != null;
+
+  bool get hasTemporaryLaunchPhase => (acceptedPlan?.durationCycles ?? 0) > 0;
+
+  bool get isLaunchCompleted =>
+      !hasTemporaryLaunchPhase || completedPlan != null;
+
+  bool requiresCompletionReview(LocalDate date) =>
+      hasTemporaryLaunchPhase &&
+      completedPlan == null &&
+      !date.isBefore(acceptedPlan!.estimatedCompletionDate);
 
   StartupLedger apply(LocalJournalEntry entry) {
     if (_appliedEventIds.contains(entry.event.id)) return this;
@@ -55,6 +74,9 @@ final class StartupLedger {
     var nextCushion = cushionPolicy;
     var nextAssessment = assessment;
     var nextAccepted = acceptedPlan;
+    var nextStarted = startedPlan;
+    var nextReview = latestReview;
+    var nextCompleted = completedPlan;
     if (entry.event.target.kind == EntityKind.startupPlan) {
       if (nextPlanId != null && nextPlanId != entry.event.target.id) {
         throw const ProjectionConflictException(
@@ -123,6 +145,48 @@ final class StartupLedger {
             );
           }
           nextAccepted = payload;
+        case LaunchPlanStartedPayload():
+          if (nextAccepted == null ||
+              nextAccepted.durationCycles == 0 ||
+              nextStarted != null) {
+            throw const ProjectionConflictException(
+              'A temporary launch baseline requires one accepted plan.',
+            );
+          }
+          final payload = entry.event.payload as LaunchPlanStartedPayload;
+          if (payload.startedOn != nextAccepted.startDate) {
+            throw const ProjectionConflictException(
+              'The launch baseline must start with the accepted plan.',
+            );
+          }
+          nextStarted = payload;
+        case LaunchPlanReassessedPayload():
+          if (nextAccepted == null ||
+              nextAccepted.durationCycles == 0 ||
+              nextCompleted != null) {
+            throw const ProjectionConflictException(
+              'A launch review requires one active accepted plan.',
+            );
+          }
+          nextReview = entry.event.payload as LaunchPlanReassessedPayload;
+        case LaunchPlanCompletedPayload():
+          if (nextAccepted == null ||
+              nextReview == null ||
+              nextCompleted != null ||
+              nextReview.outcome != LaunchReviewOutcome.safeToComplete) {
+            throw const ProjectionConflictException(
+              'Launch completion requires one latest safe review.',
+            );
+          }
+          final payload = entry.event.payload as LaunchPlanCompletedPayload;
+          if (payload.effectiveFromCycleStart != nextReview.reviewCycleStart ||
+              payload.sustainableWeeklyBudget !=
+                  nextReview.sustainableWeeklyBudget) {
+            throw const ProjectionConflictException(
+              'Launch completion must use the latest reviewed transition.',
+            );
+          }
+          nextCompleted = payload;
         default:
           throw UnsupportedEventException(entry.event.eventType);
       }
@@ -135,6 +199,9 @@ final class StartupLedger {
       cushionPolicy: nextCushion,
       assessment: nextAssessment,
       acceptedPlan: nextAccepted,
+      startedPlan: nextStarted,
+      latestReview: nextReview,
+      completedPlan: nextCompleted,
       appliedEventIds: {..._appliedEventIds, entry.event.id},
       lastPosition: entry.position,
     );

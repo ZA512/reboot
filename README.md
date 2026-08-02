@@ -57,6 +57,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Configuration manuelle des revenus et charges
 - [x] Choix de trajectoire et premier budget hebdomadaire
 - [x] Validation du démarrage : objectif de solde, projection quotidienne et coussin de calendrier
+- [x] Réévaluation explicite avant toute sortie du budget de lancement temporaire
 - [x] Tableau de bord du restant hebdomadaire en direct
 - [x] Saisie rapide, étalement exact sur 1 à 12 semaines et suppression d’erreur
 - [x] Tendances glissantes sur 4, 8, 16, 32 et 52 semaines et alertes graduées

@@ -121,6 +121,18 @@ final class LaunchAssessmentCreatedPayload implements EventPayload {
 
 enum StartupViabilityAnswer { comfortable, tight, rejected, uncertain }
 
+/// Result of a fresh check made before leaving the temporary launch budget.
+enum LaunchReviewOutcome {
+  safeToComplete,
+  pendingOperationsUnknown,
+  upcomingExpenseUnfunded,
+  dataNotFresh,
+  cushionNotReached,
+  projectedFloorBreached,
+  structurallyTooTight,
+  humanViabilityNotConfirmed,
+}
+
 /// User acceptance of the exact temporary or immediate weekly plan.
 final class LaunchPlanAcceptedPayload implements EventPayload {
   LaunchPlanAcceptedPayload({
@@ -168,6 +180,101 @@ final class LaunchPlanAcceptedPayload implements EventPayload {
   final LaunchDecisionState decisionState;
   final StartupViabilityAnswer viabilityAnswer;
   final bool acceptedBankFundingRisk;
+}
+
+/// Baseline activated for a temporary plan, including its expected endpoint.
+final class LaunchPlanStartedPayload implements EventPayload {
+  LaunchPlanStartedPayload({
+    required this.startedOn,
+    required this.expectedCompletionBalance,
+  }) {
+    _requireEur(
+      expectedCompletionBalance,
+      'expectedCompletionBalance',
+      signed: true,
+    );
+  }
+
+  @override
+  String get eventType => 'startup.launch-plan.started';
+
+  @override
+  int get schemaVersion => 1;
+
+  @override
+  EntityKind get targetKind => EntityKind.startupPlan;
+
+  final LocalDate startedOn;
+  final Money expectedCompletionBalance;
+}
+
+/// Durable result of a fresh launch-phase safety assessment.
+final class LaunchPlanReassessedPayload implements EventPayload {
+  LaunchPlanReassessedPayload({
+    required this.snapshot,
+    required this.reviewCycleStart,
+    required this.sustainableWeeklyBudget,
+    required this.projectedLowPoint,
+    required this.projectedLowPointDate,
+    required this.targetCashCushion,
+    required this.currentCushionCoverage,
+    required this.cashDivergence,
+    required this.outcome,
+  }) {
+    _requireEur(sustainableWeeklyBudget, 'sustainableWeeklyBudget');
+    _requireEur(projectedLowPoint, 'projectedLowPoint', signed: true);
+    _requireEur(targetCashCushion, 'targetCashCushion');
+    _requireEur(currentCushionCoverage, 'currentCushionCoverage');
+    _requireEur(cashDivergence, 'cashDivergence', signed: true);
+  }
+
+  @override
+  String get eventType => 'startup.launch-plan.reassessed';
+
+  @override
+  int get schemaVersion => 1;
+
+  @override
+  EntityKind get targetKind => EntityKind.startupPlan;
+
+  final LiquiditySnapshot snapshot;
+  final LocalDate reviewCycleStart;
+  final Money sustainableWeeklyBudget;
+  final Money projectedLowPoint;
+  final LocalDate projectedLowPointDate;
+  final Money targetCashCushion;
+  final Money currentCushionCoverage;
+  final Money cashDivergence;
+  final LaunchReviewOutcome outcome;
+}
+
+/// Explicit user-confirmed transition from launch to ordinary operation.
+final class LaunchPlanCompletedPayload implements EventPayload {
+  LaunchPlanCompletedPayload({
+    required this.completedOn,
+    required this.effectiveFromCycleStart,
+    required this.sustainableWeeklyBudget,
+  }) {
+    _requireEur(sustainableWeeklyBudget, 'sustainableWeeklyBudget');
+    if (effectiveFromCycleStart.isBefore(completedOn)) {
+      throw ArgumentError(
+        'Ordinary operation cannot become effective before confirmation.',
+      );
+    }
+  }
+
+  @override
+  String get eventType => 'startup.launch-plan.completed';
+
+  @override
+  int get schemaVersion => 1;
+
+  @override
+  EntityKind get targetKind => EntityKind.startupPlan;
+
+  final LocalDate completedOn;
+  final LocalDate effectiveFromCycleStart;
+  final Money sustainableWeeklyBudget;
 }
 
 void _requireEur(Money amount, String name, {bool signed = false}) {
