@@ -11,4 +11,6 @@ export 'src/local_date.dart';
 export 'src/money.dart';
 export 'src/refund_events.dart';
 export 'src/reserve_events.dart';
+export 'src/startup.dart';
+export 'src/startup_events.dart';
 export 'src/trajectory.dart';

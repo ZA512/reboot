@@ -205,6 +205,63 @@ List<EventPayload> _allPayloads() {
         targetDate: LocalDate(2026, 10, 1),
       ),
     ),
+    LiquiditySnapshotCreatedPayload(
+      snapshot: LiquiditySnapshot(
+        capturedAtUtc: DateTime.utc(2026, 4, 1, 8, 30),
+        bookedBalance: _eur(-150000),
+        pendingCardAmount: _eur(12000),
+        deferredCardAmount: _eur(8000),
+        outstandingCheques: _eur(5000),
+        committedTransfers: _eur(3000),
+        protectedVirtualAllocations: _eur(20000),
+        source: LiquiditySnapshotSource.manual,
+        confidence: StartupDataConfidence.high,
+      ),
+    ),
+    HouseholdNeedsProfileCreatedPayload(
+      profile: HouseholdNeedsProfile(
+        fullTimePersons14OrOlder: 2,
+        fullTimeChildrenUnder14: 2,
+        partialPresences: [
+          PartialHouseholdPresence(
+            ageBand: HouseholdNeedAgeBand.under14,
+            presencePermille: 500,
+          ),
+        ],
+        weeklyBudgetScope: const {
+          WeeklyBudgetCategory.groceries,
+          WeeklyBudgetCategory.hygiene,
+        },
+        minimumViableWeeklyBudget: _eur(9000),
+      ),
+    ),
+    CashCushionPolicyCreatedPayload(
+      targetBalance: _eur(0),
+      technicalCushion: _eur(40000),
+      uncertaintyMargin: _eur(10000),
+      ownedCash: _eur(30000),
+      authorizedOverdraft: _eur(150000),
+      overdraftFundedCash: _eur(20000),
+    ),
+    LaunchAssessmentCreatedPayload(
+      sustainableWeeklyBudget: _eur(12000),
+      minimumViableWeeklyBudget: _eur(9000),
+      projectedLowPoint: _eur(-190000),
+      projectedLowPointDate: LocalDate(2026, 5, 2),
+      decisionState: LaunchDecisionState.readyWithLaunchBudget,
+      confidence: StartupDataConfidence.high,
+    ),
+    LaunchPlanAcceptedPayload(
+      startDate: LocalDate(2026, 4, 4),
+      launchWeeklyBudget: _eur(9000),
+      sustainableWeeklyBudget: _eur(12000),
+      durationCycles: 26,
+      estimatedCompletionDate: LocalDate(2026, 10, 3),
+      expectedLowPoint: _eur(-150000),
+      decisionState: LaunchDecisionState.readyWithLaunchBudget,
+      viabilityAnswer: StartupViabilityAnswer.tight,
+      acceptedBankFundingRisk: true,
+    ),
     ExpenseRecordedPayload(
       amount: _eur(4250),
       label: 'Courses',

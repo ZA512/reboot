@@ -2043,4 +2043,356 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectBackupFile => 'Select backup file';
+
+  @override
+  String get startupSafetyTitle => 'Check your starting position';
+
+  @override
+  String startupStep(int current) {
+    return 'Step $current of 8';
+  }
+
+  @override
+  String get startupCushionTitle =>
+      'A stable year can still have difficult days';
+
+  @override
+  String get startupCushionBody =>
+      'REBOOT first calculates your sustainable weekly budget. It then checks whether income and payment dates create a temporary low point. The cash cushion absorbs that timing variation; it is not spending money or emergency savings.';
+
+  @override
+  String get startupGoalConceptTitle => '1. Your balance objective';
+
+  @override
+  String get startupGoalConceptBody =>
+      'The ordinary account level you want to reach, for example moving from a habitual -€1,500 to €0.';
+
+  @override
+  String get startupCushionConceptTitle => '2. The timing cushion';
+
+  @override
+  String get startupCushionConceptBody =>
+      'A separate amount calculated from the largest reasonable dip between dated income and payments.';
+
+  @override
+  String get startupFundingConceptTitle => '3. How the cushion is funded';
+
+  @override
+  String get startupFundingConceptBody =>
+      'Your own cash is safest. Authorized overdraft may cover a chosen part, but remains bank financing with real risk.';
+
+  @override
+  String get startupCheckAction => 'Check my start';
+
+  @override
+  String get startupAccountTitle => 'Where is the account really today?';
+
+  @override
+  String get startupAccountBody =>
+      'Start with the balance shown by the bank, then remove money already spent, committed, or protected.';
+
+  @override
+  String get bookedBalanceLabel => 'Balance shown by the bank';
+
+  @override
+  String get pendingCardLabel => 'Card payments not yet debited';
+
+  @override
+  String get deferredCardLabel => 'Deferred card amount still to be debited';
+
+  @override
+  String get outstandingChequesLabel => 'Cheques not yet debited';
+
+  @override
+  String get committedTransfersLabel => 'Outgoing transfers already committed';
+
+  @override
+  String get protectedAllocationsLabel =>
+      'Money already protected for another purpose';
+
+  @override
+  String get authorizedOverdraftLabel => 'Authorized overdraft limit';
+
+  @override
+  String get targetBalanceLabel => 'Account balance you want to reach';
+
+  @override
+  String get accountCheckedToday => 'I checked this account today';
+
+  @override
+  String get startupUpcomingTitle => 'What is already on the way?';
+
+  @override
+  String get startupUpcomingBody =>
+      'Your income and charges are already dated from the previous steps. Add a known large expense in the next 12 weeks if one is missing.';
+
+  @override
+  String get allPendingKnown =>
+      'All purchases already made but not debited are included above';
+
+  @override
+  String get upcomingExpenseAmountLabel => 'Known large expense (optional)';
+
+  @override
+  String get upcomingExpenseDateLabel => 'Expected date of this expense';
+
+  @override
+  String get startupHouseholdTitle => 'What must the weekly budget cover?';
+
+  @override
+  String get persons14PlusLabel => 'People aged 14 or over';
+
+  @override
+  String get childrenUnder14Label => 'Children under 14';
+
+  @override
+  String get weeklyScopeTitle => 'Paid from the weekly budget';
+
+  @override
+  String get scopeGroceries => 'Food and groceries';
+
+  @override
+  String get scopeFuel => 'Fuel';
+
+  @override
+  String get scopeHygiene => 'Hygiene';
+
+  @override
+  String get scopeChildren => 'Children\'s everyday spending';
+
+  @override
+  String get scopeHealth => 'Health out of pocket';
+
+  @override
+  String get scopeLeisure => 'Leisure and everyday purchases';
+
+  @override
+  String get minimumViableBudgetLabel =>
+      'Minimum your household needs each week';
+
+  @override
+  String get startupSimulationTitle => 'The two results to keep separate';
+
+  @override
+  String sustainableBudgetResult(String amount) {
+    return 'Sustainable weekly budget: $amount';
+  }
+
+  @override
+  String projectedLowResult(String amount, String date) {
+    return 'Projected low with today\'s available cash: $amount on $date';
+  }
+
+  @override
+  String technicalCushionResult(String amount) {
+    return 'Timing cushion needed: $amount';
+  }
+
+  @override
+  String uncertaintyMarginResult(String amount) {
+    return 'Prudent starting margin: $amount';
+  }
+
+  @override
+  String get uncertaintyMarginLabel => 'Prudent starting margin';
+
+  @override
+  String availableCashResult(String amount) {
+    return 'Actually available today: $amount';
+  }
+
+  @override
+  String balanceObjectiveResult(String amount) {
+    return 'Separate balance objective: $amount';
+  }
+
+  @override
+  String targetCushionResult(String amount) {
+    return 'Target timing cushion: $amount';
+  }
+
+  @override
+  String budgetPerPersonResult(String amount) {
+    return 'Context: $amount per person and week';
+  }
+
+  @override
+  String budgetPerConsumptionUnitResult(String amount) {
+    return 'Context: $amount per consumption unit and week';
+  }
+
+  @override
+  String minimumCoverageResult(String percent) {
+    return 'Coverage of your declared minimum: $percent%';
+  }
+
+  @override
+  String get startupFundingTitle => 'Who finances the cushion?';
+
+  @override
+  String get startupFundingBody =>
+      'Leave all or part as your own money on the account. The remainder may use authorized overdraft, but that part is financed by the bank and may create fees.';
+
+  @override
+  String get ownedCushionLabel => 'Your own money left on the account';
+
+  @override
+  String bankCushionResult(String amount) {
+    return 'Part financed by authorized overdraft: $amount';
+  }
+
+  @override
+  String requiredProgressResult(String amount) {
+    return 'Progress needed before ordinary operation: $amount';
+  }
+
+  @override
+  String get bankCushionWarning =>
+      'This solution can return the account below zero. The bank may charge fees or change the authorization.';
+
+  @override
+  String get acceptBankCushionRisk =>
+      'I understand and accept the risk of using authorized overdraft for the cushion';
+
+  @override
+  String get startupNoSafePlan =>
+      'No tested weekly amount stays above your floor, reaches the selected operating level, and respects your declared minimum. Add own cash, choose a later start, or review the assumptions.';
+
+  @override
+  String launchPlanOption(String budget, int weeks, String sustainable) {
+    return '$budget for $weeks weeks, then $sustainable';
+  }
+
+  @override
+  String directStartOption(String budget) {
+    return 'Start directly with $budget per week';
+  }
+
+  @override
+  String get startupHumanTitle =>
+      'Can your household really follow this amount?';
+
+  @override
+  String startupHumanQuestion(String amount, int weeks) {
+    return 'Can you cover the selected categories with $amount per week for $weeks weeks?';
+  }
+
+  @override
+  String get viabilityComfortable => 'Yes, without particular difficulty';
+
+  @override
+  String get viabilityTight => 'Yes, but it will be tight';
+
+  @override
+  String get viabilityNo => 'No';
+
+  @override
+  String get viabilityUnknown => 'I do not know yet';
+
+  @override
+  String get startupSummaryTitle => 'Your safe starting plan';
+
+  @override
+  String targetBalanceResult(String amount) {
+    return 'Your account objective: $amount';
+  }
+
+  @override
+  String operatingBalanceResult(String amount) {
+    return 'Account level before normal operation: $amount';
+  }
+
+  @override
+  String allowedLowResult(String amount) {
+    return 'Lowest level accepted for timing variations: $amount';
+  }
+
+  @override
+  String get startupCommitment =>
+      'I understand that the launch budget is temporary and that the cushion is not additional spending money.';
+
+  @override
+  String get confirmStartupPlan => 'Confirm this starting plan';
+
+  @override
+  String get startupSaving => 'Saving the starting plan…';
+
+  @override
+  String get startupSaveError =>
+      'The starting plan could not be saved. Nothing was partially recorded.';
+
+  @override
+  String get launchPhaseDashboardTitle => 'Temporary launch budget active';
+
+  @override
+  String launchPhaseDashboardBody(
+    String launchBudget,
+    String date,
+    String sustainableBudget,
+  ) {
+    return '$launchBudget per week until $date, then $sustainableBudget after a fresh check.';
+  }
+
+  @override
+  String startupSevereEffort(String percent) {
+    return 'Severe effort: $percent%';
+  }
+
+  @override
+  String get startupPendingIncompleteError =>
+      'Include operations already made or wait until they are debited before confirming a safe start.';
+
+  @override
+  String get startupExpenseDateRequiredError =>
+      'Choose the date of the large expense.';
+
+  @override
+  String get startupBankRiskRequiredError =>
+      'Confirm the risk of funding part of the cushion with authorized overdraft.';
+
+  @override
+  String get startupViabilityRequiredError =>
+      'Adjust the amount until you can confirm it is genuinely sustainable for your household.';
+
+  @override
+  String get startupCommitmentRequiredError =>
+      'Confirm that you understand the role of the timing cushion.';
+
+  @override
+  String get startupHouseholdInvalidError => 'Check the household composition.';
+
+  @override
+  String get startupNoPositiveBudgetError =>
+      'Predictable income does not yet support a positive weekly budget.';
+
+  @override
+  String get startupBelowMinimumError =>
+      'The sustainable budget is below the minimum declared by your household.';
+
+  @override
+  String get startupExpenseOutsideWindowError =>
+      'The large expense must fall within the first 12 weeks.';
+
+  @override
+  String get startupOwnedCushionTooHighError =>
+      'Your own contribution cannot exceed the calculated cushion.';
+
+  @override
+  String get startupInvalidAmountError => 'Enter a valid amount.';
+
+  @override
+  String get startupNonNegativeAmountError =>
+      'Enter an amount greater than or equal to zero.';
+
+  @override
+  String get startupPositiveAmountError => 'Enter an amount greater than zero.';
+
+  @override
+  String get startupInvalidDataError => 'Check the entered information.';
+
+  @override
+  String get wizardBack => 'Back';
+
+  @override
+  String get wizardNext => 'Continue';
 }

@@ -9,6 +9,8 @@ import '../l10n/app_localizations.dart';
 import '../onboarding/onboarding_controller.dart';
 import '../onboarding/onboarding_screen.dart';
 import '../settings/local_backup_controller.dart';
+import '../startup_setup/startup_setup_controller.dart';
+import '../startup_setup/startup_setup_screen.dart';
 import '../trajectory_setup/trajectory_setup_controller.dart';
 import '../trajectory_setup/trajectory_setup_screen.dart';
 
@@ -61,6 +63,10 @@ final class ProfileStartupGate extends ConsumerWidget {
           return TrajectorySetupScreen(
             firstCycleStart: service.configuration.household!.firstCycleStart,
           );
+        }
+        if (!service.startup.isReady) {
+          ref.watch(startupSetupControllerProvider);
+          return StartupSetupScreen(service: service);
         }
         return WeeklyDashboardScreen(service: service);
       },

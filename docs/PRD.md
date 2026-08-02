@@ -2,8 +2,8 @@
 
 ## Regain Expenses, Back On Our Track
 
-- Version : 2.1
-- Date : 2026-08-01
+- Version : 2.2
+- Date : 2026-08-02
 - Statut : spécification produit de référence
 - Cibles initiales : Android natif et Web/PWA
 - Accès iPhone initial : PWA installable depuis Safari
@@ -15,7 +15,7 @@
 
 Ce document définit la vision, le périmètre, les exigences et l’ordre de livraison de REBOOT.
 
-Les règles détaillées de la méthode sont définies dans la [Méthode REBOOT](reboot-method.md). Les décisions techniques acceptées sont définies dans les [ADR](adr/README.md).
+Les règles détaillées de la méthode sont définies dans la [Méthode REBOOT](reboot-method.md). La phase de démarrage est précisée par le [complément démarrage v1.1](PRD_REBOOT_Complement_Phase_Demarrage_v1.1.md). Les décisions techniques acceptées sont définies dans les [ADR](adr/README.md).
 
 Le [PRD Budget52 original](archive/PRD-Budget52-v1.0.md) est conservé sans modification pour la traçabilité historique. Il n’est plus la source normative du produit courant.
 
@@ -224,6 +224,23 @@ Le parcours demande également :
 La stratégie **Équilibre** n’ajoute aucune épargne implicite. La stratégie **Coussin** retire du quotidien une contribution annuelle explicitement choisie. La stratégie **Sortie de découvert** demande le découvert actuel, le coussin positif souhaité et une date cible ; elle calcule un effort par cycle arrondi au centime supérieur. À la date cible, l’utilisateur doit confirmer le résultat avant toute hausse du budget semaine. Une cible incompatible avec la capacité disponible produit un avertissement explicite, sans budget négatif.
 
 Le premier cycle commence par défaut au prochain jour REBOOT. L’utilisateur peut reprendre depuis l’occurrence précédente s’il saisit toutes les dépenses déjà réalisées.
+
+### 8.1. Validation obligatoire du démarrage
+
+Le budget durable calculé sur 52 semaines ne doit pas être appliqué aveuglément dès le premier cycle. Avant le premier pilotage réel, REBOOT simule quotidiennement les 52 semaines à venir et distingue explicitement :
+
+- le solde réellement disponible aujourd’hui ;
+- l’objectif de solde choisi par le foyer, par exemple passer d’un découvert récurrent à zéro ;
+- le creux de calendrier produit par les dates des revenus et paiements ;
+- le coussin technique nécessaire pour absorber ce creux ;
+- la marge prudente de démarrage ;
+- la façon dont le coussin est financé.
+
+L’objectif de solde et le coussin ne sont jamais additionnés sous un intitulé ambigu. Le coussin cible est indépendant du solde actuel : il correspond au coussin technique augmenté de la marge choisie. Il peut être financé par l’argent propre laissé sur le compte, ou en partie par un découvert autorisé explicitement accepté. Le découvert n’est jamais présélectionné ni présenté comme aussi sûr que de l’argent propre.
+
+Le wizard collecte aussi les opérations déjà engagées, les grosses dépenses proches, la composition économique du foyer, le périmètre du budget semaine et son minimum viable déclaré. Il refuse tout plan inférieur à ce minimum ou franchissant le plancher accepté. Si le budget durable immédiat est dangereux, il recherche un budget de lancement temporaire sur 4, 8, 13, 26 ou 52 cycles et simule chaque candidat sur l’horizon complet.
+
+La formule normative, les cas limites et les exigences de suivi figurent dans le complément démarrage et dans l’[ADR-0013](adr/0013-startup-balance-and-cash-cushion.md).
 
 ## 9. Cycles hebdomadaires
 
@@ -509,6 +526,10 @@ Le premier produit doit permettre de :
 - conserver le budget suivant après un surplus ou dépassement ;
 - distinguer un montant frais d’un montant partagé potentiellement ancien ;
 - utiliser le produit sans import ni connexion bancaire ;
+- distinguer l’objectif de solde du coussin de calendrier avant le premier cycle ;
+- simuler quotidiennement 52 semaines et refuser un démarrage franchissant le plancher choisi ;
+- traiter explicitement le découvert autorisé comme un financement bancaire risqué ;
+- demander un minimum hebdomadaire humain et refuser un plan inférieur ;
 - utiliser la PWA dans Safari sans installation ;
 - installer la PWA sur l’écran d’accueil d’un iPhone ;
 - redémarrer la PWA hors ligne après un premier chargement réussi ;

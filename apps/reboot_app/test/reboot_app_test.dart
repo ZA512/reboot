@@ -17,6 +17,7 @@ import 'package:reboot_app/reserves/reserves_screen.dart';
 import 'package:reboot_app/src/reboot_app.dart';
 import 'package:reboot_application/reboot_application.dart';
 import 'package:reboot_domain/reboot_domain.dart';
+import 'package:reboot_projection/reboot_projection.dart';
 
 void main() {
   testWidgets('keeps onboarding hidden while the profile is opening', (
@@ -351,12 +352,106 @@ void main() {
           .minorUnits,
       41500,
     );
-    expect(find.text('Votre prochain budget semaine'), findsOneWidget);
-    expect(find.textContaining('415'), findsWidgets);
+    expect(find.text('Vérifier votre point de départ'), findsOneWidget);
+    expect(find.text('1. Votre objectif de solde'), findsOneWidget);
     expect(find.byKey(const ValueKey('add-expense')), findsNothing);
-    expect(find.textContaining('commence le samedi 4 avril'), findsOneWidget);
     expect(journal.entries, hasLength(4));
   });
+
+  testWidgets(
+    'separates a minus 1500 balance objective from its timing cushion',
+    (tester) async {
+      _useLocale(tester, const Locale('fr'));
+      final journal = _MemoryJournal();
+      final service = await _serviceBeforeStartup(journal);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localRebootServiceProvider.overrideWith((ref) async => service),
+            onboardingDeviceContextProvider.overrideWith(
+              (ref) async => OnboardingDeviceContext(
+                localDate: LocalDate(2026, 4, 1),
+                timeZone: IanaTimeZoneId('Europe/Paris'),
+              ),
+            ),
+            currentInstantProvider.overrideWith(
+              (ref) => DateTime.utc(2026, 4, 1, 8),
+            ),
+          ],
+          child: const RebootApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await _tapStartupContinue(tester);
+      await tester.enterText(
+        find.byKey(const ValueKey('startup-booked-balance')),
+        '-1500',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('startup-authorized-overdraft')),
+        '5000',
+      );
+      await _tapStartupContinue(tester);
+      await _tapStartupContinue(tester);
+      await tester.enterText(
+        find.byKey(const ValueKey('startup-minimum-viable')),
+        '100',
+      );
+      await _tapStartupContinue(tester);
+
+      expect(find.textContaining('Budget semaine durable'), findsOneWidget);
+      expect(find.textContaining('Point bas'), findsOneWidget);
+      expect(find.textContaining('Coussin nécessaire'), findsOneWidget);
+      await _tapStartupContinue(tester);
+
+      await tester.enterText(
+        find.byKey(const ValueKey('startup-owned-cushion')),
+        '0',
+      );
+      await tester.pump();
+      expect(
+        find.textContaining('Part financée par le découvert'),
+        findsOneWidget,
+      );
+      tester
+          .widget<CheckboxListTile>(
+            find.byKey(const ValueKey('startup-bank-risk')),
+          )
+          .onChanged!(true);
+      await tester.pump();
+      await _tapStartupContinue(tester);
+
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('startup-viability-comfortable')),
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('startup-viability-comfortable')),
+      );
+      await _tapStartupContinue(tester);
+
+      expect(
+        find.textContaining('Votre objectif de solde : 0'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Point le plus bas accepté'), findsOneWidget);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('startup-commitment')),
+      );
+      await tester.tap(find.byKey(const ValueKey('startup-commitment')));
+      await _tapStartupContinue(tester);
+      await tester.pumpAndSettle();
+
+      expect(service.startup.isReady, isTrue);
+      expect(find.text('Votre prochain budget semaine'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('startup-launch-progress')),
+        findsOneWidget,
+      );
+      expect(journal.entries, hasLength(9));
+    },
+  );
 
   testWidgets('records, splits, displays, and deletes a quick expense', (
     tester,
@@ -428,7 +523,7 @@ void main() {
       service.expenses.activeExpenses.single.nature,
       ExpenseNature.necessary,
     );
-    expect(journal.entries, hasLength(7));
+    expect(journal.entries, hasLength(12));
 
     await tester.scrollUntilVisible(
       find.byIcon(Icons.delete_outline),
@@ -459,7 +554,7 @@ void main() {
           .minorUnits,
       41500,
     );
-    expect(journal.entries, hasLength(8));
+    expect(journal.entries, hasLength(13));
   });
 
   testWidgets('reuses a frequent label and its latest optional nature', (
@@ -1817,7 +1912,14 @@ CashFlowDefinition _monthlyFlow({
   );
 }
 
-Future<LocalRebootService> _readyService(_MemoryJournal journal) async {
+Future<void> _tapStartupContinue(WidgetTester tester) async {
+  final button = find.byKey(const ValueKey('startup-continue'));
+  await tester.ensureVisible(button);
+  await tester.tap(button);
+  await tester.pumpAndSettle();
+}
+
+Future<LocalRebootService> _serviceBeforeStartup(_MemoryJournal journal) async {
   final service = await LocalRebootService.restore(journal: journal);
   await service.initializeHousehold(
     InitializeHouseholdCommand(
@@ -1854,6 +1956,59 @@ Future<LocalRebootService> _readyService(_MemoryJournal journal) async {
       safetyMargin: Money.zero(Currency.eur),
       effectiveFromCycleStart: LocalDate(2026, 4, 4),
       businessDate: LocalDate(2026, 4, 1),
+    ),
+  );
+  return service;
+}
+
+Future<LocalRebootService> _readyService(_MemoryJournal journal) async {
+  final service = await _serviceBeforeStartup(journal);
+  final start = LocalDate(2026, 4, 4);
+  final annual = service.buildAnnualBudget(start);
+  final openingCash = Money.fromMinorUnits(10000000, Currency.eur);
+  final liquidity = LiquiditySnapshot(
+    capturedAtUtc: DateTime.utc(2026, 4, 1, 8),
+    bookedBalance: openingCash,
+    source: LiquiditySnapshotSource.manual,
+    confidence: StartupDataConfidence.high,
+  );
+  final projection = StartupCashProjectionEngine.project(
+    cycles: annual.cycles,
+    initialUsableCash: openingCash,
+    movements: StartupCashProjectionEngine.movementsFromAnnualBudget(annual),
+    weeklyBudgetsByCycleStart: {
+      for (final cycle in annual.cycles)
+        cycle.start: annual.recommendedWeeklyBudget,
+    },
+  );
+  final cushion =
+      projection.technicalCashCushion + annual.recommendedWeeklyBudget;
+  final funding = CashCushionFunding(
+    targetBalance: Money.zero(Currency.eur),
+    ownedCash: cushion,
+    authorizedOverdraft: Money.zero(Currency.eur),
+    overdraftFundedCash: Money.zero(Currency.eur),
+  );
+  final assessment = StartupLiquidityAssessment(
+    projection: projection,
+    uncertaintyMargin: annual.recommendedWeeklyBudget,
+    funding: funding,
+  );
+  await service.acceptStartupPlan(
+    AcceptStartupPlanCommand(
+      liquidity: liquidity,
+      householdNeeds: HouseholdNeedsProfile(
+        fullTimePersons14OrOlder: 1,
+        fullTimeChildrenUnder14: 0,
+        weeklyBudgetScope: const {WeeklyBudgetCategory.groceries},
+        minimumViableWeeklyBudget: Money.fromMinorUnits(100, Currency.eur),
+      ),
+      assessment: assessment,
+      startDate: start,
+      decisionState: LaunchDecisionState.readyWithExistingCushion,
+      viabilityAnswer: StartupViabilityAnswer.comfortable,
+      businessDate: LocalDate(2026, 4, 1),
+      acceptedBankFundingRisk: false,
     ),
   );
   return service;

@@ -239,6 +239,69 @@ final class SetTrajectoryPlanCommand {
   final OverdraftExitGoal? overdraftExitGoal;
 }
 
+/// Atomically records the facts, assessment, and accepted startup plan.
+final class AcceptStartupPlanCommand {
+  AcceptStartupPlanCommand({
+    required this.liquidity,
+    required this.householdNeeds,
+    required this.assessment,
+    required this.startDate,
+    required this.decisionState,
+    required this.viabilityAnswer,
+    required this.businessDate,
+    required this.acceptedBankFundingRisk,
+    this.selectedLaunchPlan,
+  }) {
+    if (liquidity.usableCash != assessment.projection.initialUsableCash) {
+      throw ArgumentError(
+        'The assessment must start from the confirmed usable cash.',
+      );
+    }
+    if (householdNeeds.minimumViableWeeklyBudget.compareTo(
+          sustainableWeeklyBudget,
+        ) >
+        0) {
+      throw ArgumentError(
+        'A plan cannot be accepted below the declared viable minimum.',
+      );
+    }
+    if (selectedLaunchPlan case final plan?) {
+      if (plan.sustainableWeeklyBudget != sustainableWeeklyBudget ||
+          plan.launchWeeklyBudget.compareTo(
+                householdNeeds.minimumViableWeeklyBudget,
+              ) <
+              0) {
+        throw ArgumentError('The selected launch plan is inconsistent.');
+      }
+    } else if (!assessment.canStartDirectly) {
+      throw ArgumentError(
+        'Immediate sustainable-budget startup requires a covered cushion.',
+      );
+    }
+    if (assessment.funding.usesBankFunding && !acceptedBankFundingRisk) {
+      throw ArgumentError(
+        'Bank-funded cushion risk requires explicit acceptance.',
+      );
+    }
+  }
+
+  final LiquiditySnapshot liquidity;
+  final HouseholdNeedsProfile householdNeeds;
+  final StartupLiquidityAssessment assessment;
+  final LaunchPlanCandidate? selectedLaunchPlan;
+  final LocalDate startDate;
+  final LaunchDecisionState decisionState;
+  final StartupViabilityAnswer viabilityAnswer;
+  final LocalDate businessDate;
+  final bool acceptedBankFundingRisk;
+
+  Money get sustainableWeeklyBudget =>
+      selectedLaunchPlan?.sustainableWeeklyBudget ??
+      assessment.projection.points
+          .firstWhere((point) => point.weeklyBudgetCommitment.isPositive)
+          .weeklyBudgetCommitment;
+}
+
 /// Schedules a new day or time zone without rewriting historical cycles.
 final class ChangeCyclePolicyCommand {
   /// Creates the command.
@@ -524,6 +587,7 @@ final class LocalRebootService {
     this._reserves,
     this._health,
     this._cash,
+    this._startup,
   );
 
   /// Restores all observable state from the append-only journal.
@@ -542,6 +606,7 @@ final class LocalRebootService {
       ReserveLedger.replay(entries),
       HealthLedger.replay(entries),
       CashLedger.replay(entries),
+      StartupLedger.replay(entries),
     );
   }
 
@@ -553,6 +618,7 @@ final class LocalRebootService {
   ReserveLedger _reserves;
   HealthLedger _health;
   CashLedger _cash;
+  StartupLedger _startup;
   Future<void> _commandTail = Future<void>.value();
   bool _closed = false;
 
@@ -570,6 +636,9 @@ final class LocalRebootService {
 
   /// Effective-dated cash method and cash-wallet transfer audit trail.
   CashLedger get cash => _cash;
+
+  /// Initial liquidity assessment and accepted launch plan.
+  StartupLedger get startup => _startup;
 
   /// Establishes the household exactly once.
   Future<HouseholdInitializationResult> initializeHousehold(
@@ -823,6 +892,80 @@ final class LocalRebootService {
     });
   }
 
+  /// Persists one complete, already simulated startup decision atomically.
+  Future<LaunchPlanAcceptedPayload> acceptStartupPlan(
+    AcceptStartupPlanCommand command,
+  ) {
+    return _runExclusive(() async {
+      _requireOpen();
+      if (_configuration.household == null ||
+          _configuration.annualCommitments.isEmpty) {
+        throw const IncompleteConfigurationException(
+          'Annual configuration is required before startup assessment.',
+        );
+      }
+      if (_startup.planId != null) {
+        throw StateError('The initial startup plan is already recorded.');
+      }
+      final planId = _identities.nextEntityId();
+      final target = EntityReference(kind: EntityKind.startupPlan, id: planId);
+      final funding = command.assessment.funding;
+      final projection = command.assessment.projection;
+      final selected = command.selectedLaunchPlan;
+      final accepted = LaunchPlanAcceptedPayload(
+        startDate: command.startDate,
+        launchWeeklyBudget:
+            selected?.launchWeeklyBudget ?? command.sustainableWeeklyBudget,
+        sustainableWeeklyBudget: command.sustainableWeeklyBudget,
+        durationCycles: selected?.durationCycles ?? 0,
+        estimatedCompletionDate: selected?.completionDate ?? command.startDate,
+        expectedLowPoint:
+            selected?.projection.projectedLowPoint ??
+            projection.projectedLowPoint,
+        decisionState: command.decisionState,
+        viabilityAnswer: command.viabilityAnswer,
+        acceptedBankFundingRisk: command.acceptedBankFundingRisk,
+      );
+      EventRecord event(EventPayload payload) => EventRecord(
+        id: _identities.nextEventId(),
+        recordedAtUtc: _clock.nowUtc(),
+        businessDate: command.businessDate,
+        target: target,
+        payload: payload,
+      );
+
+      await _appendValidated([
+        event(LiquiditySnapshotCreatedPayload(snapshot: command.liquidity)),
+        event(
+          HouseholdNeedsProfileCreatedPayload(profile: command.householdNeeds),
+        ),
+        event(
+          CashCushionPolicyCreatedPayload(
+            targetBalance: funding.targetBalance,
+            technicalCushion: projection.technicalCashCushion,
+            uncertaintyMargin: command.assessment.uncertaintyMargin,
+            ownedCash: funding.ownedCash,
+            authorizedOverdraft: funding.authorizedOverdraft,
+            overdraftFundedCash: funding.overdraftFundedCash,
+          ),
+        ),
+        event(
+          LaunchAssessmentCreatedPayload(
+            sustainableWeeklyBudget: command.sustainableWeeklyBudget,
+            minimumViableWeeklyBudget:
+                command.householdNeeds.minimumViableWeeklyBudget,
+            projectedLowPoint: projection.projectedLowPoint,
+            projectedLowPointDate: projection.projectedLowPointDate,
+            decisionState: command.decisionState,
+            confidence: command.liquidity.confidence,
+          ),
+        ),
+        event(accepted),
+      ]);
+      return _startup.acceptedPlan!;
+    });
+  }
+
   /// Schedules a new cycle policy and materializes transitions on demand.
   Future<CyclePolicy> changeCyclePolicy(ChangeCyclePolicyCommand command) {
     return _runExclusive(() async {
@@ -904,9 +1047,19 @@ final class LocalRebootService {
         'The household must be initialized before projecting a budget.',
       );
     }
-    final base = _configuration
-        .buildAnnualBudget(household.cyclesFromDate(cycleStart, count: 52))
-        .recommendedWeeklyBudget;
+    final launch = _startup.acceptedPlan;
+    final usesLaunchBudget =
+        launch != null &&
+        launch.durationCycles > 0 &&
+        !cycleStart.isBefore(launch.startDate) &&
+        cycleStart.isBefore(launch.estimatedCompletionDate);
+    final base = usesLaunchBudget
+        ? launch.launchWeeklyBudget
+        : _configuration
+              .buildAnnualBudget(
+                household.cyclesFromDate(cycleStart, count: 52),
+              )
+              .recommendedWeeklyBudget;
     return base + _configuration.receivedBonusForCycleStarting(cycleStart);
   }
 
@@ -1514,6 +1667,7 @@ final class LocalRebootService {
     var nextReserves = _reserves;
     var nextHealth = _health;
     var nextCash = _cash;
+    var nextStartup = _startup;
     var nextPosition = _configuration.lastPosition?.value ?? 0;
     for (final event in events) {
       nextPosition++;
@@ -1526,6 +1680,7 @@ final class LocalRebootService {
       nextReserves = nextReserves.apply(provisional);
       nextHealth = nextHealth.apply(provisional);
       nextCash = nextCash.apply(provisional);
+      nextStartup = nextStartup.apply(provisional);
     }
 
     final appended = await _journal.appendAll(events);
@@ -1537,18 +1692,21 @@ final class LocalRebootService {
     var committedReserves = _reserves;
     var committedHealth = _health;
     var committedCash = _cash;
+    var committedStartup = _startup;
     for (final entry in appended) {
       committedConfiguration = committedConfiguration.apply(entry);
       committedExpenses = committedExpenses.apply(entry);
       committedReserves = committedReserves.apply(entry);
       committedHealth = committedHealth.apply(entry);
       committedCash = committedCash.apply(entry);
+      committedStartup = committedStartup.apply(entry);
     }
     _configuration = committedConfiguration;
     _expenses = committedExpenses;
     _reserves = committedReserves;
     _health = committedHealth;
     _cash = committedCash;
+    _startup = committedStartup;
   }
 
   Future<T> _runExclusive<T>(Future<T> Function() action) {

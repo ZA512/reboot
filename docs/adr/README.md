@@ -59,6 +59,7 @@ Statuts autorisés :
 - [ADR-0008 — Distribution Android et Web/PWA](0008-android-and-web-pwa-distribution.md)
 - [ADR-0011 — Archive de récupération portable Android et Web](0011-portable-recovery-archive.md)
 - [ADR-0012 — Hébergement et contrat de sécurité PWA](0012-pwa-hosting-security-contract.md)
+- [ADR-0013 — Objectif de solde et financement du coussin de démarrage](0013-startup-balance-and-cash-cushion.md)
 
 Les trois premiers ADR ont été acceptés explicitement le 2026-07-30.
 L’ADR-0004 a été accepté le 2026-07-31 dans le cadre de la délégation des
@@ -71,6 +72,8 @@ choix techniques ont été précisés par le responsable de l’implémentation.
 L’ADR-0011 a été décidé par le responsable de l’implémentation le 2026-08-02
 dans le cadre de la délégation des décisions techniques et de sécurité.
 L’ADR-0012 a été décidé dans le même cadre le 2026-08-02.
+L’ADR-0013 formalise le 2026-08-02 la séparation demandée par le porteur du
+produit entre objectif de solde et besoin technique de trésorerie.
 
 ## ADR remplacés
 

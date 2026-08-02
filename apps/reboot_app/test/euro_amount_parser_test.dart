@@ -24,6 +24,17 @@ void main() {
     expect(parsePositiveEuroAmount('0'), isNull);
   });
 
+  test('parses the signed account balances required at startup', () {
+    expect(parseSignedEuroAmount('-1 500')!.minorUnits, -150000);
+    expect(parseSignedEuroAmount('-0,01')!.minorUnits, -1);
+    expect(parseSignedEuroAmount('0')!.isZero, isTrue);
+    expect(parseSignedEuroAmount('+10'), isNull);
+  });
+
+  test('rejects signed values outside 64-bit minor units', () {
+    expect(parseSignedEuroAmount('-92233720368547758,09'), isNull);
+  });
+
   test('rejects values outside signed 64-bit minor units', () {
     expect(parsePositiveEuroAmount('92233720368547758,08'), isNull);
   });

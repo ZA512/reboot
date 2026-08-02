@@ -58,6 +58,45 @@ final class EventPayloadJsonCodec {
           null => null,
         },
       },
+      LiquiditySnapshotCreatedPayload() => <String, Object?>{
+        'snapshot': _encodeLiquiditySnapshot(payload.snapshot),
+      },
+      HouseholdNeedsProfileCreatedPayload() => <String, Object?>{
+        'profile': _encodeHouseholdNeedsProfile(payload.profile),
+      },
+      CashCushionPolicyCreatedPayload() => <String, Object?>{
+        'targetBalance': _encodeMoney(payload.targetBalance),
+        'technicalCushion': _encodeMoney(payload.technicalCushion),
+        'uncertaintyMargin': _encodeMoney(payload.uncertaintyMargin),
+        'ownedCash': _encodeMoney(payload.ownedCash),
+        'authorizedOverdraft': _encodeMoney(payload.authorizedOverdraft),
+        'overdraftFundedCash': _encodeMoney(payload.overdraftFundedCash),
+      },
+      LaunchAssessmentCreatedPayload() => <String, Object?>{
+        'sustainableWeeklyBudget': _encodeMoney(
+          payload.sustainableWeeklyBudget,
+        ),
+        'minimumViableWeeklyBudget': _encodeMoney(
+          payload.minimumViableWeeklyBudget,
+        ),
+        'projectedLowPoint': _encodeMoney(payload.projectedLowPoint),
+        'projectedLowPointDate': payload.projectedLowPointDate.toString(),
+        'decisionState': payload.decisionState.name,
+        'confidence': payload.confidence.name,
+      },
+      LaunchPlanAcceptedPayload() => <String, Object?>{
+        'startDate': payload.startDate.toString(),
+        'launchWeeklyBudget': _encodeMoney(payload.launchWeeklyBudget),
+        'sustainableWeeklyBudget': _encodeMoney(
+          payload.sustainableWeeklyBudget,
+        ),
+        'durationCycles': payload.durationCycles,
+        'estimatedCompletionDate': payload.estimatedCompletionDate.toString(),
+        'expectedLowPoint': _encodeMoney(payload.expectedLowPoint),
+        'decisionState': payload.decisionState.name,
+        'viabilityAnswer': payload.viabilityAnswer.name,
+        'acceptedBankFundingRisk': payload.acceptedBankFundingRisk,
+      },
       ExpenseRecordedPayload() => <String, Object?>{
         'amount': _encodeMoney(payload.amount),
         'label': payload.label,
@@ -242,6 +281,84 @@ final class EventPayloadJsonCodec {
           null => null,
         },
       ),
+      'startup.liquidity-snapshot.created' => LiquiditySnapshotCreatedPayload(
+        snapshot: _decodeLiquiditySnapshot(_asMap(map['snapshot'], 'snapshot')),
+      ),
+      'startup.household-needs.created' => HouseholdNeedsProfileCreatedPayload(
+        profile: _decodeHouseholdNeedsProfile(
+          _asMap(map['profile'], 'profile'),
+        ),
+      ),
+      'startup.cash-cushion-policy.created' => CashCushionPolicyCreatedPayload(
+        targetBalance: _decodeMoney(
+          _asMap(map['targetBalance'], 'targetBalance'),
+        ),
+        technicalCushion: _decodeMoney(
+          _asMap(map['technicalCushion'], 'technicalCushion'),
+        ),
+        uncertaintyMargin: _decodeMoney(
+          _asMap(map['uncertaintyMargin'], 'uncertaintyMargin'),
+        ),
+        ownedCash: _decodeMoney(_asMap(map['ownedCash'], 'ownedCash')),
+        authorizedOverdraft: _decodeMoney(
+          _asMap(map['authorizedOverdraft'], 'authorizedOverdraft'),
+        ),
+        overdraftFundedCash: _decodeMoney(
+          _asMap(map['overdraftFundedCash'], 'overdraftFundedCash'),
+        ),
+      ),
+      'startup.launch-assessment.created' => LaunchAssessmentCreatedPayload(
+        sustainableWeeklyBudget: _decodeMoney(
+          _asMap(map['sustainableWeeklyBudget'], 'sustainableWeeklyBudget'),
+        ),
+        minimumViableWeeklyBudget: _decodeMoney(
+          _asMap(map['minimumViableWeeklyBudget'], 'minimumViableWeeklyBudget'),
+        ),
+        projectedLowPoint: _decodeMoney(
+          _asMap(map['projectedLowPoint'], 'projectedLowPoint'),
+        ),
+        projectedLowPointDate: _decodeDate(
+          map['projectedLowPointDate'],
+          'projectedLowPointDate',
+        ),
+        decisionState: _enumByName(
+          LaunchDecisionState.values,
+          _asString(map['decisionState'], 'decisionState'),
+        ),
+        confidence: _enumByName(
+          StartupDataConfidence.values,
+          _asString(map['confidence'], 'confidence'),
+        ),
+      ),
+      'startup.launch-plan.accepted' => LaunchPlanAcceptedPayload(
+        startDate: _decodeDate(map['startDate'], 'startDate'),
+        launchWeeklyBudget: _decodeMoney(
+          _asMap(map['launchWeeklyBudget'], 'launchWeeklyBudget'),
+        ),
+        sustainableWeeklyBudget: _decodeMoney(
+          _asMap(map['sustainableWeeklyBudget'], 'sustainableWeeklyBudget'),
+        ),
+        durationCycles: _asInt(map['durationCycles'], 'durationCycles'),
+        estimatedCompletionDate: _decodeDate(
+          map['estimatedCompletionDate'],
+          'estimatedCompletionDate',
+        ),
+        expectedLowPoint: _decodeMoney(
+          _asMap(map['expectedLowPoint'], 'expectedLowPoint'),
+        ),
+        decisionState: _enumByName(
+          LaunchDecisionState.values,
+          _asString(map['decisionState'], 'decisionState'),
+        ),
+        viabilityAnswer: _enumByName(
+          StartupViabilityAnswer.values,
+          _asString(map['viabilityAnswer'], 'viabilityAnswer'),
+        ),
+        acceptedBankFundingRisk: _asBool(
+          map['acceptedBankFundingRisk'],
+          'acceptedBankFundingRisk',
+        ),
+      ),
       'expense.recorded' => _decodeExpenseRecorded(map),
       'expense.allocations.planned' => _decodeExpenseAllocations(map),
       'expense.nature-set' => ExpenseNatureSetPayload(
@@ -355,6 +472,113 @@ CyclePolicy _decodeCyclePolicy(Map<String, Object?> map) {
     timeZone: IanaTimeZoneId(_asString(map['timeZone'], 'timeZone')),
   );
 }
+
+Map<String, Object?> _encodeLiquiditySnapshot(LiquiditySnapshot snapshot) => {
+  'capturedAtUtcMicros': snapshot.capturedAtUtc.microsecondsSinceEpoch
+      .toString(),
+  'bookedBalance': _encodeMoney(snapshot.bookedBalance),
+  'pendingCardAmount': _encodeMoney(snapshot.pendingCardAmount),
+  'deferredCardAmount': _encodeMoney(snapshot.deferredCardAmount),
+  'outstandingCheques': _encodeMoney(snapshot.outstandingCheques),
+  'committedTransfers': _encodeMoney(snapshot.committedTransfers),
+  'protectedVirtualAllocations': _encodeMoney(
+    snapshot.protectedVirtualAllocations,
+  ),
+  'source': snapshot.source.name,
+  'confidence': snapshot.confidence.name,
+};
+
+LiquiditySnapshot _decodeLiquiditySnapshot(Map<String, Object?> map) {
+  final micros = _decodePortableInteger(
+    map['capturedAtUtcMicros'],
+    'capturedAtUtcMicros',
+  );
+  return LiquiditySnapshot(
+    capturedAtUtc: DateTime.fromMicrosecondsSinceEpoch(
+      micros.toInt(),
+      isUtc: true,
+    ),
+    bookedBalance: _decodeMoney(_asMap(map['bookedBalance'], 'bookedBalance')),
+    pendingCardAmount: _decodeMoney(
+      _asMap(map['pendingCardAmount'], 'pendingCardAmount'),
+    ),
+    deferredCardAmount: _decodeMoney(
+      _asMap(map['deferredCardAmount'], 'deferredCardAmount'),
+    ),
+    outstandingCheques: _decodeMoney(
+      _asMap(map['outstandingCheques'], 'outstandingCheques'),
+    ),
+    committedTransfers: _decodeMoney(
+      _asMap(map['committedTransfers'], 'committedTransfers'),
+    ),
+    protectedVirtualAllocations: _decodeMoney(
+      _asMap(map['protectedVirtualAllocations'], 'protectedVirtualAllocations'),
+    ),
+    source: _enumByName(
+      LiquiditySnapshotSource.values,
+      _asString(map['source'], 'source'),
+    ),
+    confidence: _enumByName(
+      StartupDataConfidence.values,
+      _asString(map['confidence'], 'confidence'),
+    ),
+  );
+}
+
+Map<String, Object?> _encodeHouseholdNeedsProfile(
+  HouseholdNeedsProfile profile,
+) => {
+  'fullTimePersons14OrOlder': profile.fullTimePersons14OrOlder,
+  'fullTimeChildrenUnder14': profile.fullTimeChildrenUnder14,
+  'partialPresences': [
+    for (final presence in profile.partialPresences)
+      <String, Object?>{
+        'ageBand': presence.ageBand.name,
+        'presencePermille': presence.presencePermille,
+      },
+  ],
+  'weeklyBudgetScope': [
+    for (final category in WeeklyBudgetCategory.values)
+      if (profile.weeklyBudgetScope.contains(category)) category.name,
+  ],
+  'minimumViableWeeklyBudget': _encodeMoney(profile.minimumViableWeeklyBudget),
+};
+
+HouseholdNeedsProfile _decodeHouseholdNeedsProfile(
+  Map<String, Object?> map,
+) => HouseholdNeedsProfile(
+  fullTimePersons14OrOlder: _asInt(
+    map['fullTimePersons14OrOlder'],
+    'fullTimePersons14OrOlder',
+  ),
+  fullTimeChildrenUnder14: _asInt(
+    map['fullTimeChildrenUnder14'],
+    'fullTimeChildrenUnder14',
+  ),
+  partialPresences: [
+    for (final value in _asList(map['partialPresences'], 'partialPresences'))
+      _decodePartialPresence(_asMap(value, 'partialPresences[]')),
+  ],
+  weeklyBudgetScope: {
+    for (final value in _asList(map['weeklyBudgetScope'], 'weeklyBudgetScope'))
+      _enumByName(
+        WeeklyBudgetCategory.values,
+        _asString(value, 'weeklyBudgetScope[]'),
+      ),
+  },
+  minimumViableWeeklyBudget: _decodeMoney(
+    _asMap(map['minimumViableWeeklyBudget'], 'minimumViableWeeklyBudget'),
+  ),
+);
+
+PartialHouseholdPresence _decodePartialPresence(Map<String, Object?> map) =>
+    PartialHouseholdPresence(
+      ageBand: _enumByName(
+        HouseholdNeedAgeBand.values,
+        _asString(map['ageBand'], 'ageBand'),
+      ),
+      presencePermille: _asInt(map['presencePermille'], 'presencePermille'),
+    );
 
 Map<String, Object?> _encodeCashFlow(CashFlowDefinition definition) {
   return <String, Object?>{

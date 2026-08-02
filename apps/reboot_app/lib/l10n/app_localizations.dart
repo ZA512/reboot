@@ -3340,6 +3340,568 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select backup file'**
   String get selectBackupFile;
+
+  /// Startup cash-safety wizard title.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your starting position'**
+  String get startupSafetyTitle;
+
+  /// Startup wizard progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of 8'**
+  String startupStep(int current);
+
+  /// Startup cushion explanation heading.
+  ///
+  /// In en, this message translates to:
+  /// **'A stable year can still have difficult days'**
+  String get startupCushionTitle;
+
+  /// Separates sustainable budget and timing cushion.
+  ///
+  /// In en, this message translates to:
+  /// **'REBOOT first calculates your sustainable weekly budget. It then checks whether income and payment dates create a temporary low point. The cash cushion absorbs that timing variation; it is not spending money or emergency savings.'**
+  String get startupCushionBody;
+
+  /// Balance objective concept title.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Your balance objective'**
+  String get startupGoalConceptTitle;
+
+  /// Balance objective concept explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'The ordinary account level you want to reach, for example moving from a habitual -€1,500 to €0.'**
+  String get startupGoalConceptBody;
+
+  /// Timing cushion concept title.
+  ///
+  /// In en, this message translates to:
+  /// **'2. The timing cushion'**
+  String get startupCushionConceptTitle;
+
+  /// Timing cushion concept explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'A separate amount calculated from the largest reasonable dip between dated income and payments.'**
+  String get startupCushionConceptBody;
+
+  /// Cushion funding concept title.
+  ///
+  /// In en, this message translates to:
+  /// **'3. How the cushion is funded'**
+  String get startupFundingConceptTitle;
+
+  /// Cushion funding concept explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own cash is safest. Authorized overdraft may cover a chosen part, but remains bank financing with real risk.'**
+  String get startupFundingConceptBody;
+
+  /// Begins startup safety questions.
+  ///
+  /// In en, this message translates to:
+  /// **'Check my start'**
+  String get startupCheckAction;
+
+  /// Current liquidity step title.
+  ///
+  /// In en, this message translates to:
+  /// **'Where is the account really today?'**
+  String get startupAccountTitle;
+
+  /// Current liquidity step help.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with the balance shown by the bank, then remove money already spent, committed, or protected.'**
+  String get startupAccountBody;
+
+  /// Signed booked bank balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance shown by the bank'**
+  String get bookedBalanceLabel;
+
+  /// Pending card total.
+  ///
+  /// In en, this message translates to:
+  /// **'Card payments not yet debited'**
+  String get pendingCardLabel;
+
+  /// Deferred card total.
+  ///
+  /// In en, this message translates to:
+  /// **'Deferred card amount still to be debited'**
+  String get deferredCardLabel;
+
+  /// Outstanding cheque total.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheques not yet debited'**
+  String get outstandingChequesLabel;
+
+  /// Committed transfer total.
+  ///
+  /// In en, this message translates to:
+  /// **'Outgoing transfers already committed'**
+  String get committedTransfersLabel;
+
+  /// Protected virtual allocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Money already protected for another purpose'**
+  String get protectedAllocationsLabel;
+
+  /// Positive authorized overdraft depth.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized overdraft limit'**
+  String get authorizedOverdraftLabel;
+
+  /// Signed desired ordinary balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Account balance you want to reach'**
+  String get targetBalanceLabel;
+
+  /// Manual data freshness confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'I checked this account today'**
+  String get accountCheckedToday;
+
+  /// Upcoming operations step title.
+  ///
+  /// In en, this message translates to:
+  /// **'What is already on the way?'**
+  String get startupUpcomingTitle;
+
+  /// Upcoming operations explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Your income and charges are already dated from the previous steps. Add a known large expense in the next 12 weeks if one is missing.'**
+  String get startupUpcomingBody;
+
+  /// Pending operation completeness confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'All purchases already made but not debited are included above'**
+  String get allPendingKnown;
+
+  /// Optional startup expense amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Known large expense (optional)'**
+  String get upcomingExpenseAmountLabel;
+
+  /// Optional startup expense date.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected date of this expense'**
+  String get upcomingExpenseDateLabel;
+
+  /// Household feasibility step title.
+  ///
+  /// In en, this message translates to:
+  /// **'What must the weekly budget cover?'**
+  String get startupHouseholdTitle;
+
+  /// Full-time household members aged 14+.
+  ///
+  /// In en, this message translates to:
+  /// **'People aged 14 or over'**
+  String get persons14PlusLabel;
+
+  /// Full-time young children.
+  ///
+  /// In en, this message translates to:
+  /// **'Children under 14'**
+  String get childrenUnder14Label;
+
+  /// Weekly budget scope section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid from the weekly budget'**
+  String get weeklyScopeTitle;
+
+  /// Weekly scope category.
+  ///
+  /// In en, this message translates to:
+  /// **'Food and groceries'**
+  String get scopeGroceries;
+
+  /// Weekly scope category.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel'**
+  String get scopeFuel;
+
+  /// Weekly scope category.
+  ///
+  /// In en, this message translates to:
+  /// **'Hygiene'**
+  String get scopeHygiene;
+
+  /// Weekly scope category.
+  ///
+  /// In en, this message translates to:
+  /// **'Children\'s everyday spending'**
+  String get scopeChildren;
+
+  /// Weekly scope category.
+  ///
+  /// In en, this message translates to:
+  /// **'Health out of pocket'**
+  String get scopeHealth;
+
+  /// Weekly scope category.
+  ///
+  /// In en, this message translates to:
+  /// **'Leisure and everyday purchases'**
+  String get scopeLeisure;
+
+  /// Declared human weekly minimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum your household needs each week'**
+  String get minimumViableBudgetLabel;
+
+  /// Startup simulation result heading.
+  ///
+  /// In en, this message translates to:
+  /// **'The two results to keep separate'**
+  String get startupSimulationTitle;
+
+  /// Sustainable weekly amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Sustainable weekly budget: {amount}'**
+  String sustainableBudgetResult(String amount);
+
+  /// Projected low point.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected low with today\'s available cash: {amount} on {date}'**
+  String projectedLowResult(String amount, String date);
+
+  /// Technical timing cushion.
+  ///
+  /// In en, this message translates to:
+  /// **'Timing cushion needed: {amount}'**
+  String technicalCushionResult(String amount);
+
+  /// Startup uncertainty margin.
+  ///
+  /// In en, this message translates to:
+  /// **'Prudent starting margin: {amount}'**
+  String uncertaintyMarginResult(String amount);
+
+  /// Editable startup uncertainty margin.
+  ///
+  /// In en, this message translates to:
+  /// **'Prudent starting margin'**
+  String get uncertaintyMarginLabel;
+
+  /// Current usable cash result.
+  ///
+  /// In en, this message translates to:
+  /// **'Actually available today: {amount}'**
+  String availableCashResult(String amount);
+
+  /// Separate desired balance result.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate balance objective: {amount}'**
+  String balanceObjectiveResult(String amount);
+
+  /// Technical cushion plus uncertainty margin.
+  ///
+  /// In en, this message translates to:
+  /// **'Target timing cushion: {amount}'**
+  String targetCushionResult(String amount);
+
+  /// Informational weekly budget per person.
+  ///
+  /// In en, this message translates to:
+  /// **'Context: {amount} per person and week'**
+  String budgetPerPersonResult(String amount);
+
+  /// Informational weekly budget per consumption unit.
+  ///
+  /// In en, this message translates to:
+  /// **'Context: {amount} per consumption unit and week'**
+  String budgetPerConsumptionUnitResult(String amount);
+
+  /// Ratio between sustainable budget and declared minimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage of your declared minimum: {percent}%'**
+  String minimumCoverageResult(String percent);
+
+  /// Cushion funding step title.
+  ///
+  /// In en, this message translates to:
+  /// **'Who finances the cushion?'**
+  String get startupFundingTitle;
+
+  /// Explains own versus bank cushion.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave all or part as your own money on the account. The remainder may use authorized overdraft, but that part is financed by the bank and may create fees.'**
+  String get startupFundingBody;
+
+  /// Owned portion of cash cushion.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own money left on the account'**
+  String get ownedCushionLabel;
+
+  /// Bank-funded cushion amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Part financed by authorized overdraft: {amount}'**
+  String bankCushionResult(String amount);
+
+  /// Cash progress required to reach selected operating balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress needed before ordinary operation: {amount}'**
+  String requiredProgressResult(String amount);
+
+  /// Bank cushion risk warning.
+  ///
+  /// In en, this message translates to:
+  /// **'This solution can return the account below zero. The bank may charge fees or change the authorization.'**
+  String get bankCushionWarning;
+
+  /// Explicit bank-funding risk acceptance.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand and accept the risk of using authorized overdraft for the cushion'**
+  String get acceptBankCushionRisk;
+
+  /// No feasible launch plan explanation.
+  ///
+  /// In en, this message translates to:
+  /// **'No tested weekly amount stays above your floor, reaches the selected operating level, and respects your declared minimum. Add own cash, choose a later start, or review the assumptions.'**
+  String get startupNoSafePlan;
+
+  /// Launch plan choice.
+  ///
+  /// In en, this message translates to:
+  /// **'{budget} for {weeks} weeks, then {sustainable}'**
+  String launchPlanOption(String budget, int weeks, String sustainable);
+
+  /// Direct sustainable-budget launch.
+  ///
+  /// In en, this message translates to:
+  /// **'Start directly with {budget} per week'**
+  String directStartOption(String budget);
+
+  /// Human viability step title.
+  ///
+  /// In en, this message translates to:
+  /// **'Can your household really follow this amount?'**
+  String get startupHumanTitle;
+
+  /// Human viability question.
+  ///
+  /// In en, this message translates to:
+  /// **'Can you cover the selected categories with {amount} per week for {weeks} weeks?'**
+  String startupHumanQuestion(String amount, int weeks);
+
+  /// Positive viability answer.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, without particular difficulty'**
+  String get viabilityComfortable;
+
+  /// Tight viability answer.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, but it will be tight'**
+  String get viabilityTight;
+
+  /// Rejected viability answer.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get viabilityNo;
+
+  /// Uncertain viability answer.
+  ///
+  /// In en, this message translates to:
+  /// **'I do not know yet'**
+  String get viabilityUnknown;
+
+  /// Startup summary title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your safe starting plan'**
+  String get startupSummaryTitle;
+
+  /// Desired account balance summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account objective: {amount}'**
+  String targetBalanceResult(String amount);
+
+  /// Operating balance summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Account level before normal operation: {amount}'**
+  String operatingBalanceResult(String amount);
+
+  /// Accepted low balance summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest level accepted for timing variations: {amount}'**
+  String allowedLowResult(String amount);
+
+  /// Final startup acknowledgement.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand that the launch budget is temporary and that the cushion is not additional spending money.'**
+  String get startupCommitment;
+
+  /// Persists startup plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm this starting plan'**
+  String get confirmStartupPlan;
+
+  /// Startup plan saving state.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving the starting plan…'**
+  String get startupSaving;
+
+  /// Atomic startup save failure.
+  ///
+  /// In en, this message translates to:
+  /// **'The starting plan could not be saved. Nothing was partially recorded.'**
+  String get startupSaveError;
+
+  /// Dashboard launch phase card title.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary launch budget active'**
+  String get launchPhaseDashboardTitle;
+
+  /// Dashboard launch phase summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{launchBudget} per week until {date}, then {sustainableBudget} after a fresh check.'**
+  String launchPhaseDashboardBody(
+    String launchBudget,
+    String date,
+    String sustainableBudget,
+  );
+
+  /// Severe launch compression warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Severe effort: {percent}%'**
+  String startupSevereEffort(String percent);
+
+  /// Unknown pending operation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Include operations already made or wait until they are debited before confirming a safe start.'**
+  String get startupPendingIncompleteError;
+
+  /// Missing large expense date error.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the date of the large expense.'**
+  String get startupExpenseDateRequiredError;
+
+  /// Missing bank risk acknowledgement error.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the risk of funding part of the cushion with authorized overdraft.'**
+  String get startupBankRiskRequiredError;
+
+  /// Missing human viability confirmation error.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust the amount until you can confirm it is genuinely sustainable for your household.'**
+  String get startupViabilityRequiredError;
+
+  /// Missing final cushion acknowledgement error.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm that you understand the role of the timing cushion.'**
+  String get startupCommitmentRequiredError;
+
+  /// Invalid household composition error.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the household composition.'**
+  String get startupHouseholdInvalidError;
+
+  /// Non-positive sustainable budget error.
+  ///
+  /// In en, this message translates to:
+  /// **'Predictable income does not yet support a positive weekly budget.'**
+  String get startupNoPositiveBudgetError;
+
+  /// Sustainable budget below declared minimum error.
+  ///
+  /// In en, this message translates to:
+  /// **'The sustainable budget is below the minimum declared by your household.'**
+  String get startupBelowMinimumError;
+
+  /// Large expense outside startup horizon error.
+  ///
+  /// In en, this message translates to:
+  /// **'The large expense must fall within the first 12 weeks.'**
+  String get startupExpenseOutsideWindowError;
+
+  /// Invalid own cushion contribution error.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own contribution cannot exceed the calculated cushion.'**
+  String get startupOwnedCushionTooHighError;
+
+  /// Invalid signed amount error.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount.'**
+  String get startupInvalidAmountError;
+
+  /// Invalid non-negative amount error.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount greater than or equal to zero.'**
+  String get startupNonNegativeAmountError;
+
+  /// Invalid positive amount error.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount greater than zero.'**
+  String get startupPositiveAmountError;
+
+  /// Generic invalid startup data error.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the entered information.'**
+  String get startupInvalidDataError;
+
+  /// Moves to previous wizard step.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get wizardBack;
+
+  /// Moves to next wizard step.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get wizardNext;
 }
 
 class _AppLocalizationsDelegate

@@ -1025,6 +1025,224 @@ void main() {
       expect(destination.journal.entries, isEmpty);
     });
   });
+
+  group('LocalRebootService startup safety', () {
+    test(
+      'atomically records and restores one complete safe decision',
+      () async {
+        final harness = await _Harness.initialized();
+        await harness.service.createCashFlows(
+          CreateCashFlowsCommand(
+            definitions: [
+              _monthlyFlow(
+                title: 'Salaire',
+                direction: CashFlowDirection.income,
+                minorUnits: 300000,
+              ),
+              _monthlyFlow(
+                title: 'Logement',
+                direction: CashFlowDirection.outflow,
+                minorUnits: 100000,
+              ),
+            ],
+            effectiveFromCycleStart: LocalDate(2026, 4, 4),
+            businessDate: LocalDate(2026, 4, 1),
+          ),
+        );
+        await harness.service.setTrajectoryPlan(
+          SetTrajectoryPlanCommand(
+            strategy: TrajectoryStrategy.balance,
+            reserveContributions: _eur(0),
+            projectContributions: _eur(0),
+            safetyMargin: _eur(0),
+            effectiveFromCycleStart: LocalDate(2026, 4, 4),
+            businessDate: LocalDate(2026, 4, 1),
+          ),
+        );
+        final annual = harness.service.buildAnnualBudget(LocalDate(2026, 4, 4));
+        final liquidity = LiquiditySnapshot(
+          capturedAtUtc: DateTime.utc(2026, 4, 1, 9),
+          bookedBalance: _eur(500000),
+          source: LiquiditySnapshotSource.manual,
+          confidence: StartupDataConfidence.high,
+        );
+        final projection = StartupCashProjectionEngine.project(
+          cycles: annual.cycles,
+          initialUsableCash: liquidity.usableCash,
+          movements: StartupCashProjectionEngine.movementsFromAnnualBudget(
+            annual,
+          ),
+          weeklyBudgetsByCycleStart: {
+            for (final cycle in annual.cycles)
+              cycle.start: annual.recommendedWeeklyBudget,
+          },
+        );
+        final assessment = StartupLiquidityAssessment(
+          projection: projection,
+          uncertaintyMargin: annual.recommendedWeeklyBudget,
+          funding: CashCushionFunding(
+            targetBalance: _eur(0),
+            ownedCash:
+                projection.technicalCashCushion +
+                annual.recommendedWeeklyBudget,
+            authorizedOverdraft: _eur(0),
+            overdraftFundedCash: _eur(0),
+          ),
+        );
+        final appendCalls = harness.journal.appendCallCount;
+
+        final accepted = await harness.service.acceptStartupPlan(
+          AcceptStartupPlanCommand(
+            liquidity: liquidity,
+            householdNeeds: HouseholdNeedsProfile(
+              fullTimePersons14OrOlder: 2,
+              fullTimeChildrenUnder14: 2,
+              weeklyBudgetScope: const {
+                WeeklyBudgetCategory.groceries,
+                WeeklyBudgetCategory.hygiene,
+              },
+              minimumViableWeeklyBudget: _eur(20000),
+            ),
+            assessment: assessment,
+            startDate: annual.start,
+            decisionState: LaunchDecisionState.readyWithExistingCushion,
+            viabilityAnswer: StartupViabilityAnswer.comfortable,
+            businessDate: LocalDate(2026, 4, 1),
+            acceptedBankFundingRisk: false,
+          ),
+        );
+
+        expect(accepted.launchWeeklyBudget, annual.recommendedWeeklyBudget);
+        expect(harness.service.startup.isReady, isTrue);
+        expect(harness.journal.appendCallCount, appendCalls + 1);
+        expect(
+          harness.journal.entries.skip(harness.journal.entries.length - 5),
+          hasLength(5),
+        );
+
+        final restored = await LocalRebootService.restore(
+          journal: harness.journal,
+          clock: const _FixedClock(),
+          identities: _SequentialIdentities(200),
+        );
+        expect(restored.startup.isReady, isTrue);
+        expect(restored.startup.householdNeeds!.personCount, 4);
+        expect(
+          restored.startup.cushionPolicy!.targetCashCushion,
+          assessment.targetCashCushion,
+        );
+      },
+    );
+
+    test(
+      'applies the accepted launch budget until its completion cycle',
+      () async {
+        final harness = await _Harness.initialized();
+        await harness.service.createCashFlow(
+          CreateCashFlowCommand(
+            definition: CashFlowDefinition.fixed(
+              title: 'Revenu hebdomadaire',
+              direction: CashFlowDirection.income,
+              schedule: RecurringSchedule(
+                firstOccurrence: LocalDate(2026, 4, 4),
+                frequency: RecurrenceFrequency.weekly,
+              ),
+              amountPerOccurrence: _eur(10000),
+              lastConfirmedOn: LocalDate(2026, 4, 1),
+            ),
+            effectiveFromCycleStart: LocalDate(2026, 4, 4),
+            businessDate: LocalDate(2026, 4, 1),
+          ),
+        );
+        await harness.service.setTrajectoryPlan(
+          SetTrajectoryPlanCommand(
+            strategy: TrajectoryStrategy.balance,
+            reserveContributions: _eur(0),
+            projectContributions: _eur(0),
+            safetyMargin: _eur(0),
+            effectiveFromCycleStart: LocalDate(2026, 4, 4),
+            businessDate: LocalDate(2026, 4, 1),
+          ),
+        );
+        final annual = harness.service.buildAnnualBudget(LocalDate(2026, 4, 4));
+        final liquidity = LiquiditySnapshot(
+          capturedAtUtc: DateTime.utc(2026, 4, 1, 9),
+          bookedBalance: _eur(-150000),
+          source: LiquiditySnapshotSource.manual,
+          confidence: StartupDataConfidence.high,
+        );
+        final movements = StartupCashProjectionEngine.movementsFromAnnualBudget(
+          annual,
+        );
+        final projection = StartupCashProjectionEngine.project(
+          cycles: annual.cycles,
+          initialUsableCash: liquidity.usableCash,
+          movements: movements,
+          weeklyBudgetsByCycleStart: {
+            for (final cycle in annual.cycles)
+              cycle.start: annual.recommendedWeeklyBudget,
+          },
+        );
+        final funding = CashCushionFunding(
+          targetBalance: _eur(0),
+          ownedCash: _eur(0),
+          authorizedOverdraft: _eur(150000),
+          overdraftFundedCash: _eur(50000),
+        );
+        final assessment = StartupLiquidityAssessment(
+          projection: projection,
+          uncertaintyMargin: _eur(50000),
+          funding: funding,
+        );
+        final plans = LaunchPlanSearchEngine.search(
+          cycles: annual.cycles,
+          initialUsableCash: liquidity.usableCash,
+          movements: movements,
+          sustainableWeeklyBudget: annual.recommendedWeeklyBudget,
+          minimumViableWeeklyBudget: _eur(5000),
+          uncertaintyMargin: _eur(50000),
+          funding: funding,
+        );
+        final selected = plans.gentlest!;
+
+        await harness.service.acceptStartupPlan(
+          AcceptStartupPlanCommand(
+            liquidity: liquidity,
+            householdNeeds: HouseholdNeedsProfile(
+              fullTimePersons14OrOlder: 1,
+              fullTimeChildrenUnder14: 0,
+              weeklyBudgetScope: const {WeeklyBudgetCategory.groceries},
+              minimumViableWeeklyBudget: _eur(5000),
+            ),
+            assessment: assessment,
+            selectedLaunchPlan: selected,
+            startDate: annual.start,
+            decisionState: LaunchDecisionState.readyWithOverdraftRecovery,
+            viabilityAnswer: StartupViabilityAnswer.tight,
+            businessDate: LocalDate(2026, 4, 1),
+            acceptedBankFundingRisk: true,
+          ),
+        );
+
+        expect(
+          harness.service.weeklyBudgetForCycleStarting(
+            annual.cycles.first.start,
+          ),
+          selected.launchWeeklyBudget,
+        );
+        expect(
+          harness.service.weeklyBudgetForCycleStarting(
+            annual.cycles[selected.durationCycles - 1].start,
+          ),
+          selected.launchWeeklyBudget,
+        );
+        expect(
+          harness.service.weeklyBudgetForCycleStarting(selected.completionDate),
+          annual.recommendedWeeklyBudget,
+        );
+      },
+    );
+  });
 }
 
 InitializeHouseholdCommand _initialize(FirstCycleStartChoice choice) {

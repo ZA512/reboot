@@ -8,7 +8,8 @@ Le projet est actuellement en **Phase 1 — Application locale**.
 
 ## Documentation
 
-- [PRD REBOOT 2.1](docs/PRD.md)
+- [PRD REBOOT 2.2](docs/PRD.md)
+- [Complément — phase de démarrage](docs/PRD_REBOOT_Complement_Phase_Demarrage_v1.1.md)
 - [Méthode REBOOT](docs/reboot-method.md)
 - [Décisions d’architecture](docs/adr/README.md)
 - [Principes de sécurité](docs/security/README.md)
@@ -41,7 +42,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] PRD REBOOT 2.1 publié comme source de vérité
 - [x] Garde-fous Git et sécurité posés
 - [x] Analyse initiale des contradictions et questions ouvertes
-- [x] Dix ADR d’architecture acceptés
+- [x] Onze ADR d’architecture acceptés
 - [x] Méthode REBOOT formalisée
 - [x] Création du workspace Flutter/Dart
 - [x] Type monétaire et tests de référence
@@ -55,6 +56,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Onboarding Flutter : foyer, jour REBOOT et premier cycle
 - [x] Configuration manuelle des revenus et charges
 - [x] Choix de trajectoire et premier budget hebdomadaire
+- [x] Validation du démarrage : objectif de solde, projection quotidienne et coussin de calendrier
 - [x] Tableau de bord du restant hebdomadaire en direct
 - [x] Saisie rapide, étalement exact sur 1 à 12 semaines et suppression d’erreur
 - [x] Tendances glissantes sur 4, 8, 16, 32 et 52 semaines et alertes graduées

@@ -84,6 +84,9 @@ enum EntityKind {
 
   /// One already-received bonus amount assigned to ordinary daily life.
   receivedBonus,
+
+  /// Initial liquidity assessment and accepted launch plan.
+  startupPlan,
 }
 
 /// Typed target of an immutable event.

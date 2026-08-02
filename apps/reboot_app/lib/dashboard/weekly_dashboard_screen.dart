@@ -206,6 +206,11 @@ final class _DashboardBody extends ConsumerWidget {
       current.remaining.currency,
     );
     final colors = Theme.of(context).colorScheme;
+    final launchPlan = service.startup.acceptedPlan;
+    final launchIsActive =
+        launchPlan != null &&
+        launchPlan.durationCycles > 0 &&
+        current.cycle.start.isBefore(launchPlan.estimatedCompletionDate);
 
     return SafeArea(
       child: ListView(
@@ -303,6 +308,24 @@ final class _DashboardBody extends ConsumerWidget {
               ),
             ],
           ),
+          if (launchPlan != null && launchIsActive) ...[
+            const SizedBox(height: 12),
+            Card(
+              color: colors.secondaryContainer,
+              child: ListTile(
+                key: const ValueKey('startup-launch-progress'),
+                leading: const Icon(Icons.trending_up),
+                title: Text(l10n.launchPhaseDashboardTitle),
+                subtitle: Text(
+                  l10n.launchPhaseDashboardBody(
+                    _formatMoney(context, launchPlan.launchWeeklyBudget),
+                    _formatDate(context, launchPlan.estimatedCompletionDate),
+                    _formatMoney(context, launchPlan.sustainableWeeklyBudget),
+                  ),
+                ),
+              ),
+            ),
+          ],
           if (current.refundCredits.isPositive) ...[
             const SizedBox(height: 8),
             Card(

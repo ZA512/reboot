@@ -2053,4 +2053,360 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get selectBackupFile => 'Choisir le fichier de sauvegarde';
+
+  @override
+  String get startupSafetyTitle => 'Vérifier votre point de départ';
+
+  @override
+  String startupStep(int current) {
+    return 'Étape $current sur 8';
+  }
+
+  @override
+  String get startupCushionTitle =>
+      'Une année équilibrée peut encore avoir des jours difficiles';
+
+  @override
+  String get startupCushionBody =>
+      'REBOOT calcule d’abord votre budget semaine durable. Il vérifie ensuite si les dates des revenus et des paiements créent un creux temporaire. Le coussin absorbe cette variation de calendrier : ce n’est ni un budget à dépenser ni une épargne de précaution.';
+
+  @override
+  String get startupGoalConceptTitle => '1. Votre objectif de solde';
+
+  @override
+  String get startupGoalConceptBody =>
+      'Le niveau habituel que vous voulez atteindre, par exemple passer d’un découvert récurrent de 1 500 € à un solde de 0 €.';
+
+  @override
+  String get startupCushionConceptTitle => '2. Le coussin de calendrier';
+
+  @override
+  String get startupCushionConceptBody =>
+      'Un montant séparé, calculé à partir du plus grand creux raisonnable entre les dates des revenus et des paiements.';
+
+  @override
+  String get startupFundingConceptTitle => '3. Le financement du coussin';
+
+  @override
+  String get startupFundingConceptBody =>
+      'Votre propre argent est la solution la plus sûre. Le découvert autorisé peut financer une part choisie, mais il reste un crédit bancaire risqué.';
+
+  @override
+  String get startupCheckAction => 'Vérifier mon démarrage';
+
+  @override
+  String get startupAccountTitle =>
+      'Où en est réellement le compte aujourd’hui ?';
+
+  @override
+  String get startupAccountBody =>
+      'Partez du solde affiché par la banque, puis retirez l’argent déjà dépensé, engagé ou protégé.';
+
+  @override
+  String get bookedBalanceLabel => 'Solde affiché par la banque';
+
+  @override
+  String get pendingCardLabel => 'Paiements par carte pas encore débités';
+
+  @override
+  String get deferredCardLabel => 'Carte à débit différé restant à prélever';
+
+  @override
+  String get outstandingChequesLabel => 'Chèques pas encore débités';
+
+  @override
+  String get committedTransfersLabel => 'Virements sortants déjà engagés';
+
+  @override
+  String get protectedAllocationsLabel =>
+      'Argent déjà protégé pour un autre usage';
+
+  @override
+  String get authorizedOverdraftLabel => 'Découvert autorisé';
+
+  @override
+  String get targetBalanceLabel => 'Solde du compte que vous voulez atteindre';
+
+  @override
+  String get accountCheckedToday => 'J’ai consulté ce compte aujourd’hui';
+
+  @override
+  String get startupUpcomingTitle => 'Qu’est-ce qui est déjà en route ?';
+
+  @override
+  String get startupUpcomingBody =>
+      'Vos revenus et charges sont déjà datés grâce aux étapes précédentes. Ajoutez une grosse dépense connue dans les 12 prochaines semaines si elle manque.';
+
+  @override
+  String get allPendingKnown =>
+      'Tous les achats déjà réalisés mais non débités sont inclus ci-dessus';
+
+  @override
+  String get upcomingExpenseAmountLabel => 'Grosse dépense connue (facultatif)';
+
+  @override
+  String get upcomingExpenseDateLabel => 'Date prévue de cette dépense';
+
+  @override
+  String get startupHouseholdTitle => 'Que doit couvrir le budget semaine ?';
+
+  @override
+  String get persons14PlusLabel => 'Personnes de 14 ans ou plus';
+
+  @override
+  String get childrenUnder14Label => 'Enfants de moins de 14 ans';
+
+  @override
+  String get weeklyScopeTitle => 'Payé avec le budget semaine';
+
+  @override
+  String get scopeGroceries => 'Alimentation et courses';
+
+  @override
+  String get scopeFuel => 'Carburant';
+
+  @override
+  String get scopeHygiene => 'Hygiène';
+
+  @override
+  String get scopeChildren => 'Dépenses courantes des enfants';
+
+  @override
+  String get scopeHealth => 'Reste à charge santé';
+
+  @override
+  String get scopeLeisure => 'Loisirs et achats du quotidien';
+
+  @override
+  String get minimumViableBudgetLabel =>
+      'Minimum nécessaire au foyer chaque semaine';
+
+  @override
+  String get startupSimulationTitle => 'Les deux résultats à ne pas mélanger';
+
+  @override
+  String sustainableBudgetResult(String amount) {
+    return 'Budget semaine durable : $amount';
+  }
+
+  @override
+  String projectedLowResult(String amount, String date) {
+    return 'Point bas avec l’argent disponible aujourd’hui : $amount le $date';
+  }
+
+  @override
+  String technicalCushionResult(String amount) {
+    return 'Coussin nécessaire pour le calendrier : $amount';
+  }
+
+  @override
+  String uncertaintyMarginResult(String amount) {
+    return 'Marge prudente de démarrage : $amount';
+  }
+
+  @override
+  String get uncertaintyMarginLabel => 'Marge prudente de démarrage';
+
+  @override
+  String availableCashResult(String amount) {
+    return 'Réellement disponible aujourd’hui : $amount';
+  }
+
+  @override
+  String balanceObjectiveResult(String amount) {
+    return 'Objectif de solde séparé : $amount';
+  }
+
+  @override
+  String targetCushionResult(String amount) {
+    return 'Coussin de calendrier cible : $amount';
+  }
+
+  @override
+  String budgetPerPersonResult(String amount) {
+    return 'Repère : $amount par personne et par semaine';
+  }
+
+  @override
+  String budgetPerConsumptionUnitResult(String amount) {
+    return 'Repère : $amount par unité de consommation et par semaine';
+  }
+
+  @override
+  String minimumCoverageResult(String percent) {
+    return 'Couverture de votre minimum déclaré : $percent %';
+  }
+
+  @override
+  String get startupFundingTitle => 'Qui finance le coussin ?';
+
+  @override
+  String get startupFundingBody =>
+      'Laissez tout ou partie avec votre propre argent sur le compte. Le reste peut utiliser le découvert autorisé, mais cette partie est financée par la banque et peut occasionner des frais.';
+
+  @override
+  String get ownedCushionLabel => 'Votre argent laissé sur le compte';
+
+  @override
+  String bankCushionResult(String amount) {
+    return 'Part financée par le découvert autorisé : $amount';
+  }
+
+  @override
+  String requiredProgressResult(String amount) {
+    return 'Progression nécessaire avant le fonctionnement normal : $amount';
+  }
+
+  @override
+  String get bankCushionWarning =>
+      'Cette solution peut ramener le compte sous zéro. La banque peut facturer des frais ou modifier l’autorisation.';
+
+  @override
+  String get acceptBankCushionRisk =>
+      'Je comprends et j’accepte le risque d’utiliser le découvert autorisé pour le coussin';
+
+  @override
+  String get startupNoSafePlan =>
+      'Aucun montant testé ne respecte à la fois votre plancher, le niveau de compte choisi et votre minimum déclaré. Ajoutez de la trésorerie propre, démarrez plus tard ou revoyez les hypothèses.';
+
+  @override
+  String launchPlanOption(String budget, int weeks, String sustainable) {
+    return '$budget pendant $weeks semaines, puis $sustainable';
+  }
+
+  @override
+  String directStartOption(String budget) {
+    return 'Commencer directement avec $budget par semaine';
+  }
+
+  @override
+  String get startupHumanTitle =>
+      'Votre foyer peut-il réellement suivre ce montant ?';
+
+  @override
+  String startupHumanQuestion(String amount, int weeks) {
+    return 'Pouvez-vous couvrir les catégories choisies avec $amount par semaine pendant $weeks semaines ?';
+  }
+
+  @override
+  String get viabilityComfortable => 'Oui, sans difficulté particulière';
+
+  @override
+  String get viabilityTight => 'Oui, mais ce sera serré';
+
+  @override
+  String get viabilityNo => 'Non';
+
+  @override
+  String get viabilityUnknown => 'Je ne sais pas encore';
+
+  @override
+  String get startupSummaryTitle => 'Votre plan de démarrage';
+
+  @override
+  String targetBalanceResult(String amount) {
+    return 'Votre objectif de solde : $amount';
+  }
+
+  @override
+  String operatingBalanceResult(String amount) {
+    return 'Niveau du compte avant le fonctionnement normal : $amount';
+  }
+
+  @override
+  String allowedLowResult(String amount) {
+    return 'Point le plus bas accepté pour les variations : $amount';
+  }
+
+  @override
+  String get startupCommitment =>
+      'Je comprends que le budget de lancement est temporaire et que le coussin n’est pas un budget supplémentaire à dépenser.';
+
+  @override
+  String get confirmStartupPlan => 'Confirmer ce plan de démarrage';
+
+  @override
+  String get startupSaving => 'Enregistrement du plan de démarrage…';
+
+  @override
+  String get startupSaveError =>
+      'Le plan de démarrage n’a pas pu être enregistré. Rien n’a été sauvegardé partiellement.';
+
+  @override
+  String get launchPhaseDashboardTitle =>
+      'Budget de lancement temporaire actif';
+
+  @override
+  String launchPhaseDashboardBody(
+    String launchBudget,
+    String date,
+    String sustainableBudget,
+  ) {
+    return '$launchBudget par semaine jusqu’au $date, puis $sustainableBudget après une nouvelle vérification.';
+  }
+
+  @override
+  String startupSevereEffort(String percent) {
+    return 'Effort sévère : $percent %';
+  }
+
+  @override
+  String get startupPendingIncompleteError =>
+      'Incluez les opérations déjà réalisées ou attendez leur débit avant de valider un démarrage sûr.';
+
+  @override
+  String get startupExpenseDateRequiredError =>
+      'Choisissez la date de la grosse dépense.';
+
+  @override
+  String get startupBankRiskRequiredError =>
+      'Confirmez le risque lié au financement d’une partie du coussin par le découvert autorisé.';
+
+  @override
+  String get startupViabilityRequiredError =>
+      'Ajustez le montant jusqu’à pouvoir confirmer qu’il est réellement tenable pour votre foyer.';
+
+  @override
+  String get startupCommitmentRequiredError =>
+      'Confirmez que vous avez compris le rôle du coussin de calendrier.';
+
+  @override
+  String get startupHouseholdInvalidError =>
+      'Vérifiez la composition du foyer.';
+
+  @override
+  String get startupNoPositiveBudgetError =>
+      'Les revenus prévisibles ne permettent pas encore de créer un budget semaine positif.';
+
+  @override
+  String get startupBelowMinimumError =>
+      'Le budget durable est inférieur au minimum déclaré par votre foyer.';
+
+  @override
+  String get startupExpenseOutsideWindowError =>
+      'La grosse dépense doit se situer dans les 12 premières semaines.';
+
+  @override
+  String get startupOwnedCushionTooHighError =>
+      'Votre apport propre ne peut pas dépasser le coussin calculé.';
+
+  @override
+  String get startupInvalidAmountError => 'Saisissez un montant valide.';
+
+  @override
+  String get startupNonNegativeAmountError =>
+      'Saisissez un montant positif ou nul.';
+
+  @override
+  String get startupPositiveAmountError =>
+      'Saisissez un montant supérieur à zéro.';
+
+  @override
+  String get startupInvalidDataError => 'Vérifiez les informations saisies.';
+
+  @override
+  String get wizardBack => 'Retour';
+
+  @override
+  String get wizardNext => 'Continuer';
 }
