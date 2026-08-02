@@ -10,6 +10,7 @@ tests de sécurité.
 - [ADR-0005 — SQLite chiffrée, Drift et migrations](../adr/0005-encrypted-sqlite-and-migrations.md)
 - [ADR-0006 — Cycle de vie des clés, révocation et récupération](../adr/0006-key-lifecycle-revocation-and-recovery.md)
 - [ADR-0009 — Journal Web chiffré et garde locale de clé](../adr/0009-browser-encrypted-journal.md)
+- [ADR-0012 — Hébergement et contrat de sécurité PWA](../adr/0012-pwa-hosting-security-contract.md)
 - [Benchmark du journal Web chiffré](../web-storage-benchmark.md)
 
 ## Invariants initiaux
@@ -22,6 +23,8 @@ tests de sécurité.
 - télémétrie désactivée par défaut et dépourvue de données métier ;
 - journaux nettoyés des montants, libellés, identifiants bancaires et secrets ;
 - dépendances verrouillées et lockfiles versionnés.
+- aucun script, CDN, police ou outil de mesure tiers chargé par la PWA à
+  l’exécution.
 
 ## Avant toute implémentation sensible
 

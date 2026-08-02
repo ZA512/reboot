@@ -78,4 +78,6 @@ jobs:
         run: |
           node --check build/web/reboot_service_worker.js
           test ! -e build/web/flutter_service_worker.js
+          test -f build/web/_headers
           grep -q "reboot-shell-" build/web/reboot_service_worker.js
+          ! grep -q '"_headers"' build/web/reboot_service_worker.js

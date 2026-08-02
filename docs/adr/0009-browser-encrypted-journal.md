@@ -97,8 +97,9 @@ d’une saisie et mesure 69 ms pour restaurer un snapshot synthétique puis rejo
 100 événements, contre 34,0 secondes pour un rejeu intégral lors du même passage.
 Passer cet ADR à `Accepted` et activer les données réelles exigera donc encore au
 minimum : codec versionné des projections métier, récupération chiffrée,
-validation Safari iPhone réelle, politique de persistance navigateur, CSP et
-hébergement durci et tests de concurrence multi-onglets.
+validation Safari iPhone réelle, politique de persistance navigateur, codec
+des projections et tests de concurrence multi-onglets. La CSP et le contrat
+d’hébergement sont désormais fixés par l’ADR-0012.
 
 Le cœur d’une récupération chiffrée est désormais prototypé : une archive
 AES-256-GCM indépendante de la clé locale, accompagnée d’un code séparé `RBP1`,
@@ -179,7 +180,7 @@ protégerait pas mieux la clé contre un script hostile de même origine.
 
 ## Liens
 
-- ADR liés : ADR-0001, ADR-0003, ADR-0006 et ADR-0008.
+- ADR liés : ADR-0001, ADR-0003, ADR-0006, ADR-0008 et ADR-0012.
 - Prototype : `docs/web-storage-prototype.md`.
 - Benchmark : `docs/web-storage-benchmark.md`.
 - [Web Cryptography Level 2](https://www.w3.org/TR/WebCryptoAPI/)

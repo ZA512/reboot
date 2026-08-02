@@ -51,4 +51,8 @@ window.rebootPwa = Object.freeze({
   },
 });
 
-_flutter.loader.load();
+_flutter.loader.load({
+  config: {
+    fontFallbackBaseUrl: new URL("font-fallback/", document.baseURI).href,
+  },
+});

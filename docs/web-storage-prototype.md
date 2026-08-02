@@ -134,6 +134,19 @@ données financières bloquées.
 La validation sur un iPhone réel reste obligatoire avant de déclarer la PWA
 installable et utilisable hors ligne sur la plateforme cible.
 
+## Étape 4 — Contrat d’hébergement et CSP
+
+Le build contient désormais un fichier `_headers` vérifié automatiquement. Il
+interdit les scripts tiers, inline et `unsafe-eval`, conserve uniquement
+`wasm-unsafe-eval` pour le moteur Flutter, isole le contexte et force la
+revalidation des points d’entrée et du service worker. Le fichier de politique
+n’est pas précaché avec le shell.
+
+Cloudflare Pages est la cible statique de référence. La publication réelle et
+le contrôle de ces en-têtes sur l’origine de production restent à effectuer
+avant toute saisie financière. Le contrat complet est décrit par
+[l’ADR-0012](adr/0012-pwa-hosting-security-contract.md).
+
 Drift/SQLite WebAssembly est différé : il ne supprimerait pas le besoin du
 chiffrement applicatif et ajouterait des pages, caches et migrations à auditer.
 Il pourra être réévalué seulement si le benchmark montre que le journal direct
@@ -165,6 +178,8 @@ La proposition complète et ses limites sont consignées dans
   Safari encore requis ;
 - codec versionné des projections métier branché sur le snapshot chiffré ;
 - comportement du stockage détecté et annoncé, sans repli mémoire silencieux ;
+- CSP et contrat d’hébergement versionnés ; validation de l’origine de
+  production encore requise ;
 - benchmark sur 300 000 événements effectué sur ordinateur, puis confirmé sur
   Safari iPhone réel ;
 - validation Safari sur un iPhone réel.

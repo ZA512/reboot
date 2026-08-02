@@ -115,6 +115,28 @@ contient pas le manifeste exact et atomique du shell hors ligne. Le cache PWA
 ne contient que les ressources statiques listées par cette commande, jamais le
 journal, les clés ou les données financières locales.
 
+Le dossier `build/web` contient aussi `_headers`, le contrat de sécurité prévu
+pour Cloudflare Pages. Le build échoue si la CSP, l’isolation ou les règles de
+cache obligatoires manquent. Publier le dossier complet de façon atomique et
+contrôler les en-têtes reçus depuis l’URL publique ; ne jamais ajouter un CDN,
+un script d’analyse ou une autre application sur l’origine de la PWA sans
+réexaminer l’ADR-0012.
+
+Flutter possède par défaut une URL de polices de repli distante. REBOOT la
+remplace par `font-fallback/` et embarque le sous-ensemble actuellement requis.
+Son origine, sa licence et son empreinte sont consignées dans
+[`docs/licenses/README.md`](licenses/README.md). Toute mise à niveau de Flutter
+doit refaire le test navigateur sous CSP afin de détecter un nouveau repli.
+
+Pour vérifier localement le build sous ces mêmes en-têtes :
+
+```shell
+dart run tool/serve_web_release.dart
+```
+
+Le serveur de contrôle écoute uniquement sur `127.0.0.1:8788`, refuse de
+servir `_headers` et n’est pas un serveur de production.
+
 ## Politique de dépendances
 
 - utiliser la dernière version stable compatible au moment de l’ajout ;

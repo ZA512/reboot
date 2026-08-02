@@ -4,10 +4,13 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
+import 'web_hosting_contract.dart';
+
 const String _cacheNamePlaceholder = '@@CACHE_NAME@@';
 const String _precachePathsPlaceholder = '@@PRECACHE_PATHS@@';
 const String _workerFileName = 'reboot_service_worker.js';
 const String _legacyWorkerFileName = 'flutter_service_worker.js';
+const String _hostingHeadersFileName = '_headers';
 
 Future<void> main(List<String> arguments) async {
   final prepareOnly = arguments.contains('--prepare-only');
@@ -31,6 +34,10 @@ Future<void> main(List<String> arguments) async {
     workerTemplate: File(
       '${projectDirectory.path}${Platform.pathSeparator}tool'
       '${Platform.pathSeparator}reboot_service_worker.template.js',
+    ),
+    hostingHeadersSource: File(
+      '${projectDirectory.path}${Platform.pathSeparator}web'
+      '${Platform.pathSeparator}$_hostingHeadersFileName',
     ),
   );
 
@@ -75,6 +82,7 @@ Future<void> _buildFlutterWeb(Directory projectDirectory) async {
 Future<PreparedWebRelease> prepareWebRelease({
   required Directory buildDirectory,
   required File workerTemplate,
+  required File hostingHeadersSource,
 }) async {
   if (!buildDirectory.existsSync()) {
     throw StateError('Missing Web build directory: ${buildDirectory.path}');
@@ -82,6 +90,17 @@ Future<PreparedWebRelease> prepareWebRelease({
   if (!workerTemplate.existsSync()) {
     throw StateError('Missing service worker template: ${workerTemplate.path}');
   }
+
+  if (!hostingHeadersSource.existsSync()) {
+    throw StateError(
+      'Missing PWA hosting contract: ${hostingHeadersSource.path}',
+    );
+  }
+  final hostingHeadersText = await hostingHeadersSource.readAsString();
+  WebHostingContract.parse(hostingHeadersText).validate();
+  await File(
+    '${buildDirectory.path}${Platform.pathSeparator}$_hostingHeadersFileName',
+  ).writeAsString(hostingHeadersText, flush: true);
 
   final legacyWorker = File(
     '${buildDirectory.path}${Platform.pathSeparator}$_legacyWorkerFileName',
@@ -149,6 +168,7 @@ bool _isExcluded(File file, Directory buildDirectory) {
   return segments.any((segment) => segment.startsWith('.')) ||
       path == _workerFileName ||
       path == _legacyWorkerFileName ||
+      path == _hostingHeadersFileName ||
       path.endsWith('.symbols') ||
       path.startsWith('canvaskit/experimental_webparagraph/') ||
       path.startsWith('canvaskit/skwasm') ||
@@ -168,6 +188,9 @@ String _relativePath(File file, Directory buildDirectory) {
 
 void _verifyRequiredAssets(List<String> assetPaths) {
   const required = {
+    'font-fallback/roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2',
+    'font-fallback/notosanssymbols/v43/'
+        'rP2up3q65FkAtHfwd-eIS2brbDN6gxP34F9jRRCe4W3gfQ8gb_VFRkzrbQ.woff2',
     'flutter_bootstrap.js',
     'index.html',
     'main.dart.js',

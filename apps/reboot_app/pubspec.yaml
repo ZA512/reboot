@@ -10,6 +10,7 @@ resolution: workspace
 
 dependencies:
   cryptography: 2.9.0
+  cupertino_icons: 1.0.9
   flutter:
     sdk: flutter
   flutter_localizations:

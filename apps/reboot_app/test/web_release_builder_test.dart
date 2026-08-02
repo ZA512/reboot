@@ -9,6 +9,7 @@ void main() {
     late Directory temporaryDirectory;
     late Directory buildDirectory;
     late File workerTemplate;
+    late File hostingHeadersSource;
 
     setUp(() async {
       temporaryDirectory = await Directory.systemTemp.createTemp(
@@ -24,6 +25,9 @@ void main() {
             "const cache = '@@CACHE_NAME@@';\n"
             'const assets = @@PRECACHE_PATHS@@;\n',
           );
+      hostingHeadersSource = File(
+        '${temporaryDirectory.path}${Platform.pathSeparator}_headers.source',
+      )..writeAsStringSync(File('web/_headers').readAsStringSync());
 
       for (final path in const [
         'flutter_bootstrap.js',
@@ -31,6 +35,9 @@ void main() {
         'main.dart.js',
         'manifest.json',
         'assets/font.otf',
+        'font-fallback/roboto/v32/KFOmCnqEu92Fr1Me4GZLCzYlKw.woff2',
+        'font-fallback/notosanssymbols/v43/'
+            'rP2up3q65FkAtHfwd-eIS2brbDN6gxP34F9jRRCe4W3gfQ8gb_VFRkzrbQ.woff2',
         'canvaskit/canvaskit.js',
         'canvaskit/canvaskit.js.symbols',
         'canvaskit/chromium/canvaskit.js',
@@ -62,6 +69,7 @@ void main() {
         final first = await prepareWebRelease(
           buildDirectory: buildDirectory,
           workerTemplate: workerTemplate,
+          hostingHeadersSource: hostingHeadersSource,
         );
         final firstSource = await first.worker.readAsString();
 
@@ -80,6 +88,13 @@ void main() {
         expect(first.assetPaths, isNot(contains('canvaskit/skwasm.js')));
         expect(first.assetPaths, isNot(contains('flutter_service_worker.js')));
         expect(first.assetPaths, isNot(contains('.last_build_id')));
+        expect(first.assetPaths, isNot(contains('_headers')));
+        expect(
+          File(
+            '${buildDirectory.path}${Platform.pathSeparator}_headers',
+          ).readAsStringSync(),
+          hostingHeadersSource.readAsStringSync(),
+        );
         expect(firstSource, contains(first.cacheName));
         expect(firstSource, contains('"main.dart.js"'));
         expect(firstSource, isNot(contains('@@CACHE_NAME@@')));
@@ -94,6 +109,7 @@ void main() {
         final second = await prepareWebRelease(
           buildDirectory: buildDirectory,
           workerTemplate: workerTemplate,
+          hostingHeadersSource: hostingHeadersSource,
         );
         expect(second.cacheName, first.cacheName);
         expect(await second.worker.readAsString(), firstSource);
@@ -104,6 +120,7 @@ void main() {
       final first = await prepareWebRelease(
         buildDirectory: buildDirectory,
         workerTemplate: workerTemplate,
+        hostingHeadersSource: hostingHeadersSource,
       );
       File(
         '${buildDirectory.path}${Platform.pathSeparator}main.dart.js',
@@ -112,6 +129,7 @@ void main() {
       final second = await prepareWebRelease(
         buildDirectory: buildDirectory,
         workerTemplate: workerTemplate,
+        hostingHeadersSource: hostingHeadersSource,
       );
 
       expect(second.cacheName, isNot(first.cacheName));
@@ -126,12 +144,32 @@ void main() {
         prepareWebRelease(
           buildDirectory: buildDirectory,
           workerTemplate: workerTemplate,
+          hostingHeadersSource: hostingHeadersSource,
         ),
         throwsA(
           isA<StateError>().having(
             (error) => error.message,
             'message',
             contains('main.dart.js'),
+          ),
+        ),
+      );
+    });
+
+    test('refuses a build without its hosting security contract', () async {
+      hostingHeadersSource.deleteSync();
+
+      await expectLater(
+        prepareWebRelease(
+          buildDirectory: buildDirectory,
+          workerTemplate: workerTemplate,
+          hostingHeadersSource: hostingHeadersSource,
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            contains('hosting contract'),
           ),
         ),
       );
