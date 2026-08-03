@@ -11,6 +11,7 @@ Le projet est actuellement en **Phase 1 — Application locale**.
 - [PRD REBOOT 2.2](docs/PRD.md)
 - [Complément — phase de démarrage](docs/PRD_REBOOT_Complement_Phase_Demarrage_v1.1.md)
 - [Méthode REBOOT](docs/reboot-method.md)
+- [Classeur autonome REBOOT](outputs/reboot_excel_v1/README.md)
 - [Décisions d’architecture](docs/adr/README.md)
 - [Principes de sécurité](docs/security/README.md)
 - [Environnement de développement](docs/development.md)
@@ -69,6 +70,7 @@ Le nom de travail **Budget52** est conservé uniquement dans le PRD historique a
 - [x] Changement futur du jour REBOOT avec cycle de transition explicite
 - [x] Primes déjà reçues lissées jusqu’à leur prochaine confirmation
 - [x] Explication détaillée du budget semaine, de ses hypothèses et de ses arrondis
+- [x] Classeur Excel autonome pour appliquer la méthode sans l'application
 - [x] Widget Android confidentiel du restant hebdomadaire
 - [x] Sauvegarde locale Android chiffrée et restauration sur une installation neuve
 - [x] Archive de récupération chiffrée portable entre Android et Web
